@@ -1,0 +1,122 @@
+@media only screen and (max-width: 1600px) {
+    #gigInfo {
+        flex-direction: column;
+    }
+}
+@media only screen and (max-width: 600px) {  
+    table, table td, table tr, table th { 
+        display: block;
+    }
+    table {
+        width: fit-content!important;
+        margin: auto;
+    }  
+    table td {
+        padding: 5px!important;
+    }
+}
+@media only screen and (min-width: 601px) {  
+    tr {
+        padding: 16px 12px!important;
+    }
+}
+
+#gigInfo {
+    display: flex;
+    color: #FFF;
+    font-size: 1.25em;
+}
+#gigInfo > * {
+    margin: .25em auto;
+    min-width: max-content;
+}
+
+.note-box {
+    background-color: #FFF;
+    color: #000;
+    border-radius: 0 3px 3px;
+    padding: 2em 2em;
+    margin: 0 2em;
+}
+.notes .title {
+    background-color: #FFF;
+    color: #000;
+    margin: 0 2em;
+    padding: 0 .5em;
+    font-size: 1em;
+}
+
+#systems ul {
+    list-style: square;
+    font-size: 1.25em;
+}
+#systems .department {
+    color: #d6d6d6;
+}
+#systems .name {
+    color: #FFF;
+}
+.system a {
+    color: #03c77f;
+}
+
+.uk-tab>.uk-active>a {
+    color: #FFF!important;
+    background-color: #333;
+}
+
+
+.uk-tab>*:not(.uk-disabled)>a {
+    color: #FFF!important;
+}
+.uk-tab>*:not(.uk-disabled):hover>a {
+    background-color: #333;
+    transition: background-color .2s;
+}
+
+.employee .title {
+    font-size: 1.25em;
+}
+
+.uk-badge {
+    background: #FFF!important;
+    color: #000!important;
+    margin: .5em!important;
+    padding: 1.25em!important;
+}
+.employees a:hover{
+    text-decoration: none;
+}
+.employees a:hover .uk-badge{
+    background: #333!important;
+    transition: background .2s, color .2s;
+    color: #FFF!important;
+}
+.emp-type {
+    display: flex;
+    flex-direction: column;
+    margin: 1.5em 0;
+}
+.emp-type a {
+    width: fit-content;
+}
+
+#dayOfShow {
+    background-color: #333;
+    padding: 1em;
+}
+
+table {
+    background-color: #212121;
+    color: #FFF;
+}
+.uk-table-hover tbody tr:hover, .uk-table-hover>tr:hover {
+    background: #333!important;
+}
+table button {
+    background-color: #03c77f!important;
+}
+table button {
+    line-height: normal!important;
+    padding: 1em .25em!important;
+}

@@ -1,0 +1,315 @@
+{% load static %}
+{% load mathfilters %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Estimate
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <div class="flex">
+        <img class='logo' src="https://bssl.binghamtonsa.org/images/BSSL_HEADER.png" />
+        <p class="title">Reservation Form</p>
+    </div>
+    <div class="flex">
+        <p style="margin-left: 1.25em;">
+            Student Association of<br>
+            Binghamton University Inc.<br>
+            P.O. Box 6000<br>
+            Binghamton, NY 13902-6000<br>
+            (505) 510 - 2775<br>
+            <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
+            <a href="http://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+        </p>
+        <div id="top-tables">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Event Date</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td>
+                        {{gig.name}}
+                    </td>
+                    <td>{{gig.start|date:"n/j/y"}}</td>
+                </tr>
+            </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Shop Time</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td>{{gig.location}}</td>
+                    <td>L: {{gig.load_in_lighting|date:"h:i A"}} / S: {{gig.load_in_sound|date:"h:i A"}}</td>
+                    <td>{{gig.start|date:"h:i A"}}</td>
+                    <td>{{gig.end|date:"h:i A"}}</td>
+                </tr>
+            </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill To</th>
+                        <th>SA Acct #</th>
+                        <th>Date Created</th>
+                        <th>Reservation #</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td>{{gig.org}}</td>
+                    <td>{{gig.org.SA_account_num}}</td>
+                    <td>{% now "n/j/y" %}</td>
+                    <td>E{{invoice.id}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="flex">
+        <table id="item-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            {% for system in systems %}
+            <tr>
+                <td>
+                    {{system.system.get_department_display}} - {{system.system.name}}<br>
+                    {% if system.system.base_price %}
+                    &emsp;Base price
+                    {% endif %}
+                    {% if system.system.price_per_hour %}
+                    &emsp;Hourly
+                    {% endif %}
+                </td>
+                <td></td>
+                <td>
+                    {% if system.system.base_price %}
+                    <br>
+                    {% endif %}
+                    {% if system.system.price_per_hour %}
+                    {{system.hours_rented}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if system.system.base_price %}
+                    {{system.system.base_price}}
+                    {% endif %}
+                    {% if system.system.price_per_hour %}
+                    {{system.system.price_per_hour}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if system.system.base_price %}
+                    {{system.system.base_price}}
+                    {% endif %}
+                    {% if system.system.price_per_hour %}
+                    {{system.system.price_per_hour|mul:system.hours_rented|floatformat:2}}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr style="height: 2em; border: 2px solid black;background-color: rgb(202, 202, 202);">
+                <td colspan="2"></td>
+                <td colspan="3">Subtotal: ${{invoice.subtotal}}</td>
+            </tr>
+            {% for fee in invoice.fees.all %}
+            <tr>
+                <td>
+                    {{fee.name}}
+                </td>
+                <td>{{fee.description}}</td>
+                <td>
+                </td>
+                <td>
+                    {% if fee.amount %}
+                    {{fee.amount}}
+                    {% endif %}
+                    {% if fee.percentage %}
+                    {{fee.percentage}}%
+                    {% endif %}
+                </td>
+                <td>
+                    {% if fee.amount %}
+                    {{fee.amount}}
+                    {% endif %}
+                    {% if fee.percentage%}
+                    {{invoice.subtotal|mul:fee.percentage|div:100|floatformat:2}}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr style="height: 2em;background-color: rgb(202, 202, 202);">
+                <td colspan=2></td>
+                <td colspan=3>
+                    Total: ${{invoice.total}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="terms">
+        <ul>
+            <li>The Event Coordinator will have the location reserved, and be preesnt at the event location, by the Shop
+                Time, and will be present for the duration of the event. </li>
+            <li>Any of the music or audio samples that BSSL will play will be on a clearly labeled digital audio player.
+                Music media will be given to the sound engineer far enough
+                in advance of the show so that they can be tested and replaced if necessary. The promoter will either
+                (1) provide the engineers with a playlist or program which
+                clearly lists sound and lighting cues in English, or (2) provide a representative to stay with the
+                engineers throughout the show to cue them. </li>
+            <li>Engineers are not required to work more than 15 minutes past the End Time. If the engineers agree to
+                work beyond contracted hours, the promoter will be billed
+                the overtime rate for time beyond the End Time in one hour increments. Large system overtime rate is
+                $35/hour and small system rate is $28/hr. </li>
+            <li>BSSL will not consider refunds on the basis of missed cues, conditions not suitable for videotaping,
+                etc., unless the promoter has had a production meeting with
+                BSSL prior to the event, at which a list of cues was presented. </li>
+            <li>BSSL will not be held responsible for any losses due to equipment failure. The promoter shall be held
+                responsible for the cost of repairing or replacing any
+                equipment damaged or stolen by event participants or audience members. </li>
+            <li>Changing a system between one and two Mondays prior to the event may be done so without incurring a fee.
+                Changing a system between one Monday and 48
+                hours prior will incur an additional 15% fee of the cancelled system (for example, if you have medium
+                lights booked and you change to small lights, you will be
+                charged for small lights and 15% of medium lights). Systems may not be changed within 48 hours of the
+                event. </li>
+            <li>Changing the time/location of your event between one Monday and 48 hours prior will incur an additional
+                15% fee. Changing the event time/location between 24
+                and 48 hours prior to the event will incur a 25% fee. Time/location cannot be changed within 24 hours of
+                the event. </li>
+            <li>Cancelling an event may be done up to one Monday prior to the event without incurring a fee. Cancelling
+                an event between one Monday and 48 hours prior to the
+                event will incur a 25% fee. Cancelling an event between 24 and 48 hours prior to the event will incur a
+                50% fee. Any
+                cancellations done the day of the event, or if the promoter neglects to inform BSSL of the event being
+                cancelled, the group will be charged an addditional 100% fee. </li>
+            <li>Accessories can be added up to 48 hours prior to an event. Adding accessories between 24 and 48 hours
+                prior to the event will incur an additional 50% fee of the
+                accessory price. Adding accessories the day of the event will incur an additional 100% fee of the
+                accessory price.</li>
+            <li>Reservation is contingent upon availability of staff. If no
+                staff is available, BSSL reserves the right to cancel this
+                reservation. Promoter will be contacted at least 48 hours
+                prior to the event.</li>
+        </ul>
+    </div>
+    <div id="signautes" class="flex">
+        <div>
+            <span>________________________</span><br>
+            STAFF<br>
+            BSSL
+        </div>
+        <div>
+            <span>________________________</span><br>
+            Event Coordinator<br>
+            {{gig.org}}<br>
+            {{gig.contact}}
+        </div>
+    </div>
+</body>
+<style>
+    @page {
+        @bottom-left {
+            content: counter(page) '/'counter(pages);
+        }
+    }
+
+    /* @media print { */
+    table {
+        border: 2px solid black;
+        border-collapse: collapse;
+        margin: 1em auto !important;
+        font-family: 'Helvetica';
+    }
+
+    th {
+        border-bottom: 2px solid black;
+        border-left: 2px solid black;
+        border-right: 2px solid black;
+        background-color: rgb(202, 202, 202);
+    }
+
+    td {
+        border-left: 2px solid black;
+        border-right: 2px solid black;
+    }
+
+    table tr:last-child {
+        border-top: 2px solid black;
+    }
+
+    .flex {
+        display: flex;
+        width: 100%;
+    }
+
+    .flex * {
+        margin: auto;
+    }
+
+    #top-tables {
+        margin-right: 0em;
+        width: 70.5%;
+    }
+
+    #top-tables table {
+        margin-right: 0 !important;
+        width: 100%;
+        text-align: center;
+    }
+
+    .logo {
+        width: 15em;
+        margin-left: 0;
+    }
+
+    .title {
+        font-size: 2em;
+        margin-right: 0;
+    }
+
+    #item-table {
+        width: 100%;
+        text-align: center;
+    }
+
+    #item-table tr:nth-child(even) {
+        background-color: rgb(228, 228, 228);
+    }
+
+    #item-table td {
+        padding: .25em 0 .25em 0;
+    }
+
+    #item-table td:first-child {
+        text-align: left;
+        padding: 0 0 0 .5em
+    }
+
+    #terms ul {
+        font-size: 12pt;
+        list-style: square;
+    }
+
+    #signautes div {
+        margin-top: 2em;
+        text-align: center;
+    }
+
+    /* } */
+</style>
+
+</html>

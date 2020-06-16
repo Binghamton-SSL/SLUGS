@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+All Gigs
+{% endblock %}
+
+
+{% block content %}
+<div class="section">
+    {% if message %}
+    <div uk-alert class="uk-alert-success">
+       {{message}}
+    </div>
+    {% endif %}
+    <h1 class="title">Report a broken / problematic System</h1>
+    <form method="POST" action="{% url 'gig:reportBroken' system_id=system_id %}">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" class="uk-button" value="Submit"/>
+    </form>
+</div>
+<style>
+    label {
+        color: #FFF;
+    }
+</style>
+{% endblock %}

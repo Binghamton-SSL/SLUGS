@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% load static %}
+{% load employee_type %}
+{% load grouping %}
+
+{% block title %}
+Gig
+{% endblock %}
+
+{% block headincludes %}
+<link rel="stylesheet" href="{% static 'gig/css/gigindex.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/ticket.css' %}"/>
+<script src="{% static 'gig/js/gigindex.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    {% if message %}
+        <div uk-alert class="{{message.type}}">
+        {{message.message}}
+        </div>
+    {% endif %}
+    <div class="ticket">
+        <div class="ticketGrid">
+            <p class="name">
+                {{gig.name}}
+            </p>
+            <p class="org">
+                Presented By: {{gig.org}}
+                
+            </p>
+            <p class="date">
+                {{gig.start|date:"n/j/y"}}
+            </p>
+            <p class="time">
+                {{gig.start|date:"P"}} - {{gig.end|date:"P"}}
+            </p>
+            <p class="location">
+                {{gig.location.name}}
+            </p>
+        </div>
+    </div>
+</div>
+<div id="gigInfo" class="section">
+    <div>
+        {% if gig.load_in_lighting == gig.load_in_sound %}
+        Load in: {{gig.load_in_lighting|date:"P"}}
+        {% else %}
+        <div>
+            <div>Load in (Lighting): {{gig.load_in_lighting|date:"P"}}</div>
+            <div>Load in (Sound): {{gig.load_in_sound|date:"P"}}</div>
+        </div>
+        {% endif %}
+    </div>
+    <div>
+        Start time: {{gig.start|date:"P"}}
+    </div>
+    <div>
+        End time: {{gig.end|date:"P"}}
+    </div>
+    <div>
+        {% if gig.load_out_lighting == gig.load_out_sound %}
+        Load out: {{gig.load_out_lighting|date:"P"}}
+        {% else %}
+        <div>
+            <div>Load out (Lighting): {{gig.load_out_lighting|date:"P"}}</div>
+            <div>Load out (Sound): {{gig.load_out_sound|date:"P"}}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% if gig.notes %}
+<div class="notes section">
+    <span class="title">Notes:</span>
+    <div class="note-box">
+        {{gig.notes}}
+    </div>
+</div>
+{% endif %}
+<div id="systems" class="section">
+    <span class='title'>Systems rented</span>
+    <ul>
+    {% for system in systems %}
+        <li>
+            <div class="system">
+                <span class="department">{{system.system.get_department_display}}</span> - <span class="name">{{system.system.name}}</span> {% if system.system.is_addon%}  <span>(Addon)</span> {% endif%} {% if not gig.archived%}- <a href="{% url 'gig:reportBroken' system.system.id %}">Report Issue</a>{% endif %}
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<br>
+<div class="section">
+    <span class="title">Staff</span>
+    <ul uk-tab  uk-switcher>
+        <li class="{% if not lEmployees %}uk-disabled{% endif %}"><a href="#">Lighting</a></li>
+        <li class="{% if not lEmployees %}uk-active{% endif %} {% if not sEmployees %}uk-disabled{% endif %}"><a>Sound</a></li>
+        {% if mEmployees %}
+        <li><a href="#">Management</a></li>
+        {% endif %}
+        {% if oEmployees %}
+        <li><a href="#">Other</a></li>
+        {% endif %}
+    </ul>
+    <ul class="uk-switcher uk-margin">
+        {% if lEmployees %}
+        <li>
+            <div class="employees">
+                {% for emp in lEmployees %}
+                <div class="employee">
+                {% if emp.linked_employee %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="mailto:{{emp.linked_employee.email}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                <a class="uk-hidden@m" href="sms:{{emp.linked_employee.phone_number}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                {% else %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="#"><span class="uk-badge">TBD</span></a>
+                <a class="uk-hidden@m" href="#"><span class="uk-badge">TBD</span></a>
+                {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </li>
+        {% endif %}
+        {% if sEmployees %}
+        <li>
+            <div class="employees">
+                {% for emp in sEmployees %}
+                <div class="employee">
+                {% if emp.linked_employee %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="mailto:{{emp.linked_employee.email}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                <a class="uk-hidden@m" href="sms:{{emp.linked_employee.phone_number}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                {% else %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="#"><span class="uk-badge">TBD</span></a>
+                <a class="uk-hidden@m" href="#"><span class="uk-badge">TBD</span></a>
+                {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </li>
+        {% endif %}
+        {% if mEmployees %}
+        <li>
+            <div class="employees">
+                {% for emp in mEmployees %}
+                <div class="employee">
+                {% if emp.linked_employee %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="mailto:{{emp.linked_employee.email}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                <a class="uk-hidden@m" href="sms:{{emp.linked_employee.phone_number}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                {% else %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="#"><span class="uk-badge">TBD</span></a>
+                <a class="uk-hidden@m" href="#"><span class="uk-badge">TBD</span></a>
+                {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </li>
+        {% endif %}
+        {% if oEmployees %}
+        <li>
+            <div class="employees">
+                {% for emp in oEmployees %}
+                <div class="employee">
+                {% if emp.linked_employee %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="mailto:{{emp.linked_employee.email}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                <a class="uk-hidden@m" href="sms:{{emp.linked_employee.phone_number}}"><span class="uk-badge">{{emp.linked_employee}}</span></a>
+                {% else %}
+                <span class='title'>{{emp.employee_type}}</span> - 
+                <a class="uk-visible@m" href="#"><span class="uk-badge">TBD</span></a>
+                <a class="uk-hidden@m" href="#"><span class="uk-badge">TBD</span></a>
+                {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+<!-- <div class="section">
+    <span class="title">Circuits</span>
+</div> -->
+{% if showEmployee|isEngineer or user|has_group:"Manager" %}
+<div id="dayOfShow" class="section">
+    <span class="title">Day of Show:</span>
+    <form method="POST" action="{% url 'gig:gigindex' gig_id=gig.id %}">
+        {% csrf_token %}
+        <table class="uk-table uk-table-divider">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Time in</th>
+                    <th>Time Out</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                    {% if user|has_group:"Manager" or emp.department == showEmployee.department %}
+                        {% for obj in emp.shift_objects.all %}
+                            <tr id="shfit-{{obj.id}}">
+                                <td>{{emp.linked_employee}} - {{emp.employee_type}}</td>
+                                {% if not gig.archived %}
+                                <td>
+                                    <input name="{{obj.id}}-in" class="uk-input" value="{{obj.time_in|date:'o-m-d\TH:i'}}" type="datetime-local"/>
+                                </td>
+                                <td>
+                                    <input name="{{obj.id}}-out" class="uk-input" value="{{obj.time_out|date:'o-m-d\TH:i'}}" type="datetime-local"/>
+                                </td>
+                                {% else %}
+                                <td>
+                                    {{obj.time_in|date:'m/d/o H:i'}}
+                                </td>
+                                <td>
+                                    {{obj.time_out|date:'m/d/o H:i'}}
+                                </td>
+                                {% endif %}
+                                <td>
+                                    {{obj.total_hours}} Hrs
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% if not gig.archived %}
+                        <tr id="add_new-{{emp.id}}">
+                            <td>
+                                {{emp.linked_employee}} - {{emp.employee_type}}
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                            <button onclick="add_row('{{emp.linked_employee}} - {{emp.employee_type}}',{{emp.id}})" type="button" class="add-row uk-button uk-button-default">Add new shift</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="section">
+            <p class="title">Engineer's Notes</p>
+            <p>
+                Anything out of the ordinary? Notes about the show? <br>
+                NOTE: Broken equipment should always be reported, but this is not the place! Hit the "Report issue" link next to the broken system.
+            </p>
+            {% if not gig.archived %}
+            <textarea class="uk-textarea" name="day_of_show_notes">{{gig.day_of_show_notes}}</textarea>
+            {% else %}
+            <div class="notes section">
+                <div class="note-box">
+                    {% if gig.day_of_show_notes %}
+                        {{gig.day_of_show_notes}}
+                    {% else %}
+                        [No notes were left]
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% if not gig.archived %}
+        <input type="submit" class="uk-button" value="Update Day of Show"/>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Training
+{% endblock %}
+
+{% block headincludes %}
+<link rel="stylesheet" href="{% static 'training/css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="title">Training Materials</div>
+    <span>Training materials are loaded directly from our Google Drive, they may take a second to pop up</span>
+    <iframe src="https://drive.google.com/embeddedfolderview?id=1RE8u9tS6FmksGi7_mRRS0jjejvAi8acV#grid" style="width:100%; height:600px; border:0;"></iframe>
+</div>
+<!-- <div class="section">
+    <div class="title">Request Training</div>
+    <form class="user-form" method="POST" action="{% url 'employee:index' %}">
+        {% csrf_token %}
+    </form>
+</div> -->
+{% endblock %}

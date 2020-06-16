@@ -1,0 +1,4 @@
+*.json
+*/settings.py
+*.sqlite3
+__pycache__

@@ -1,0 +1,39 @@
+#no_notifications {
+    color: rgb(192, 192, 192);
+    text-align: center;
+    font-size: 1.25em;
+}
+
+a {
+    color: inherit!important;
+}
+
+a:hover {
+    text-decoration: none!important;
+    color: inherit;
+}
+
+.uk-alert:not(.uk-alert-danger):hover {
+    background-color: #333;
+    color: #FFF;
+    transition: background-color .25s, color .25s;
+
+}
+
+.ticket {
+    margin: auto;
+}
+
+table {
+    background-color: #212121;
+    color: #FFF;
+}
+.uk-table-hover tbody tr:hover, .uk-table-hover>tr:hover {
+    background: #333!important;
+}
+tr {
+    cursor: pointer;
+}
+tr img {
+    width: 3em;
+}

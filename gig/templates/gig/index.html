@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% load employee_type %}
+
+{% block title %}
+All Gigs
+{% endblock %}
+
+{% block headincludes %}
+<link rel="stylesheet" href="{% static 'gig/css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    <span class="title">All gigs:</span>
+    <table class="uk-table uk-table-hover uk-table-divider">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th class="uk-visible@m">Organization</th>
+                <th>Location</th>
+                <th>When</th>
+            </tr>
+        </thead>
+        <tbody class="uk-visible@m">
+            {% for gig in gigs %}
+                <tr onclick='window.location = "{% url 'gig:gigindex' gig.id %}"'>
+                    <td>{{gig.name}}</td>
+                    <td>{{gig.org}}</td>
+                    <td>{{gig.location.name}}</td>
+                    <td>{{gig.start|date:"n/j/y | P"}} - {{gig.end|date:"P"}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tbody class="uk-hidden@m">
+            {% for gig in gigs %}
+                <tr onclick='window.location = "{% url 'gig:gigindex' gig.id %}"'>
+                    <td>{{gig.name}}</td>
+                    <td>{{gig.location.name}}</td>
+                    <td>{{gig.start|date:"n/j/y | P"}} - {{gig.end|date:"P"}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

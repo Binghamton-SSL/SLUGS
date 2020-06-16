@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+{% load grouping %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block headincludes %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/ticket.css' %}"/>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    <span class="title">Notifications:</span>
+    {% if request.user|show_notifications:notifications %}
+        {% for notification in notifications %}
+            {% if request.user|show_notification:notification %}
+                <div uk-alert class="notification {{notification.message_type}}">
+                    {{notification.message|safe}}
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% if signup_open %}
+            <a class="alert" href="{% url 'gig:signup' %}"><div style="display: flex; text-align: center;" uk-alert>
+                <span clas="icon" uk-icon="icon: microphone; ratio: 1.5"></span> <div style="margin: auto;">This week's work is available for signup!</div> <span clas="icon" uk-icon="icon: bolt; ratio: 1.5"></span>
+            </div></a>
+        {% endif %}
+    {% elif signup_open %}
+        <a class="alert" href="{% url 'gig:signup' %}"><div style="display: flex; text-align: center;" uk-alert>
+            <span clas="icon" uk-icon="icon: microphone; ratio: 1.5"></span> <div style="margin: auto;">This week's work is available for signup!</div> <span clas="icon" uk-icon="icon: bolt; ratio: 1.5"></span>
+        </div></a>
+    {% else %}
+    <div id="no_notifications">Nothings here.... for now 😳</div>
+    {% endif %}
+</div>
+{% if nextGig %}
+
+    <div class="section">
+        <span class="title">Your next show:</span>
+        <a href="{% url 'gig:gigindex' nextGig.0.linked_gig__id %}">
+            <div class="ticket">
+                <div class="ticketGrid">
+                    <p class="name">
+                        {{nextGig.0.linked_gig__name}}
+                    </p>
+                    <p class="org">
+                        Presented By: {{nextGig.0.linked_gig__org}}
+                        
+                    </p>
+                    <p class="date">
+                        {{nextGig.0.linked_gig__start|date:"n/j/y"}}
+                    </p>
+                    <p class="time">
+                        {{nextGig.0.linked_gig__start|date:"P"}} - {{nextGig.0.linked_gig__end|date:"P"}}
+                    </p>
+                    <p class="location">
+                        {{nextGig.0.linked_gig__location__name}}
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+{% endif %}
+<div class="section">
+    <span class="title">My shows:</span>
+    <table class="uk-table uk-table-hover uk-table-divider">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th class="uk-visible@m">Organization</th>
+                <th>Location</th>
+                <th>When</th>
+            </tr>
+        </thead>
+        <tbody class="uk-visible@m">
+            {% for gig in gigs %}
+                <tr onclick='window.location = "{% url 'gig:gigindex' gig.linked_gig__id %}"'>
+                    <td>{{gig.linked_gig__name}}</td>
+                    <td>{{gig.linked_gig__org}}</td>
+                    <td>{{gig.linked_gig__location__name}}</td>
+                    <td>{{gig.linked_gig__start|date:"n/j/y | P"}} - {{gig.linked_gig__end|date:"P"}}</td>
+                </tr>
+            {% endfor %}
+            {% if not gigs %}
+            <tr>
+                <td colspan="4" style="text-align: center;">
+                You have no gigs...<br>
+                <img alt="Probies w no gigs fail the vibe check." src="{% static 'img/index/vibe_check.png' %}"/>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+        <tbody class="uk-hidden@m">
+            {% for gig in gigs %}
+                <tr onclick='window.location = "{% url 'gig:gigindex' gig.linked_gig__id %}"'>
+                    <td>{{gig.linked_gig__name}}</td>
+                    <td>{{gig.linked_gig__location__name}}</td>
+                    <td>{{gig.linked_gig__start|date:"n/j/y | P"}} - {{gig.linked_gig__end|date:"P"}}</td>
+                </tr>
+            {% endfor %}
+            {% if not gigs %}
+            <tr>
+                <td colspan="4" style="text-align: center;">
+                You have no gigs...<br>
+                <img alt="Probies w no gigs fail the vibe check." src="{% static 'img/index/vibe_check.png' %}"/>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

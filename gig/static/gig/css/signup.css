@@ -1,0 +1,67 @@
+@media only screen and (max-width: 600px) {
+    .section {
+        margin: .25em!important;
+    }
+    .section > .title {
+        text-align: center;
+    }
+    .uk-card.gig {
+        width: 100%!important;
+    }
+}
+
+.uk-card.gig {
+    width: 80%;
+    margin: 1.25em auto;
+}
+.uk-card.gig .info {
+    display: flex;
+    flex-direction: column;
+}
+.uk-card.gig .info b{
+    color: #000;
+    margin: .5em 0 0 0;
+}
+.uk-card.gig .info .open_spot {
+    display: flex;
+}
+.uk-card.gig .info .open_spot input{
+    width: 0;
+    height: 0;
+    opacity: 0;
+
+}
+.uk-card.gig .info .open_spot label div{
+    margin: .25em 0;
+    padding: .5em;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #fdd3d3;
+}
+.uk-card.gig .info .open_spot input:disabled ~ label div{
+    background-color: #000000;
+    color: #FFF;
+    cursor: default;
+}
+.uk-card.gig .info .open_spot input:disabled ~ span{
+    margin: auto .25em;
+}
+.uk-card.gig .info .open_spot label:hover div{
+    background-color: #e4e4e4;
+}
+.uk-card.gig .info .open_spot input:checked ~ label div{
+    background-color: #0af19d;
+}
+:not(pre)>code, :not(pre)>kbd, :not(pre)>samp {
+    color: #000!important;
+}
+#groups p{
+    color: #FFF;
+    margin: .25em 0;
+}
+#groups .uk-badge {
+    margin: .25em .25em;
+}
+kbd {
+    white-space: break-spaces!important;
+}

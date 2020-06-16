@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+Home
+{% endblock %}
+
+
+{% block content %}
+<style>
+    #content {
+        display: flex;
+    }
+    #message {
+        margin: 5em auto;
+        color: #FFF;
+        text-align: center;
+    }
+    h1 {
+        color: #FFF;
+    }
+    img {
+        width: 5em;
+    }
+</style>
+<div id="message">
+    <h1>
+        Dude.... what the hell
+    </h1>
+    <img alt="Probies w no gigs fail the vibe check." src="{% static 'img/index/vibe_check.png' %}"/>
+    <p>
+        You're not supposed to be here. You should head home bud.
+    </p>
+    <br><br>
+    Technical computery error message
+    <div uk-alert class="uk-alert-danger">
+        403 ERROR: You do not have the required permission to access this.
+    </div>
+</div>
+{% endblock %}
