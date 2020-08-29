@@ -9,6 +9,23 @@
             BSSL
             {% endblock %}
         </title>
+        <meta name="title" content="SLUGS">
+        <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+        <meta property="og:title" content="S.L.U.G.S.">
+        <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+        <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+        <meta property="twitter:title" content="S.L.U.G.S.">
+        <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+        <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="{% static 'css/uikit.min.css' %}"/>
         <link rel="stylesheet" href="{% static 'css/base.css' %}"/>

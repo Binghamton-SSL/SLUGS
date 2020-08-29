@@ -128,7 +128,7 @@ def signup(request):
     for gig in gigs:
         gig.employees = Employee.objects.filter(linked_gig=gig)
         for emp in gig.employees:
-            emp.isIntersted = InterestedEmployee.objects.filter(linked_employee=request.user).filter(job=emp).exists()
+            emp.isIntersted = InterestedEmployee.objects.filter(linked_employee=request.user,job=emp).filter(job=emp).exists()
     return render(request, 'gig/signup.html', {'gigs': gigs})
 
 def reportBrokenEquipment(request,system_id):

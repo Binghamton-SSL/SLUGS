@@ -66,7 +66,7 @@ class GigAdmin(nested_admin.NestedModelAdmin):
             if request.method == 'POST':
                 for item in list(request.POST.dict().keys()):
                     if item != "csrfmiddlewaretoken":
-                        emp_obj = Employee.objects.get(id=item[0])
+                        emp_obj = Employee.objects.get(id=item.split("-")[0])
                         emp_obj.linked_employee = EmployeeObject.objects.get(id=request.POST.get(item)) if (request.POST.get(item) != "") else None
                         emp_obj.save()
                 return redirect('admin:gig_gig_changelist')

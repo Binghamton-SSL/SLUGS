@@ -46,7 +46,7 @@ Home
                         {{nextGig.0.linked_gig__name}}
                     </p>
                     <p class="org">
-                        Presented By: {{nextGig.0.linked_gig__org}}
+                        Presented By: {{nextGig.0.linked_gig__org__name}}
                         
                     </p>
                     <p class="date">
@@ -78,7 +78,7 @@ Home
             {% for gig in gigs %}
                 <tr onclick='window.location = "{% url 'gig:gigindex' gig.linked_gig__id %}"'>
                     <td>{{gig.linked_gig__name}}</td>
-                    <td>{{gig.linked_gig__org}}</td>
+                    <td>{{gig.linked_gig__org__name}}</td>
                     <td>{{gig.linked_gig__location__name}}</td>
                     <td>{{gig.linked_gig__start|date:"n/j/y | P"}} - {{gig.linked_gig__end|date:"P"}}</td>
                 </tr>

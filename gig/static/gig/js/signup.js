@@ -3,7 +3,7 @@ $(document).ready(function() {
         $.ajax({
             url:'/gigs/signup/',
             type:'post',
-            data: JSON.stringify({"value":this.checked,"id":$(this).attr('id')[0]}),
+            data: JSON.stringify({"value":this.checked,"id":$(this).attr('id').split("-")[0]}),
             success: function (data) {
                 console.log("test")
                 if(data.status == 400) UIkit.notification({message: data.message, status: 'danger', pos: 'bottom-right','timeout': 1000}) 

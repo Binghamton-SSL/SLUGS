@@ -45,13 +45,13 @@ All Gigs
                         {% if request.user|has_group:emp.get_department_display %}
                             {% if request.user|has_group:emp.employee_type %}
                                 <span class="open_spot"> <input {% if emp.isIntersted %}checked{% endif %} class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>{{emp.employee_type}}</div></label> </span>
-                            {% elif request.user|has_group:"Probie - Sound" and emp.department == "S" or request.user|has_group:"Probie - Lights" and emp.department == "L"%}
+                            {% elif request.user|has_group:"Probie - Sound" and emp.department == "S" or request.user|has_group:"Probie - Lighting" and emp.department == "L"%}
                                 <span class="open_spot"> <input disabled class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>{{emp.employee_type}}</div></label> <span>( You have to probie a show first! 😞)</span> </span>
-                            {% elif emp.employee_type.name != "Probie - Sound" and emp.employee_type.name != "Probie - Lighting" %}
-                                <!-- <span class="open_spot"> <input {% if emp.isIntersted %}checked{% endif %} class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>Make this my {{emp.employee_type}} test</div></label> </span> -->
+                            {% elif emp.employee_type.name != "Probie - Sound" and emp.employee_type.name != "Probie - Lighting" and emp.employee_type.name != "Sound Tech" and emp.employee_type.name != "Lighting Tech"  %}
+                                <span class="open_spot"> <input {% if emp.isIntersted %}checked{% endif %} class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>Make this my {{emp.employee_type}} test</div></label> </span>
                             {% endif %}
                         {% else %}
-                        <!-- <span class="open_spot"> <input disabled class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>{{emp.employee_type}}</div></label> <span>( Unavailable to you 😞)</span> </span> -->
+                        <span class="open_spot"> <input disabled class="uk-checkbox" id="{{emp.id}}-checkbox" type="checkbox"/> <label for="{{emp.id}}-checkbox"><div>{{emp.employee_type}}</div></label> <span>(You cannot sign up for this {{emp.get_department_display}} job)</span> </span>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
