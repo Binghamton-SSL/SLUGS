@@ -1,9 +1,0 @@
-{% extends "admin/base.html" %}
-{% load static %}
-{% block title %}{{ title }} | Fairly Admin{% endblock %}
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static "admin/css/base-extension.css" %}">{% endblock %}
-{% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}"><img src="{% static 'img/logo/logo.svg' %}"/> Admin</a></h1>
-{% endblock %}
-
-{% block nav-global %}{% endblock %}
