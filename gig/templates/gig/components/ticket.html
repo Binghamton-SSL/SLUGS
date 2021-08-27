@@ -1,0 +1,137 @@
+{% load static %}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<div class="font-bold ticket">
+    <div class="ticketGrid">
+        <p class="name">
+            {{gig.name}}
+        </p>
+        <p class="org">
+            Presented By: {{gig.org}}
+            
+        </p>
+        <p class="date">
+            {{gig.start|date:"n/j/y"}}
+        </p>
+        <p class="time">
+            {{gig.start|date:"P"}} - {{gig.end|date:"P"}}
+        </p>
+        <p class="location">
+            {{gig.location.name}}
+        </p>
+    </div>
+</div>
+<style>
+.ticketGrid {
+    display: grid;
+    grid-template-areas: 
+        "name name name"
+        "org org org"
+        "date . time"
+        "place place place";
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+.ticket {
+    max-width: 600px;
+    font-size: 12px;
+    position: relative !important;
+    background: #008856;
+    background-image: url("{% static 'img/ticket/rice-paper-2.png' %}");
+    font-family: 'Poppins', sans-serif;
+    padding: 7px 3px;
+    margin: 1em auto;
+    height: min-content;
+}
+.ticket:after {
+    content: "";
+    position: absolute !important;
+    z-index: 30;
+    top: 0;
+    left: 0;
+    border-right: #000 7px solid;
+    border-bottom: #000 7px solid;
+    -moz-border-radius: 0 0 20px 0;
+    -webkit-border-radius: 0 0 20px 0;
+    border-radius: 0 0 20px 0;
+}
+ 
+.ticket:before {
+    content: "";
+    position: absolute !important;
+    z-index: 30;
+    top: 0;
+    right: 0;
+    border-left: #000 7px solid;
+    border-bottom: #000 7px solid;
+    -moz-border-radius: 0 0 0 20px;
+    -webkit-border-radius: 0 0 0 20px;
+    border-radius: 0 0 0 20px;
+}
+.ticket > div:after {
+    content: "";
+    position: absolute !important;
+    z-index: 30;
+    bottom: 0;
+    left: 0;
+    border-right: #000 7px solid;
+    border-top: #000 7px solid;
+    -moz-border-radius: 0 20px 0 0;
+    -webkit-border-radius: 0 20px 0 0;
+    border-radius: 0 20px 0 0;
+}
+ 
+.ticket > div:before {
+    content: "";
+    position: absolute !important;
+    z-index: 30;
+    bottom: 0;
+    right: 0;
+    border-left: #000 7px solid;
+    border-top: #000 7px solid;
+    -moz-border-radius: 20px 0 0 0;
+    -webkit-border-radius: 20px 0 0 0;
+    border-radius: 20px 0 0 0;
+}
+.ticket > div {
+    outline: 1px rgba(255,255,255,0.4) dashed;
+    border: 1px rgba(0,0,0,0.3) dashed;
+    margin: 4px 10px;
+    padding: 5px;
+    text-decoration: none;
+    color: rgba(0,0,0,0.7);
+    white-space: nowrap;
+}
+
+.ticket .name {
+    grid-area: name;
+    text-align: center;
+    margin: 1em 0 0 0;
+    font-size: 1.5rem;
+}
+
+.ticket .org {
+    grid-area: org;
+    text-align: center;
+    margin: auto;
+}
+.ticket .date {
+    grid-area: date;
+    text-align: left;
+    margin: 5px;
+}
+.ticket .time {
+    grid-area: time;
+    text-align: right;
+    margin: 5px;
+}
+.ticket .location {
+    grid-area: place;
+    text-align: center;
+    margin: 5px;
+}
+.ticket p {
+    font-size: 1.5em;
+}
+</style>

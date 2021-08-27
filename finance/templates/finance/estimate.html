@@ -1,0 +1,573 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BSSL {{estimate}}</title>
+
+    {% tailwind_css %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+</head>
+
+<body>
+    <table style="border: none;">
+        <thead class="bg-white">
+            <tr style="border: none;">
+                <td>
+                </td>
+            </tr>
+        </thead>
+        <tbody class="relative">
+            <tr style="border: none;">
+                <td style="border: none;">
+                    <div id="page-content">
+                        <div class="flex">
+                            <div class="flex flex-col" style="width: 2.5in">
+                                <h1 class="text-8xl font-stencil">BSSL</h1>
+                                <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
+                                <h1 class="font-brand">
+                                    <span class="text-xs text-center">Binghamton Sound Stage and Lighting</span><br>
+                                    <a href="tel:6077774144">(607) 777-4144</a><br>
+                                    <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
+                                    <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+                                </h1>
+                                <p class="mt-4 text-xs">
+                                    Student Assoc. of SUNY Binghamton, Inc.<br>
+                                    UU B19 - BSSL<br>
+                                    4400 Vestal Parkway, East<br>
+                                    Binghamton, NY 13902-6000<br>
+                                </p>
+                            </div>
+                            <div class="flex-col space-y-4" style="width:6in">
+                                <h1 class="ml-auto mr-4 text-4xl font-bold text-right">Reservation Form</h1>
+                                <table class="w-full ml-6">
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Event
+                                            </td>
+                                            <td>
+                                                Location
+                                            </td>
+                                            <td>
+                                                Event Date
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{estimate.gig.name}}
+                                            </td>
+                                            <td>
+                                                {{estimate.gig.location}}
+                                            </td>
+                                            <td>
+                                                {{estimate.gig.start|date:"n/j/Y"}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="w-full ml-6">
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Shop Time
+                                            </td>
+                                            <td>
+                                                Arrival Time
+                                            </td>
+                                            <td>
+                                                Setup By
+                                            </td>
+                                            <td>
+                                                Show Start
+                                            </td>
+                                            <td>
+                                                Show End
+                                            </td>
+                                            <td>
+                                                Load Out
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{shop_time|date:"n/j/Y"}}<br>
+                                                {{shop_time|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{load_in|date:"n/j/Y"}}<br>
+                                                {{load_in|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{estimate.gig.setup_by|date:"n/j/Y"}}<br>
+                                                {{estimate.gig.setup_by|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{estimate.gig.start|date:"n/j/Y"}}<br>
+                                                {{estimate.gig.start|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{estimate.gig.end|date:"n/j/Y"}}<br>
+                                                {{estimate.gig.end|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{load_out|date:"n/j/Y"}}<br>
+                                                {{load_out|date:"f A"}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="w-full ml-6">
+                                    <colgroup>
+                                        <col span="1" style="width: 40%;">
+                                        <col span="1" style="width: 30%;">
+                                        <col span="1" style="width: 30%;">
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Bill To
+                                            </td>
+                                            {% if estimate.gig.org.SA_account_num %}
+                                            <td>
+                                                SA Acct #
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                Estimate Date
+                                            </td>
+                                            <td>
+                                                Reservation Number
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{estimate.gig.org.name}}
+                                            </td>
+                                            {% if estimate.gig.org.SA_account_num %}
+                                            <td>
+                                                {{estimate.gig.org.SA_account_num}}
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                {% now "n/j/Y" %}
+                                            </td>
+                                            <td>
+                                                E{{2500|add:estimate.pk}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="mt-2" style="width: 8.75in">
+                            {% if estimate.notes %}
+                            <div class="p-2 font-mono border-2 border-b-0 border-black">
+                                <h1 class="text-lg">NOTE:</h1>
+                                <div class="text-sm">
+                                    {{estimate.notes|safe}}
+                                </div>
+                            </div>
+                            {% endif %}
+                            <table style="border-bottom: none;" class="w-full text-sm">
+                                <colgroup>
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 50%;">
+                                    <col span="1" style="width: 5%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <!-- <tr>
+                                    <td colspan="5" style="background-color: white!important; padding: .5rem .25rem">
+                                            <div class="flex font-mono text-xs">
+                                                <span class="my-auto">Initial:</span>
+                                                <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                                                    <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                                </div>
+                                                <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                                    <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                                </div>
+                                            </div>
+                                    </td> 
+                                    </tr> -->
+                                    <tr>
+                                        <td>
+                                            Item
+                                        </td>
+                                        <td>
+                                            Description
+                                        </td>
+                                        <td>
+                                            Qty
+                                        </td>
+                                        <td>
+                                            Rate
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% for system, time_rented, qty, total_price, is_addon in systems.values %}
+                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                        <td>
+                                            {% if is_addon %}
+                                            + {{system.name}}
+                                            {% else %}
+                                            {{system.name}} {{system.get_department_display}}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if system.description %}
+                                            <span class="text-xs">{{system.description}}</span><br>
+                                            {% endif %}
+                                            {% if system.base_price %}
+                                            Flat Rate
+                                            {% endif %}
+                                            {% if system.price_per_hour %}
+                                            Hourly Rate
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{qty}}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if system.base_price %}
+                                            {{system.base_price}}
+                                            {% elif system.price_per_hour %}
+                                            {{system.price_per_hour}}
+                                            {% else %}
+                                            0.00
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{total_price}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">
+                                            Subtotal:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{estimate.subtotal}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="border: none;">
+                                        <td style="border: none; padding: 1px"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% if estimate.fees.all.count > 0 or estimate.onetimefee_set.all.count > 0 %}
+                            <table style="border: none" class="w-full text-sm no-border">
+                                <colgroup>
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 45%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            Fee
+                                        </td>
+                                        <td>
+                                            Description
+                                        </td>
+                                        <td>
+                                            % of total
+                                        </td>
+                                        <td>
+                                            Rate
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% for fee, amt in fees.values %}
+                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                        <td>
+                                            {{fee.name}}
+                                        </td>
+                                        <td class="text-xs">
+                                            {% if fee.description %}{{fee.description}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if fee.percentage %}{{fee.percentage}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if fee.amount %}{{fee.amount}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            ${{amt}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">Fee
+                                            Total:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{estimate.fees_amt}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            {% endif %}
+                            <table class="w-full">
+                                <colgroup>
+                                    <col span="1" style="width: 50%;">
+                                    <col span="1" style="width: 35%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <tbody>
+                                    {% if estimate.adjustments %}
+                                    <tr>
+                                        <td colspan="2" class="text-right" style="border-right:none!important;">
+                                            Adjustments:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{estimate.adjustments}}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class="text-lg font-black">
+                                        <td class="border-r-0">
+                                            <!-- <div class="flex font-mono text-xs">
+                                            <span class="my-auto">Initial:</span>
+                                            <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                                                <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                            </div>
+                                            <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                                <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                            </div>
+                                        </div> -->
+                                        </td>
+                                        <td class="text-right border-l-0" style="border-right:none!important;">Total:
+                                        </td>
+                                        <td class="text-center" style="border-left:none!important;">
+                                            ${{estimate.total_amt}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dont_break">
+                            <div>
+                                <ul class="mt-4 text-[.6rem] list-disc list-inside">
+                                    <li>
+                                        The Event Coordinator will have the location reserved, and be present at the
+                                        event location, by
+                                        the Shop Time, and will be present for the duration
+                                        of the event. Note: The shop time is for our employees to report to work. It is
+                                        NOT indicative
+                                        of their arrival to the event space.
+                                    </li>
+                                    <li>
+                                        Any music or audio samples that BSSL will play will be on a clearly labeled
+                                        digital audio
+                                        player. Music media will be given to the sound
+                                        engineer far enough in advance of the show so that they can be tested and
+                                        replaced if necessary.
+                                        The promoter will either (1) provide the engineers
+                                        with a playlist or program which clearly lists sound and lighting cues in
+                                        English, or (2)
+                                        provide a representative to stay with the engineers
+                                        throughout the show to cue them.
+                                    </li>
+                                    <li>
+                                        Engineers are not required to work more than 15 minutes past the End Time. If
+                                        the engineers
+                                        agree to work beyond contracted hours, the
+                                        promoter will be billed a $20 late fee, as well as the extra labor per hour at
+                                        the current
+                                        hourly rate.
+                                    </li>
+                                    <li>
+                                        BSSL will not consider refunds on the basis of missed cues, conditions not
+                                        suitable for
+                                        videotaping, etc., unless the promoter has had a production
+                                        meeting with BSSL prior to the event, at which a list of cues was presented.
+                                    </li>
+                                    <li>
+                                        BSSL will not be held responsible for any losses due to equipment failure. The
+                                        promoter shall be
+                                        held responsible for the cost of repairing or
+                                        replacing any equipment damaged or stolen by event participants or audience
+                                        members
+                                    </li>
+                                    <li>
+                                        Changing a system between one and two Mondays prior to the event may be done so
+                                        without
+                                        incurring a fee. Changing a system between one
+                                        Monday and 48 hours prior will incur an additional 15% fee of the cancelled
+                                        system (for example,
+                                        if you have medium lights booked and you
+                                        change to small lights, you will be charged for small lights and 15% of medium
+                                        lights). Systems
+                                        may not be changed within 48 hours of the event.
+                                    </li>
+                                    <li>
+                                        Changing the time/location of your event between one Monday and 48 hours prior
+                                        will incur an
+                                        additional 15% fee. Changing the event
+                                        time/location between one 48 and 24 hours prior to the event will incur a 25%
+                                        fee. Time/location
+                                        cannot be changed within 24 hours of the event.
+                                    </li>
+                                    <li>
+                                        Cancelling an event may be done up to one Monday prior to the event without
+                                        incurring a fee.
+                                        Cancelling an event between one Monday and 48
+                                        hours prior to the event will incur a 25% fee. Cancelling an event between 24
+                                        and 48 hours prior
+                                        to the event will incur a 50% fee. Any
+                                        cancellations done the day of the event, or if the promoter neglects to inform
+                                        BSSL of the event
+                                        being cancelled, the group will be charge an
+                                        additional 100% fee.
+                                    </li>
+                                    <li>
+                                        Accessories can be added up to 48 hours prior to an event. Adding accessories
+                                        between 24 and 48
+                                        hours prior to the event will incur an additional
+                                        50% fee of the accessory price. Adding accessories the day of the event will
+                                        incur an additional
+                                        100% fee of the accessory price.
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="flex mt-10 text-sm dont_break" style="width: 8.75in;">
+                                    <div class="flex mx-auto">
+                                        <p class="mr-4">BSSL</p>
+                                        <div class="flex flex-col">
+                                            <p class="mx-auto">_________________________________</p>
+                                            <p class="mx-auto">{{request.user.first_name}} {{request.user.last_name}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex mx-auto">
+                                        <p class="mr-4">{{estimate.gig.org}}</p>
+                                        <div class="flex flex-col">
+                                            <p class="mx-auto">_________________________________</p>
+                                            <p class="mx-auto">{{estimate.gig.contact.name}}</p>
+                                            <p class="mx-auto text-xs">
+                                                {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
+                                            </p>
+                                            <p class="mx-auto text-xs">
+                                                {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                    have read the contract in
+                                    full
+                                    and agree to the terms and conditions. I agree to pay the
+                                    total amount in full upon receipt of invoice.</p>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr style="border: none;">
+                <td style="border: none; padding-top: .25in;">
+                    <div class="flex">
+                        <span class="my-auto">Initial:</span>
+                        <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                        </div>
+                        <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                        </div>
+                    </div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+<style>
+    @page {
+        size: 8.5in 11in;
+        counter-increment: page;
+
+    }
+
+    @media print {
+        .dont_break {
+            break-inside: avoid;
+        }
+    }
+
+    body {
+        width: 8.5in;
+        height: 11in;
+        background-color: white;
+    }
+
+    table {
+        border: black solid 2px;
+    }
+
+    table thead {
+        background-color: #CCC;
+    }
+
+    table tr {
+        border-top: black solid 1px;
+    }
+
+    table td {
+        border-left: black solid 1px;
+        border-right: black solid 1px;
+        padding-left: .5rem;
+    }
+
+    #item_table tr {
+        /* border: none!important; */
+    }
+</style>
+<script>
+    print()
+</script>
+
+</html>

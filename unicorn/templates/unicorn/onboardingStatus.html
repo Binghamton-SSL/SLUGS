@@ -1,0 +1,21 @@
+<div style="margin: auto;">
+    <button
+    unicorn:click="toggle"
+    style="
+    {% if onboarding.is_open == True %}
+    background-color: #03c77f;
+    {% elif onboarding.is_open == False %}
+    background-color: #f0506e;
+    {% endif %}
+    "
+    class="sidebar_button">
+    {% if onboarding.is_open == True %}
+    Onboarding is open
+    {% elif onboarding.is_open == False %}
+    Onboarding is closed
+    {% else %}
+    Getting onboarding status...
+    {% endif %}
+    </button>
+    </div>
+    

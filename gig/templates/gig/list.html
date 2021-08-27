@@ -1,0 +1,49 @@
+{% extends "theme/base.html" %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - Shows{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10">
+    <h1 class="text-4xl text-bold">
+        Shows
+    </h1>
+    <div class="my-4 md:mx-20">
+        <table style="border-spacing: 1rem 1rem;" class="w-full table-auto">
+            <thead class="border-b-2 border-white">
+                <tr>
+                    <td>
+                        Name
+                    </td>
+                    <td class="hidden md:inline">
+                        Organization
+                    </td>
+                    <td>
+                        Location
+                    </td>
+                    <td>
+                        When
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gig in gigs %}
+                <tr tabindex="0" onclick="window.location='{% url 'gig:showView' gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
+                    <td class="pl-2">
+                        {{gig.name}}
+                    </td>
+                    <td class="hidden pl-2 md:table-cell">
+                        {{gig.org}}
+                    </td>
+                    <td class="py-4 pl-2">
+                        {{gig.location}}
+                    </td>
+                    <td class="pl-2">
+                        {{gig.start}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

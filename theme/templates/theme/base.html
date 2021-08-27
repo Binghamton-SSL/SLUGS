@@ -1,0 +1,72 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SLUGS {% block title %}{% endblock %}</title>
+
+    {% tailwind_css %}
+    <link rel="shortcut icon" href="{% static 'img/logo/icon.ico' %}" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-204812814-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+    //   gtag('config', 'G-TXQNJ4GT70', {'user_id': '{{request.user.id}}'});
+      gtag('config', 'UA-204812814-1', {'user_id': '{{request.user.id}}'});
+      gtag('set', {'user_id': '{{request.user.id}}'});
+    </script>
+</head>
+
+<body class="leading-normal tracking-normal font-brand bg-black text-white {% block body_classes %} {% endblock %}">
+    {% block nav %} {% nav request %} {% endblock %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="py-2 text-center text-black {% if message.tags %} {{ message.tags }} {% endif %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}bg-red-500 {% endif %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}bg-yellow-500 {% endif %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}bg-green-500 {% endif %}
+        ">{{ message|safe }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% block content %} {% endblock %}
+</body>
+{% block footer %}
+<footer class="text-center mt-52">
+    <p>If there are any EMERGENT issues that keep you from performing your job and must be addressed now <a class="underline" href="tel:9176516798">click to call or text Joe</a></p>
+    <p class="text-xs">Any issues or feedback? <a href="mailto:SLUGS@joebabbitt.com" class="underline">Let us know</a> so we can make <span class="font-stencil">S.L.U.G.S</span> better</p>
+    <p class="font-mono text-xs text-gray-300"><span class="font-stencil">S.L.U.G.S</span> is created for the exclusive use of BSSL</p>
+    <p class="text-xs text-gray-600">We use Google Analytics to monitor usage and make sure all is well. <br> If you're worried about your privacy contact <a href="mailto:slugs@joebabbitt.com" class="underline">Joe</a></p>
+</footer>
+{% endblock %}
+</html>

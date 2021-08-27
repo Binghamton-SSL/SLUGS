@@ -1,0 +1,22 @@
+{% extends "theme/base.html" %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - 403 - You done goofed{% endblock %}
+
+{% block nav %}{% endblock %}
+{% block content %}
+<div class="flex flex-col max-w-5xl mx-auto">
+    <h1 class="m-4 text-4xl">Hey bestie...</h1>
+    <img class="w-24 h-24 mx-auto my-4" src="{% static 'img/index/vibe_check.png' %}"/>
+    <h2 class="mx-auto text-2xl text-center">Seems like you're not supposed to be here bud</h2>
+    <h4 class="text-xl text-center">Imma have you clock out</h4>
+    <div class="flex flex-col mx-auto my-10">
+        <a href="/">
+            <button class="px-4 py-2 bg-[#009961] rounded">Go Home</button>
+        </a>
+    </div>
+    <h6 class="text-center text-gray-700">
+        Last warning buddy, scram
+    </h6>
+</div>
+{% endblock %}
+{% block footer %}{% endblock %}

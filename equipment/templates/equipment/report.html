@@ -1,0 +1,18 @@
+{% extends "theme/base.html" %}
+{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %}
+{% block title %} Report {{system.name}} as broken{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10">
+    <h2 class="text-3xl">
+        Report an issue with {{system.get_department_display}} - {{system.name}}
+    </h2>
+    {% crispy form %}
+</div>
+
+<style>
+    label {
+        color: white !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,54 @@
+<div>
+    <div class="flex space-x-4 text-xl overflow-x-auto max-w-[100vw] md:max-w-none deptList">
+        {% for dept in depts %}
+        <button unicorn:click="choose_dept('{{dept.0}}')" class="p-2 border-2 border-b-0 border-white border-solid rounded-t-sm w-max {% if dept.0 == selectedDept %} bg-gray-700 {% endif %}">{{dept.1}}</button>
+        {% endfor %}
+    </div>
+    <div class="p-4 border-2 border-white border-solid">
+        <ul class="space-y-4">
+            {% for job in jobs %}
+            <li class="flex space-x-2">
+                {% if job.is_test %}
+                <div class="my-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
+                    </svg>
+                </div>
+                {% endif %}
+                <span class="my-auto">{{job.position}}</span> <span class="my-auto">-</span>
+                <div class="flex flex-col p-2 space-y-2 bg-gray-600 rounded-sm sm:space-y-0 sm:space-x-2 sm:flex-row">
+                    {% if job.employee != None %}
+                    <span>{{job.employee.first_name}} {{job.employee.last_name}}</span>
+                    <div class="flex mx-auto space-x-2">
+                        <a href="tel:{{job.employee.phone_number}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                        </a>
+                        <a href="mailto:{{job.employee.email}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                        </a>
+                    </div>
+                    {% else %}
+                    TBD
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<style>
+    .deptList::-webkit-scrollbar {
+        display: none;
+    }
+    .deptList {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }

@@ -1,0 +1,91 @@
+{% extends "theme/base.html" %}
+{% load unicorn %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - Signup for work{% endblock %}
+
+{% block headincludes %}{% unicorn_scripts %}{% endblock %}
+{% block content %}
+<div class="max-w-5xl m-4 md:mx-auto">
+    <h1 class="text-3xl">
+        Sign up for upcoming shows!
+    </h1>
+    <h3 class="text-lg">
+        Your updates are saved automagically. Just click.
+    </h3>
+    <h4 class="mb-5">As always, remember that expressing interest in a job does <b>NOT</b> mean you have been staffed. We will reach out to you when/if you're staffed for the position. You're also welcome to sign up for multiple positions on a show.</h4>
+    {% if gigs|length > 0 %}
+    {% else %}
+    <div class="flex flex-col p-4 pb-0 pl-0 text-xl text-center text-black bg-white rounded-sm">
+        You have full permission to go yell at the managers. All the spots are filled yet here we are...
+        <img class="w-16" src="{% static 'gig/img/whoops.png' %}" alt="Awkward..."/>
+    </div>
+    {% endif %}
+    {% for gig in gigs %}
+    <div class="w-full px-4 py-2 text-black bg-white">
+        <a class="underline" href="{% url 'gig:showView' gig_id=gig.pk %}"><h2 class="text-2xl">
+            {{gig.name}}
+        </h2></a>
+        <p>
+            {{gig.start}} - {{gig.end}}
+        </p>
+        <p>
+            Location: {{gig.location}}
+        </p>
+        <div class="p-4 m-2 mx-auto bg-gray-300 rounded max-w-prose">
+            {{gig.notes|safe}}
+        </div>
+        <div class="flex flex-col mx-auto w-max md:flex-row">
+            {% for loadin in gig.loadin_set.all %}
+                <div class="p-4 m-2 border-2 border-black border-solid rounded w-max">
+                    <p class="text-lg font-bold">{{loadin.get_department_display}}</p>
+                    <div class="flex space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        {{loadin.shop_time}}
+                    </div>
+                    <div class="flex space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                        </svg>
+                        {{loadin.load_in}}
+                    </div>
+                    <div class="flex space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                        </svg>
+                        {{loadin.load_out}}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col mx-auto mb-4 w-max md:flex-row">
+            {% for system in gig.systeminstance_set.all %}
+                <div class="flex flex-col p-4 mx-auto text-black bg-white border-2 border-black rounded-sm">
+                    <h3 class="text-2xl text-center">{{system.system.get_department_display}}</h3>
+                    <h3 class="text-lg text-center ">{{system.system.name}}</h3>
+                    {% if system.addons %}
+                    <ul class="text-center">
+                        {% for addon in system.addons.all %}
+                        <li>+ {{addon}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        {% unicorn 'gigSignup' gig_id=gig.pk u_id=request.user.id %}
+    </div>
+    {% endfor %}
+    <div class="p-4 my-2 text-black bg-white">
+        <h2>
+            As a reminder. You may sign  up for the following jobs.
+        </h2>
+        <div >
+            {% for group in request.user.groups.all %}
+            <div class="inline-block p-2 m-2 text-white bg-black rounded-sm">{{group}}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

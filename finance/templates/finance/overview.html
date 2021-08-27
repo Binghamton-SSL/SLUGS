@@ -1,0 +1,27 @@
+{% extends "theme/base.html" %}
+{% load unicorn %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - Finance Homepage{% endblock %}
+
+{% block headincludes %}{% unicorn_scripts %}{% endblock %}
+{% block content %}
+<div class="max-w-5xl m-4 md:mx-auto">
+    <h1 class="text-4xl">Financial Overview</h1>
+    <h2 class="mt-5 text-2xl">Most Recent Pay Period</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <h2 class="text-xl">
+            {{most_recent_pay_period.start}} - {{most_recent_pay_period.end}}; Payday {{most_recent_pay_period.payday}}
+        </h2>
+        <div>
+            {{shifts.count}} Shifts in period totaling {{shifts_hours.total_time__sum}} man-hours of work and costing ${{shifts_price.cost__sum|floatformat:2}}
+        </div>
+        <div>
+            {% for shift in shifts %}
+                {% unicorn 'financeShift' shift=shift %}
+            {% endfor %}
+        </div>
+    </div>
+    <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>
+    {% unicorn 'previousPayPeriod' %}
+</div>
+{% endblock %}

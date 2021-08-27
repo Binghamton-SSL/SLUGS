@@ -1,0 +1,247 @@
+{% extends "theme/base.html" %}
+{% load unicorn %}
+{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
+{% block title %} - {{gig.name}}{% endblock %}
+
+{% block headincludes %}{% unicorn_scripts %}{% endblock %}
+{% block content %}
+
+<div class="m-5 mt-10">
+    {% ticket gig %}
+</div>
+<div class="mx-4 my-10 sm:mx-auto max-w-prose">
+    <h2 class="p-1 text-black bg-white w-max">
+        Notes:
+    </h2>
+    <div class="px-2 py-1 mt-1 text-black bg-white">
+        {% if gig.notes %}
+        {{gig.notes|safe}}
+        {% else %}
+        <span class="font-mono">No engineering notes provided 🤷‍♂️</span>
+        {% endif %}
+    </div>
+</div>
+<div class="flex flex-col max-w-5xl mx-auto space-y-4 xl:space-y-0 xl:space-x-4 xl:flex-row">
+    <div class="max-w-[100vw] flex flex-col mx-auto xl:ml-0 sm:max-w-lg">
+        <h1 class="mx-4 text-3xl">
+            Load In/Out
+        </h1>
+        <div class="relative">
+            <div class="absolute top-0 bottom-0 left-0 pointer-events-none -right-1" style="background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(255,255,255,0) 3%, rgba(255,255,255,0) 97%, rgba(0,0,0,1) 100%);"></div>
+            <div class="my-auto overflow-x-auto">
+                <div class="flex my-4 space-x-4 sm:m-4">
+                    <div class="w-4 text-transparent bg-transparent"><p>.</p></div>
+                    {% for loadin in gig.loadin_set.all %}
+                    <div class="p-4 mx-auto text-black bg-white rounded-sm">
+                        <h3 class="text-xl">{{loadin.get_department_display}}</h3>
+                        <div class="flex m-2 text-lg w-max">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            {{loadin.shop_time}}
+                        </div>
+                        <div class="flex m-2 text-lg w-max">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                            {{loadin.load_in}}
+                        </div>
+                        <div class="flex m-2 text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                            </svg>
+                            {{loadin.load_out}}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="w-4 text-transparent bg-transparent"><p>.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="max-w-[100vw] mx-auto flex flex-col sm:max-w-lg">
+        <h1 class="mx-4 text-3xl">
+            Systems Rented
+        </h1>
+        <div class="relative">
+            <div class="absolute top-0 bottom-0 left-0 pointer-events-none -right-1" style="background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(255,255,255,0) 3%, rgba(255,255,255,0) 97%, rgba(0,0,0,1) 100%);"></div>
+            <div class="my-auto overflow-x-auto">
+                <div class="flex my-4 space-x-4 sm:m-4">
+                    <div class="w-4 text-transparent bg-transparent"><p>.</p></div>
+                    {% for system in gig.systeminstance_set.all %}
+                    <div class="flex flex-col p-4 mx-auto text-black bg-white rounded-sm">
+                        <h3 class="text-2xl text-center">{{system.system.get_department_display}}</h3>
+                        <h3 class="text-lg text-center ">{{system.system.name}}</h3>
+                        {% if system.addons %}
+                        <ul class="text-center">
+                            {% for addon in system.addoninstance_set.all %}
+                            <li>+ {{addon.addon}} ({{addon.qty}})</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        <a href="{% url 'equipment:report' system.system.pk %}"
+                            class="mx-auto mt-auto mb-2 text-sm font-bold text-center underline">Report Broken</a>
+                    </div>
+                    {% endfor %}
+                    <div class="w-4 text-transparent bg-transparent"><p>.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
+    {% unicorn 'employeeList' show=gig.id %}
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="{% static 'js/jquery.formset.js' %}" type="text/javascript"> </script>
+{% if my_job|isEngineer and not gig.archived or request.user|has_group:"Manager" %}
+<div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
+    <h1 class="mx-4 text-3xl"> Day of Show </h1>
+    <div class="my-2">
+        <form method="POST">
+            {% csrf_token %}
+            {% for name, job_formset in forms.items %}
+            {% if name == 'show_notes' %}
+            <div class="my-2">
+                <div class="p-4 my-4 vibg-gray-700">
+                    <h2 class="text-xl">Engineer's Notes</h2>
+                    <p>Anything out of the ordinary? Notes about the show?</p>
+                    <div class="flex p-2 my-2 space-x-4 bg-red-700 rounded-sm">
+                        <div class="w-6 h-6 my-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        </div>
+                        <p>
+                            Broken equipment should always be reported, but this is not the place! Hit the "Report issue" link
+                            under to the broken system.
+                        </p>
+                    </div>
+                    {% crispy forms.show_notes %}
+                </div>
+            </div>
+            {% else %}
+                {% if job_formset.employee is not None %}
+                <div class="p-4 my-4 bg-gray-700">
+                    <p class="text-xl">{{job_formset.employee}}</p>
+                    <div id="{{job_formset.form.prefix}}">
+                        {{ job_formset.form.management_form|crispy }}
+                        {% for form in job_formset.form.forms %}
+                        <div
+                            class="{% cycle 'row1' 'row2' %} formset row-{{job_formset.form.prefix}} flex">
+                            <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                                {% for field in form.visible_fields %}
+                                <div>
+                                    {# Include the hidden fields in the form #}
+                                    {% if forloop.first %}
+                                    {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                    {% endfor %}
+                                    {% endif %}
+                                    {{ field.errors.as_ul }}
+                                    {{ field|as_crispy_field }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <script type="text/javascript">
+                        $('.row-{{job_formset.form.prefix}}').formset({
+                            addText: 'Add Shift',
+                            deleteText: '✕',
+                            deleteCssClass: 'delete-row my-auto bg-black w-min px-4 py-2',
+                            prefix: '{{ job_formset.form.prefix }}',
+                            hideLastAddForm: true,
+                        });;
+                    </script>
+                </div>
+                {% else %}
+                <div class="hidden">
+                    {% crispy job_formset.form helper %}
+                </div>
+                <div class="relative flex-col px-4 pt-4 pb-20 my-4 bg-gray-700 flex-">
+                    <p>This job isn't assigned to an employee...</p>
+                    <sup>bro you doing this by yourself???</sup>
+                    <img class="absolute right-0 w-20 h-20" src="{% static 'gig/img/wat.png' %}" alt="Wut" />
+                </div>
+                {% endif %}
+            {% endif %}
+            {% endfor %}
+            <button class="m-2 bg-[#009961] py-4 px-2" type="submit">Update day of show</button>
+        </form>
+
+    </div>
+</div>
+<style>
+    label {
+        color: white !important;
+    }
+
+    .add-row {
+        padding: 1rem;
+        background-color: #009961;
+        display: block;
+        width: max-content;
+        margin: .5rem 0;
+    }
+
+    @media (min-width: 768px) { 
+        .delete-row {
+            margin-bottom: .75rem;
+        }
+     }
+
+    .delete-row {
+        margin-left: .5rem;
+        height: max-content;
+        
+    }
+</style>
+{% elif my_job %}
+<div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
+<h1 class="mx-4 text-3xl">My shifts:</h1>
+<div class="flex flex-col p-4 my-4 text-black bg-white">
+{% if not gig.archived %}
+    <div class="w-full">
+        {% unicorn 'gigShift' job=my_job %}
+    </div>
+{% endif %}
+    {% if not my_job|isEngineer %}
+        <div class="flex p-2 my-2 mt-5 space-x-2 bg-blue-300 rounded">
+            <div class="my-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="">Something not look right? Contact the engineer for this show and they'll be able to make any changes required through their version of this page.</p>
+        </div>
+    {% endif %}
+    {% for shift in my_job.shifts.all %}
+    <div class="flex m-4 border-2 border-black rounded">
+        <div class="flex flex-col ml-4 mr-auto">
+            <span>{{shift.time_in}}</span>
+            <span>{{shift.time_out}}</span>
+        </div>
+        <div class="flex flex-col ml-auto mr-4">
+            {% if shift.time_out %}
+            <span>{{shift.total_time|duration}}</span>
+            <span>${{shift.cost|floatformat:2}}</span>
+            {% else %}
+            <span>Ongoing</span>
+            <span>$TBD</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>   
+</div>
+{% endif %}
+{% endblock %}

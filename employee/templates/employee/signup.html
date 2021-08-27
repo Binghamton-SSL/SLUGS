@@ -1,0 +1,25 @@
+{% extends "theme/base.html" %} {% load grouping %} {% load crispy_forms_tags %}
+{% block title %}Signup{% endblock %}
+{% block nav %}{% endblock %}
+{% block content %}
+<div class="m-5">
+    <h1 class="text-5xl">
+        Signup for BSSL <span class="font-stencil">S.L.U.G.S</span>
+    </h1>
+    <h2 class="mt-4 text-lg">
+        We're glad to have you join us! Welcome to your first interaction with SLUGS.
+        This is our custom system that we use to book, staff, and manage shows. We're
+        going to get you setup with an account real quick.
+    </h2>
+    {% crispy form %}
+</div>
+<style>
+    label {
+        color: white!important;
+    }
+    small {
+        color: white!important
+    }
+</style>
+{% endblock %}
+{% block footer %}{% endblock %}

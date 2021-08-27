@@ -1,0 +1,186 @@
+{% extends "theme/base.html" %}
+{% load unicorn %}
+{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
+{% block title %} - Overview - {{request.user.first_name}} {{request.user.last_name}}{% endblock %}
+
+{% block headincludes %}{% unicorn_scripts %}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-4 mt-10 sm:mx-auto">
+    <h1 class="text-4xl">
+        Employee Overview
+    </h1>
+    <h2 class="text-2xl">User Information</h2>
+    <div class="p-4 my-4 text-black bg-white">
+        {% crispy forms.userChangeForm %}
+    </div>
+    <h2 id="paperwork" class="text-2xl">Paperwork</h2>
+    <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
+        {% for form in request.user.paperworkform_set.all %}
+            <div class="p-4 text-black {% if form.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
+                <a href="/media/{{form.form.form_pdf}}"><h5 class="text-xl underline">{{form.form.form_name}}</h5></a>
+                {% if form.processed %}<p class="text-center font-bold text-xs">This form has been processed</p>{% endif %}
+                <div class="flex flex-col">
+                    {% if form.form.handed_in %}
+                        <div class="flex space-x-2 p-2 bg-gray-300 rounded-sm">
+                            <div class="mr-2 my-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                            </div>
+                            <p>{{form.form.handed_in}}</p>
+                        </div>
+                    {% else %}
+                        {% if form.pdf %}
+                        <div class="flex space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 my-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <p>{{form.uploaded}}</p>
+                        </div>
+                        <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
+                        {% else %}
+                        <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <h2 class="text-2xl">Shifts worked</h2>
+    <div class="p-4 my-4 text-black bg-white">
+        <h3 class="text-xl">You've worked {{shifts|length}} {% if shifts|length == 1 %} shift {% else %} shifts
+            {% endif %} totaling {{timeworked.total_time__sum}}, and earning ${{amount_made.cost__sum|floatformat:2}}</h3>
+        {% if contested_shifts|length > 0 %}
+        <div class="flex p-4 m-2 space-x-2 bg-red-500">
+            <div class="my-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-700" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <p>You have contested shifts! This means that something doesn't seem to add up in our records. This
+                <b>CAN</b> prevent you from being paid. You'll find them below at the top. Please be sure to reach out
+                to the <a class="underline" href="mailto:Bssl.finance@binghamtonsa.org">Finanical Director</a> to take
+                care of these.</p>
+        </div>
+        {% endif %}
+        <div class="mx-auto md:w-max">
+            {% for shift in contested_shifts %}
+            <div class="flex-col p-4 m-2 text-black bg-red-100 rounded-sm">
+                <div class="flex p-2 m-2 mx-auto space-x-2 bg-red-300 rounded-sm w-max">
+                    <div class="my-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-200" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <p>
+                        Contested Shift
+                    </p>
+                </div>
+                <div class="flex flex-col space-x-4 md:flex-row">
+                    <div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                        </div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                              </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                        </div>
+                    </div>
+                    <div class="my-2 text-center md:my-auto">
+                        {{shift.content_object}}
+                    </div>
+                </div>
+                <div class="my-1 text-lg text-center">
+                    {{shift.total_time}} Hours
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Paid at: {{shift.content_object.position.hourly_rate}}
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Total: ${{shift.cost}}
+                </div>
+            </div>
+            {% endfor %}
+            {% for shift in unprocessed_shifts %}
+            <div class="flex-col p-4 m-2 text-black bg-gray-300 rounded-sm">
+                <div class="flex flex-col space-x-4 md:flex-row">
+                    <div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                        </div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                              </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                        </div>
+                    </div>
+                    <div class="my-2 text-center md:my-auto">
+                        {{shift.content_object}}
+                    </div>
+                </div>
+                <div class="my-1 text-lg text-center">
+                    {{shift.total_time}} Hours
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Paid at: {{shift.content_object.position.hourly_rate}}
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Total: ${{shift.cost}}
+                </div>
+            </div>
+            {% endfor %}
+            {% for shift in processed_shifts %}
+            <div class="flex-col p-4 m-2 text-black bg-green-100 rounded-sm">
+                <div class="flex flex-col space-x-4 md:flex-row">
+                    <div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                        </div>
+                        <div class="flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                              </svg>
+                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                        </div>
+                    </div>
+                    <div class="my-2 text-center md:my-auto">
+                        {{shift.content_object}}
+                    </div>
+                </div>
+                <div class="my-1 text-lg text-center">
+                    {{shift.total_time}} Hours
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Paid at: {{shift.content_object.position.hourly_rate}}
+                </div>
+                <div class="my-1 text-lg text-center">
+                    Total: ${{shift.cost}}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

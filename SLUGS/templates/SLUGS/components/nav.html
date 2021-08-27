@@ -1,0 +1,69 @@
+{% load static %}
+{% load grouping %}
+<nav class="flex px-4 text-black bg-white">
+    <a href="/">
+        <img class="w-14 h-14 sm:w-20 sm:h-20 filter hover:invert-[.5]" src="{% static 'img/logo/logo.svg' %}" />
+    </a>
+    <div class="my-auto space-x-4 text-lg font-bold">
+        <a class="hover:text-gray-600" href="{% url 'gig:list' %}">Shows</a>
+        <a class="hover:text-gray-600" href="{% url 'training:index' %}">Training</a>
+        <a class="hover:text-gray-600" href="{% url 'employee:overview' %}">You</a>
+        {% if request.user|has_group:"Manager" %}
+        <a class="hidden md:inline hover:text-gray-600" href="{% url 'admin:index' %}">Admin</a>
+        <a class="hidden md:inline hover:text-gray-600" href="{% url 'employee:office_hours' %}">Office Hours</a>
+        {% if request.user|has_group:"Financial Director/GM" %}<a class="hidden md:inline hover:text-gray-600" href="{% url 'finance:overview' %}">Finance</a>{% endif %}
+        {% endif %}
+    </div>
+    <div class="my-auto ml-auto mr-0">
+        <div class="relative hidden md:block">
+            <a href="#"><span>Hey there,</span>
+                {{request.user.first_name}}</a>
+            <div
+                class="absolute w-full h-0 mt-5 overflow-hidden transition-all duration-75 bg-white shadow focused-within-parent:h-28">
+                <div class="flex flex-col py-5">
+                    <a class="mx-auto" href="mailto:slugs@joebabbitt.com">Help!</a>
+                    <hr class="my-2"/>
+                    <a class="mx-auto" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+        <div tabindex="0" onclick="openMenu()" class="text-black md:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+        </div>
+    </div>
+</nav>
+<div onclick="closeMenu()" class="absolute top-0 z-40 hidden w-screen h-screen transition-all bg-black opacity-75 menubackground"></div>
+<div class="fixed top-0 right-0 z-50 w-4/6 h-screen text-black transition-all transform translate-x-full bg-white shadow mobile-nav">
+    <div class="flex flex-col mt-10">
+        <div tabindex="0" onclick="closeMenu()" class="p-2 mx-auto rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        {% if request.user|has_group:"Manager" %}
+        <div class="flex flex-col mt-5 ml-5 space-y-4">
+            <a class="text-lg font-bold underline" href="{% url 'admin:index' %}">Admin</a>
+            <a class="text-lg font-bold underline" href="{% url 'employee:office_hours' %}">Office Hours</a>
+            {% if request.user|has_group:"Financial Director/GM" %}<a class="text-lg font-bold underline" href="{% url 'finance:overview' %}">Finance</a>{% endif %}
+            <hr/>
+        </div>
+        {% endif %}
+        <div class="flex flex-col mt-5 ml-5 space-y-4">
+            <a class="text-lg font-bold underline" href="sms:19176516798">Get Help!</a>
+            <a class="text-lg font-bold underline" href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+</div>
+<script>
+    const openMenu = () => {
+        document.querySelector('.menubackground').classList.remove('hidden')
+        document.querySelector('.mobile-nav').classList.remove('translate-x-full')
+    }
+    const closeMenu = () => {
+        document.querySelector('.menubackground').classList.add('hidden')
+        document.querySelector('.mobile-nav').classList.add('translate-x-full')
+    }
+</script>

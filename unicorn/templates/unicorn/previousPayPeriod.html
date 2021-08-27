@@ -1,0 +1,46 @@
+{% load unicorn %}
+
+<div class="p-4 text-black bg-white rounded">
+    Select Pay Period:
+    <select class="my-4 ml-4" unicorn:model="selected_pp">
+        <option value="-1"></option>
+        {% for option in available_pay_period.all%}
+        <option value="{{option.pk}}">{{option}}</option>
+        {% endfor %}
+    </select>
+    {% if sub_pay_period %}
+        <h2 class="text-xl">
+            {{sub_pay_period.start}} - {{sub_pay_period.end}}
+        </h2>
+        <div>
+            {{sub_shifts.count}} Shifts in period totaling {{sub_shifts_hours.total_time__sum}} man-hours of work and costing ${{sub_shifts_price.cost__sum|floatformat:2}}
+        </div>
+        <div>
+            {% for shift in sub_shifts %}
+            <a href="{{shift.get_admin_url}}">
+                <div class="p-4 my-4 border-2 border-black rounded-sm hover:bg-gray-100">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="flex flex-col">
+                            <span>{{shift.content_object.employee}}</span>
+                            <span>{{shift.content_object}}</span>
+                            <span class="mt-2">Start: {{shift.time_in}}</span>
+                            <span>End: {{shift.time_out}}</span>
+                        </div>
+                        <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
+                            <span>Rate: ${{shift.content_object.position.hourly_rate.hourly_rate}}/hr</span>
+                            <span>Total: ${{shift.cost|floatformat:2}}</span>
+                            {% if shift.processed %}
+                            <div class="bg-[#009961] text-white px-4 py-2 my-2 rounded-sm text-center">Accepted</div>
+                            {% elif shift.contested %}
+                            <div class="px-4 py-2 my-2 text-center text-white bg-yellow-600 rounded-sm">Contested</div>
+                            {% else %}
+                            <div class="px-4 py-2 my-2 text-center text-black bg-gray-400 rounded-sm">Unprocessed</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

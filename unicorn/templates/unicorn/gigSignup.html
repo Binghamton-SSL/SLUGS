@@ -1,0 +1,45 @@
+<div>
+    {% if jobs|length > 0 %}
+    <div class="flex flex-col m-4 mx-auto md:flex-row w-max">
+        {% for id, job in jobs.items %}
+        <button unicorn:click="toggleInterest({{job.0.id}})" class="p-4 m-4 rounded text-center
+            {% if job.1 %}
+                {% if job.2%}
+                text-white
+                bg-green-500
+                {% else %}
+                text-black
+                bg-yellow-300
+                {% endif %}
+            {% else %}
+            bg-gray-300
+            {% endif %}
+        ">
+            {{job.0.position}} {% if not job.2 %}(TEST){% endif %}
+        </button>
+        {% endfor %}
+        {% else %}
+        <div class="flex p-4 space-x-4 bg-yellow-300">
+            <div class="my-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            </div>
+            <div>
+                <p>Unfortunately you can't sign up for any open jobs on the show. Most likely because you need to test up 👀 <br>(or you're not in the department this show is for)
+                </p>
+                <p class="mt-2">The following jobs are assigned to this show:</p>
+                <ul class="list-disc list-inside">
+                    {% for job in all_jobs.values %}
+                    <li>
+                        {{job}}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

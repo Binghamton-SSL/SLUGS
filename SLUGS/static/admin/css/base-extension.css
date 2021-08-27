@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+:root {
+    --primary: #009961;
+    --border-color: #03c77f;
+}
+
+#site-name img {
+    width: 1.5em;
+}
+body {
+    background-color: #000;
+    font-family: 'Rubik', sans-serif;
+}
+h1 {
+    color: #cccccc;
+}
+#header {
+    background-color: #FFF;
+    color: #000;
+}
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: #03c77f;
+}
+#user-tools a {
+    color: #000!important;
+}
+.module caption {
+    background-color: #009961;
+}
+a.section:link, a.section:visited {
+    color: #000
+}
+.module h2 {
+    background-color: #009961;
+}
+a:link, a:visited {
+    color: #009b62;
+    text-decoration: none;
+}
+.object-tools a:link, .object-tools a:visited {
+    background-color: rgb(194, 194, 194);
+    color: #000;
+}
+li.deletelink {
+    color: #000;
+}
+div.breadcrumbs {
+    background-color: #009961;
+    box-shadow: #00000070 0px 4px 4px 0px;
+    color: #FDE4DE;
+}
+#changelist-filter li.selected a {
+    color: #03c77f!important;
+}
+.submit-row a.deletelink {
+    background-color: #f0506e!important;
+    border-radius: 2px!important;
+}
+.submit-row input, a.button {
+    background-color: #56A096!important;
+    border-radius: 2px!important;
+}
+
+.selector-chosen h2 {
+    background-color: #009961!important;
+}
+
+.inline-group .inline-group {
+    margin: 0 auto 30px;
+    width: 95%;
+}
+.colM {
+    background-color: #FFF;
+}
+
+.required label, label.required {
+    color: #FFF!important;
+}
+
+label {
+    color: rgb(223, 223, 223)!important;
+}

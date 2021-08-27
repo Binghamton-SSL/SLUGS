@@ -1,0 +1,113 @@
+{% extends "theme/base.html" %}
+{% load grouping %}
+{% load static %}
+{% load gig_components %}
+{% load tz %}
+
+
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="flex flex-col mx-auto max-w-7xl">
+    <div class="mx-4 mt-10 space-y-10 sm:mx-10">
+        <div>
+            <h1 class="text-4xl text-bold">
+                Notifications
+            </h1>
+            <div class="flex flex-col my-4 space-y-4">
+                {% if request.user|show_notifications:notifications or signup_open %}
+                <style>
+                    .notification a {
+                        text-decoration: underline;
+                    }
+                </style>
+                {% for notification in notifications %}
+                {% if request.user|show_notification:notification %}
+                <div class="notification max-w-5xl mx-auto rounded-sm py-2 px-4 {{notification.message_type}}">
+                    {{notification.message|safe}}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if signup_open %}
+                <a class="" href="{% url 'gig:signup' %}">
+                    <div
+                        class="flex max-w-5xl px-4 py-2 mx-auto text-center text-black transition bg-red-300 rounded-sm hover:bg-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <div style="margin: auto;">This week's work is available for signup! {% if request.user|has_group:"New Hire" %}<br> <span style="font-weight: bold; font-size: .75rem;">(well not for you bc you still haven't handed in all your paperwork)</span>  {% endif %}</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                </a>
+                {% endif %}
+                {% else %}
+                <div class="text-center mx-auto text-xl p-4 rounded bg-[#1F1F1F]" id="no_notifications">Nothing's here.... for now 😳</div>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            {% if next_gig %}
+            <h1 class="text-4xl text-bold"> Next Show</h1>
+                <a href="{% url 'gig:showView' next_gig.pk %}">
+                {% ticket next_gig %}
+                </a>
+            {% endif %}
+        </div>
+        <div>
+            <h1 class="text-4xl text-bold">
+                My shows
+            </h1>
+            <div class="my-4 md:mx-20">
+                {% if jobs.count > 0 %}
+                <table style="border-spacing: 1rem 1rem;" class="w-full table-auto">
+                    <thead class="border-b-2 border-white">
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td class="hidden md:inline">
+                                Organization
+                            </td>
+                            <td>
+                                Location
+                            </td>
+                            <td>
+                                When
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                        <tr tabindex="0" onclick="window.location='{% url 'gig:showView' job.gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
+                            <td class="pl-2">
+                                {{job.gig.name}}
+                            </td>
+                            <td class="hidden pl-2 md:table-cell">
+                                {{job.gig.org}}
+                            </td>
+                            <td class="py-4 pl-2">
+                                {{job.gig.location}}
+                            </td>
+                            <td class="pl-2">
+                                {{job.gig.start}}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="bg-[#1F1F1F] p-5 text-center text-xl text-white">
+                    You have no gigs...
+                    <img class="w-24 h-24 mx-auto my-4" src="{% static 'img/index/vibe_check.png' %}"/>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

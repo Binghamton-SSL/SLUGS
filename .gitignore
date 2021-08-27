@@ -2,3 +2,17 @@
 */settings.py
 *.sqlite3
 __pycache__
+.env
+SLUGS/settings.py
+.vscode/
+*.sqlite3
+passenger_wsgi.py
+calendar_service_account.json
+__pycache__/
+uploads/
+media/
+exports/
+.DS_Store
+.coverage
+migrations/
+htmlcov/

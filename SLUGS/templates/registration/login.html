@@ -1,0 +1,45 @@
+{% extends 'theme/base.html' %}
+{% load static %}
+
+{% block nav %}{%endblock%}
+
+{% block content %}
+<div class="flex flex-col justify-center h-screen">
+    {% for message in messages %}
+        <div {% if message.tags %} class="rounded-sm py-2 {{ message.tags }}"{% endif %}>{{ message|safe }}</div>
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <div class="py-2 text-lg text-center text-black bg-red-500">
+                {{error}}
+            </div>
+        {% endfor %}
+    <div class="mx-auto my-auto">
+        <object class="w-full filter invert" type="image/svg+xml" data="{% static 'img/logo/logo-in.svg' %}">SLUGS logo</object>
+        <h1 class="text-4xl text-center font-stencil">
+            S.L.U.G.S.
+        </h1>
+        <div id="login my-4">
+            <h4 class="text-lg">
+                Login:
+            </h4>
+            <form class="flex flex-col space-y-2 text-black" method="POST"
+            {% if next %}
+            action="./?next={{next}}"
+            {% else %}
+            action="."
+            {% endif %}>
+                {% csrf_token %}
+                <input placeholder="Email" class="uk-input" type="text" name="username" autofocus="" autocapitalize="none" autocomplete="username" maxlength="255" required="" id="id_username">
+                <input placeholder="Password" class="uk-input" type="password" name="password" autocomplete="current-password" required="" id="id_password">
+            
+                <input type="submit" class="py-2 text-black bg-white rounded-sm" value="Log in"/>
+            </form>
+        </div>
+        <div class="mt-2">
+            <a class="underline" href={% url 'password_reset' %}>I forgor my password 💀</a>
+            <!-- <a class="underline" href="mailto:bssl@binghamtonsa.org?subject=I forgot my password 🥺&body=I forgot my password. Can you reset it for me?">Forgot your password?</a> -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block footer %}{% endblock %}

@@ -1,0 +1,37 @@
+<div style="margin: auto; display: flex; flex-direction: column;">
+{% if plz_close %}
+<div style="width: 100%; color: black">
+    <div style="display: flex; padding: .25rem; background-color: #FCD34D;">
+        <div style="margin: auto 0;">
+            <svg xmlns="http://www.w3.org/2000/svg" style="height: 2rem; width: 2rem;" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        </div>
+        <p>
+            Heads Up! There's no gigs to sign up for. You should probably close signup...
+        </p>
+    </div>
+</div>
+{% endif %}
+<button
+unicorn:click="toggle"
+style="
+{% if signup.is_open == True %}
+background-color: #03c77f;
+{% elif signup.is_open == False %}
+background-color: #f0506e;
+{% endif %}
+margin: .5rem auto;
+"
+class="sidebar_button">
+{% if signup.is_open == True %}
+Signup is open
+{% elif signup.is_open == False %}
+Signup is closed
+{% else %}
+Getting signup status...
+{% endif %}
+</button>
+</div>

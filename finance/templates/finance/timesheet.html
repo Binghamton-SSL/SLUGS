@@ -1,0 +1,265 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BSSL Timesheet - {{employee.first_name}} {{employee.last_name}} - {{pay_period}}</title>
+
+    {% tailwind_css %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+</head>
+
+<body class="relative flex flex-col">
+    <div class="flex">
+        <div style="width: 4.25in" class="flex flex-col">
+            <div class="flex">
+                <img src="{% static 'finance/img/SAlogo.png' %}" class="mt-5" alt="SA Logo" style="width: 2in;" />
+                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">BSSL</h1>
+            </div>
+            <div class="flex mt-10">
+                <div class="mr-10">
+                    <div class="mt-2 font-bold">Employee Name:</div>
+                    <div class="mt-2 font-bold">Group:</div>
+                    <div class="mt-5 font-bold">Graduate Student:</div>
+                </div>
+                <div>
+                    <div class="mt-3 text-sm border-b-2 border-black w-52">{{employee.last_name}},
+                        {{employee.first_name}}</div>
+                    <div class="mt-3 text-sm border-b-2 border-black w-52">BSSL</div>
+                    <div class="mt-5 text-sm">{% if employee.is_grad_student %} Yes {% else %} No {% endif %}</div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 4.25in" class="flex flex-col">
+            <h1 class="text-3xl font-medium text-right text-gray-400 font-brand">Biweekly Time Sheet</h1>
+            <div class="flex mt-24">
+                <div class="ml-auto mr-10">
+                    <div>
+                        Pay period start date:
+                    </div>
+                    <div>
+                        Pay period end date:
+                    </div>
+                    <div class="mt-5">
+                        Payday:
+                    </div>
+                </div>
+                <div class="mr-0 text-right">
+                    <div>
+                        {{pay_period.start}}
+                    </div>
+                    <div>
+                        {{pay_period.end}}
+                    </div>
+                    <div class="mt-5">
+                        {{pay_period.payday}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-5" style="width: 8.5in">
+        <table class="w-full" width="100%" style="border: none!important;">
+            <col span="1" style="width: 12%;">
+            <col span="1" style="width: 12%;">
+            <col span="1" style="width: 40%;">
+            <col span="1" style="width: 12%;">
+            <col span="1" style="width: 12%;">
+            <col span="1" style="width: 12%;">
+            <thead>
+                <tr class="text-sm font-bold text-center">
+                    <td>
+                        Day
+                    </td>
+                    <td class="py-2">
+                        Date
+                    </td>
+                    <td class="pl-2 text-left">
+                        Event
+                    </td>
+                    <td>
+                        Time in
+                    </td>
+                    <td>
+                        Time out
+                    </td>
+                    <td>
+                        Total Hours
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_rows %}
+                {% if row.type == 'd' %}
+                <tr class="text-sm text-center">
+                    <td class="font-bold" style="background-color: #CCC;">
+                        {{row.name}}
+                    </td>
+                    <td class="pt-0 pb-auto">
+                        {{row.date|date:"n/j/Y"}}
+                    </td>
+                    <td class="pl-2 text-left">
+                        {% for shift in row.shifts %}
+                        <div>{{shift.0.content_object}}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shift in row.shifts %}
+                        <div>{{shift.0.time_in|date:"h:i A"}}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shift in row.shifts %}
+                        <div>{{shift.0.time_out|date:"h:i A"}}
+                            {% if shift.0.time_in.day != shift.0.time_out.day %}(+1){% endif %}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shift in row.shifts %}
+                        <div>{{shift.1|floatformat:2}}</div>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% elif row.type == 'w' %}
+                <tr class="font-bold">
+                    <td style="background-color: #CCC;"></td>
+                    <td colspan="4" class="bg-[#9FCD63] pl-4">Total {{row.name}}:</td>
+                    <td class="bg-[#9FCD63] text-center">{{row.total|floatformat:2}}</td>
+                </tr>
+                {% elif row.type == 't' %}
+                <tr class="font-bold border-b-2 border-black">
+                    <td style="background-color: #CCC;"></td>
+                    <td colspan="4" class="bg-[#9FCD63] pl-4">Subtotal {{row.name}}:</td>
+                    <td class="bg-[#9FCD63] text-center">{{row.total|floatformat:2}}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                {% for rate, shifts in rates.values %}
+                {% if shifts != 0 %}
+                <tr style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="4" class="pl-4 bg-[#C7D6A1] border-b-2 border-black">
+                        {{rate}}
+                    </td>
+                    <td class="text-center bg-[#C7D6A1] border-b-2 border-black">
+                        {{shifts|floatformat:2}}
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                <tr class="font-bold" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="4" class="pl-4 bg-[#9FCD63] border-b-2 border-black">
+                        Total Hours:
+                    </td>
+                    <td class="text-center bg-[#9FCD63] border-b-2 border-black">
+                        {{t_total|floatformat:2}}
+                    </td>
+                </tr>
+                <tr class="font-bold" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="4" class="pl-4 bg-[#9FCD63] border-b-2 border-black">
+                        Total Amount:
+                    </td>
+                    <td class="text-center bg-[#9FCD63] border-b-2 border-black">
+                        ${{t_amt.cost__sum|floatformat:2}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-auto mb-2 dont_break">
+        <div class="mt-4 text-sm">
+            I Certify to the best of my knowledge the hours and wages listed above are correct.
+        </div>
+        <div class="flex mt-10" style="width: 8.5in;">
+            <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
+                <div class="flex w-full border-t-2 border-black">
+                    <div class="w-full">
+                        Employee Signature
+                    </div>
+                    <div class="w-max">
+                        Date
+                    </div>
+                </div>
+                <div class="flex w-full border-t-2 border-black">
+                    <div class="w-full">
+                        Manager Signature
+                    </div>
+                    <div class="w-max">
+                        Date
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<style type="text/css">
+    @media print {
+        .dont_break {
+            break-inside: avoid;
+        }
+    }
+
+    @page {
+        size: 8.5in 11in;
+    }
+
+    body {
+        width: 8.5in;
+        height: 11in;
+        background-color: white;
+    }
+
+    table {
+        border: black solid 2px;
+    }
+
+    table thead {
+        background-color: #CCC;
+    }
+
+    table tr {
+        border-top: black solid 1px;
+    }
+
+    table td {
+        border-left: black solid 1px;
+        border-right: black solid 1px;
+    }
+
+    #item_table tr {
+        /* border: none!important; */
+    }
+</style>
+<script>
+    print()
+</script>
+
+</html>

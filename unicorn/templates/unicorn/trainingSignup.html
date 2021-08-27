@@ -1,0 +1,21 @@
+<div>
+    {% if full %}
+    <div class="w-full p-2 px-4 mt-4 mb-2 text-center text-white bg-gray-700 rounded">
+        Training is full 🥺
+    </div>
+    {% else %}
+    <button unicorn:click="toggleSignup" class=" rounded mt-4 mb-2 p-2 px-4 w-full text-center
+    {% if is_signed_up_for_training %}
+    bg-green-500
+    {% else %}
+    bg-gray-300
+    {% endif %}
+    ">
+        {% if is_signed_up_for_training %}
+            Signed up
+        {% else %}
+            Sign up
+        {% endif %}
+    </button>
+    {% endif %}
+</div>

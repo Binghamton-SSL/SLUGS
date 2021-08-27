@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block title %}{{ title }} | SLUGS Admin{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}"><img src="{% static 'img/logo/logo.svg' %}"/> Admin</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

@@ -1,0 +1,192 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BSSL Timesheet Summary - {{pay_period}}</title>
+
+    {% tailwind_css %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+</head>
+
+<body class="relative flex flex-col">
+    <div class="flex">
+        <div style="width: 6.75in" class="flex flex-col my-auto">
+            <div class="flex">
+                <img src="{% static 'finance/img/SAlogo.png' %}" class="mt-5" alt="SA Logo" style="width: 1in;" />
+                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">BSSL</h1>
+                <h1 class="mx-2 my-auto mb-0 text-3xl font-medium text-right text-gray-400 font-brand">Pay Period Summary</h1>
+
+            </div>
+        </div>
+        <div class="flex flex-col m-auto">
+        </div>
+        <div style="width: 4.25in" class="flex flex-col">
+            <div class="flex">
+                <div class="ml-auto mr-10">
+                    <div>
+                        Pay period start date:
+                    </div>
+                    <div>
+                        Pay period end date:
+                    </div>
+                    <div class="mt-5">
+                        Payday:
+                    </div>
+                </div>
+                <div class="mr-0 text-right">
+                    <div>
+                        {{pay_period.start}}
+                    </div>
+                    <div>
+                        {{pay_period.end}}
+                    </div>
+                    <div class="mt-5">
+                        {{pay_period.payday}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-5" style="width: 11in">
+        <table class="w-full" width="100%" style="border: none!important;">
+            <col span="1" style="width: 10%;">
+            <col span="1" style="width: 20%;">
+            {% for rate in rates %}
+                <col span="1" style="width: calc(60% / {{ rates | length }} );">
+            {% endfor %}
+            <col span="1" style="width: 10%;">
+            <thead>
+                <tr>
+                    <td class="bg-white" colspan="2"></td>
+                    <td class="font-bold text-center" colspan="{{ rates | length }}">Hours</td>
+                    <td class="bg-white"></td>
+                </tr>
+                <tr class="text-sm font-bold text-center">
+                    <td>
+                        B-Num
+                    </td>
+                    <td class="py-2">
+                        Name
+                    </td>
+                    {% for rate in rates %}
+                    <td>{{rate.name}}</td>
+                    {% endfor %}
+                    <td>Gross Pay</td>
+                </tr>
+                <tr>
+                    <tr>
+                        <td colspan="2" class="pr-4 text-right bg-white">Rates</td>
+                        {% for rate in rates %}
+                        <td class="text-center">${{rate.hourly_rate}}</td>
+                        {% endfor %}
+                        <td class="bg-white"></td>
+                    </tr>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for emp in employees.values %}
+                <tr>
+                    <td>{{emp.bnum}}</td>
+                    <td>{{emp.name}}</td>
+                    {% for rate in emp.rates.values %}
+                        <td>{% if rate.1 is not 0 %}{{rate.1}}{% else %}-{% endif %}</td>
+                    {% endfor %}
+                    <td>${{emp.total_amount|floatformat:2|intcomma}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-auto mb-2 dont_break">
+        <div class="mt-4 text-sm">
+            I Certify to the best of my knowledge the hours and wages listed above are correct.
+        </div>
+        <div class="flex mt-10" style="width: 11in;">
+            <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
+                <div class="flex w-full border-t-2 border-black">
+                    <div class="w-full">
+                        Financial Director
+                    </div>
+                    <div class="w-max">
+                        Date
+                    </div>
+                </div>
+                <div class="flex w-full border-t-2 border-black">
+                    <div class="w-full">
+                        VPF - SA
+                    </div>
+                    <div class="w-max">
+                        Date
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<style type="text/css">
+    @media print {
+        .dont_break {
+            break-inside: avoid;
+        }
+    }
+
+    @page {
+        size: 11in 8.5in;
+    }
+
+    body {
+        width: 11in;
+        height: 8.5in;
+        background-color: white;
+    }
+
+    table {
+        border: black solid 2px;
+    }
+
+    table thead {
+        background-color: #CCC;
+    }
+
+    table tr {
+        border: black solid 1px;
+    }
+
+    table td {
+        border-left: black solid 1px;
+        border-right: black solid 1px;
+    }
+</style>
+<script>
+    print()
+</script>
+
+</html>
