@@ -1,3 +1,8 @@
+### 8/28/2021 - Security Update 
+* Bump dependencies for security updates
+* Push new requirements.txt and pipfile
+* Black formatting for all files
+
 ### 8/28/2021
 * Added Changelog
 * Added setupdevenv command

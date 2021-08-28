@@ -39,6 +39,7 @@ class PaymentInlineAdmin(admin.StackedInline):
     exclude = []
     extra = 0
 
+
 @admin.register(Estimate)
 class EstimateAdmin(admin.ModelAdmin):
     @staticmethod
@@ -51,11 +52,17 @@ class EstimateAdmin(admin.ModelAdmin):
 
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
-    list_filter = ('gig__start', 'gig__org')
-    ordering = ['-gig__start']
+    list_filter = ("gig__start", "gig__org")
+    ordering = ["-gig__start"]
     filter_horizontal = ["fees"]
     autocomplete_fields = ["gig", "billing_contact"]
-    readonly_fields = ["subtotal", "fees_amt", "total_amt", "outstanding_balance", "get_printout_link"]
+    readonly_fields = [
+        "subtotal",
+        "fees_amt",
+        "total_amt",
+        "outstanding_balance",
+        "get_printout_link",
+    ]
     fieldsets = (
         (
             "Information",
@@ -71,7 +78,10 @@ class EstimateAdmin(admin.ModelAdmin):
             },
         ),
         ("Billing info", {"fields": ["payment_due", "paid", "fees", "adjustments"]}),
-        ("Bill", {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]}),
+        (
+            "Bill",
+            {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},
+        ),
     )
 
 

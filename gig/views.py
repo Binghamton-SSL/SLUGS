@@ -45,7 +45,7 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         self.added_context["helper"] = shiftFormHelper()
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
         if not self.added_context["gig"].published:
-            raise PermissionDenied() 
+            raise PermissionDenied()
         try:
             self.added_context["my_job"] = (
                 Job.objects.get(employee=request.user, gig=self.added_context["gig"])

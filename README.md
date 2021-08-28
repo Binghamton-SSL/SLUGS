@@ -11,7 +11,15 @@
 * 
 
 ## Deploying
-TBD
+* Pull latest changes
+* `$ python3 manage.py makemigrations`
+* `$ python3 manage.py  migrate`
+* `$ python3 manage.py collectstatic`
+* navigate to wherever the tmp dir is and `$ touch restart.txt`
+
+
+## Creating a manual backup of data
+`$ python3 manage.py dumpdata -a -o data.json`
 
 ## Hard reset the deployment
 TBD

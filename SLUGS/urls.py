@@ -25,7 +25,7 @@ urlpatterns = [
     path("unicorn/", include("django_unicorn.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("__debug__/", include(debug_toolbar.urls)),
-    path("admin/", include('loginas.urls')),
+    path("admin/", include("loginas.urls")),
     path("admin/", admin.site.urls),
     path(
         "media/forms/<path:relative_path>", FormDownload.as_view(), name="download_form"
@@ -40,9 +40,12 @@ urlpatterns = [
         EstimateDownload.as_view(),
         name="download_estimate",
     ),
-    path('auth/password_reset/', auth_views.PasswordResetView.as_view(
-        html_email_template_name='registration/password_reset_html_email.html'
-    )),
+    path(
+        "auth/password_reset/",
+        auth_views.PasswordResetView.as_view(
+            html_email_template_name="registration/password_reset_html_email.html"
+        ),
+    ),
     path("auth/", include("django.contrib.auth.urls"), name="auth"),
     path("utils/", include("utils.urls")),
     path("", views.index.as_view(), name="index"),

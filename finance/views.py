@@ -122,7 +122,12 @@ class viewInvoice(SLUGSMixin, TemplateView):
     added_context = {}
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context = {"systems": {}, "fees": {}, "payments": {}, "payment_amt": 0.00}
+        self.added_context = {
+            "systems": {},
+            "fees": {},
+            "payments": {},
+            "payment_amt": 0.00,
+        }
         self.added_context["estimate"] = Estimate.objects.get(pk=kwargs["e_id"])
         self.added_context["shop_time"] = (
             self.added_context["estimate"]
@@ -241,8 +246,8 @@ class viewTimesheet(SLUGSMixin, TemplateView):
 
         override_shifts = shifts.filter(override_pay_period=pay_period)
         if len(override_shifts) > 0:
-            override_start = override_shifts.order_by('time_in').first().time_in
-            override_end = override_shifts.order_by('-time_in').first().time_in
+            override_start = override_shifts.order_by("time_in").first().time_in
+            override_end = override_shifts.order_by("-time_in").first().time_in
             for d in range(
                 0,
                 int(
@@ -261,19 +266,22 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                     s.append(
                         (
                             shift,
-                            round(shift.total_time / timezone.timedelta(minutes=15)) / 4,
+                            round(shift.total_time / timezone.timedelta(minutes=15))
+                            / 4,
                         )
                     )
-                    w_total += round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                    w_total += (
+                        round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                    )
                 table_rows.append(
                     {"type": "d", "date": day, "name": day.strftime("%A"), "shifts": s}
                 )
             table_rows.append(
-                    {
-                        "type": "w",
-                        "name": "Overridden Shifts",
-                        "total": w_total,
-                    }
+                {
+                    "type": "w",
+                    "name": "Overridden Shifts",
+                    "total": w_total,
+                }
             )
             t_total += w_total
             w_total = 0

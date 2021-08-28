@@ -46,7 +46,15 @@ class Gig(models.Model):
         )
 
     def __str__(self):
-        return self.name + " - " + str(self.org) + " - " + str(self.start.date()) + (" [UNPUBLISHED]" if not self.published else "") + (" [ARCHIVED]" if self.archived else "") # noop
+        return (
+            self.name
+            + " - "
+            + str(self.org)
+            + " - "
+            + str(self.start.date())
+            + (" [UNPUBLISHED]" if not self.published else "")
+            + (" [ARCHIVED]" if self.archived else "")
+        )  # noop
 
     # def save(self, *args, **kwargs):
     #     super().save(*args, **kwargs)

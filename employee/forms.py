@@ -179,25 +179,24 @@ class uploadForm(ModelForm):
 
 
 class massAssignPaperworkForm(Form):
-    formstoadd = forms.ModelMultipleChoiceField(queryset=Paperwork.objects.all(), widget=widgets.FilteredSelectMultiple('Forms to assign', is_stacked=False))
+    formstoadd = forms.ModelMultipleChoiceField(
+        queryset=Paperwork.objects.all(),
+        widget=widgets.FilteredSelectMultiple("Forms to assign", is_stacked=False),
+    )
     ids = forms.CharField(widget=forms.HiddenInput())
 
     def add_forms(self, request):
-        for empid in self.cleaned_data['ids'].split(','):
+        for empid in self.cleaned_data["ids"].split(","):
             forms = []
             attachments = []
-            for form in self.cleaned_data['formstoadd']:
+            for form in self.cleaned_data["formstoadd"]:
                 emp = Employee.objects.get(pk=empid)
-                pform = PaperworkForm(
-                    form=form,
-                    employee=emp)
+                pform = PaperworkForm(form=form, employee=emp)
                 pform.save()
                 forms.append(pform)
                 attachments.append(pform.form.form_pdf.file.name)
             template = get_template("employee/components/general_forms.html")
-            email_template = template.render(
-                {"request": request}
-            )
+            email_template = template.render({"request": request})
             send_generic_email(
                 request=request,
                 subject=f"[ACTION REQUIRED] New forms to fill out on SLUGS",

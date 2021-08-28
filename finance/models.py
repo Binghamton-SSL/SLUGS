@@ -167,24 +167,43 @@ class Estimate(models.Model):
         if self.status == "E":
             return format_html(
                 "<a href='%s?time=%s'>%s</a>"
-                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate")
+                % (
+                    reverse("finance:estimate", args=(self.id,)),
+                    datetime.now(),
+                    "Print Estimate",
+                )
             )
         elif self.status == "B":
             return format_html(
                 "<a href='%s?time=%s'>%s</a>"
-                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate")
+                % (
+                    reverse("finance:estimate", args=(self.id,)),
+                    datetime.now(),
+                    "Print Estimate",
+                )
             )
         elif self.status == "Q" or self.status == "A":
             return format_html(
                 "<a href='%s?time=%s'>%s</a>"
-                % (reverse("finance:invoice", args=(self.id,)), datetime.now(), "Print Invoice")
+                % (
+                    reverse("finance:invoice", args=(self.id,)),
+                    datetime.now(),
+                    "Print Invoice",
+                )
             )
         else:
             return format_html(
                 "<a href='%s?time=%s'>%s</a>"
                 "<br>"
                 "<a href='%s?time=%s'>%s</a>"
-                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate", reverse("finance:invoice", args=(self.id,)), datetime.now(), "Print Invoice")
+                % (
+                    reverse("finance:estimate", args=(self.id,)),
+                    datetime.now(),
+                    "Print Estimate",
+                    reverse("finance:invoice", args=(self.id,)),
+                    datetime.now(),
+                    "Print Invoice",
+                )
             )
 
     def __str__(self):
@@ -203,7 +222,9 @@ class Shift(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
-    override_pay_period = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, null=True, blank=True)
+    override_pay_period = models.ForeignKey(
+        "PayPeriod", on_delete=models.PROTECT, null=True, blank=True
+    )
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
@@ -295,4 +316,4 @@ class Payment(models.Model):
     estimate = models.ForeignKey("Estimate", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.payment_date} - ${self.amount}'
+        return f"{self.payment_date} - ${self.amount}"

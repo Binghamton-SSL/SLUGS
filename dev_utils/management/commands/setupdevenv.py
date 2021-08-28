@@ -65,7 +65,13 @@ class Command(BaseCommand):
             ("AA", "", "S", 0, 26),
         ]
         SYSTEM_ADDONS = [
-            ("Stage Labor", "T", "", 0, 13), # <- This doesn't work because it's not hourly to the gig, it's a setup thing. # noqa
+            (
+                "Stage Labor",
+                "T",
+                "",
+                0,
+                13,
+            ),  # <- This doesn't work because it's not hourly to the gig, it's a setup thing. # noqa
             (
                 "Deluxe Live Act Package",
                 "S",
@@ -79,7 +85,7 @@ class Command(BaseCommand):
                 "Dancers/Singers/Musicians - Up to 2 monitors; Includes all cables, mics, equipment; Drum set OKAY if not mic'ed",  # noqa
                 50,
                 0,
-            ), 
+            ),
             ("Acapella Hourly Rate", "S", "", 0, 13),
             ("Sr. Engineer Hourly", "O", "", 0, 13),
             ("Tech Hourly", "O", "", 0, 13),

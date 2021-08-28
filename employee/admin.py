@@ -81,20 +81,21 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     )
         super().save_formset(request, form, formset, change)
 
-    @admin.action(description='Assign Paperwork')
+    @admin.action(description="Assign Paperwork")
     def mass_assign_paperwork(modeladmin, request, queryset):
-        selected = queryset.values_list('pk', flat=True)
-        return HttpResponseRedirect('/employee/mass-assign-paperwork/%s' % (
-            ','.join(str(pk) for pk in selected),
-        ))
-        return reverse('employee:mass_assign', args=[queryset])
+        selected = queryset.values_list("pk", flat=True)
+        return HttpResponseRedirect(
+            "/employee/mass-assign-paperwork/%s"
+            % (",".join(str(pk) for pk in selected),)
+        )
+        return reverse("employee:mass_assign", args=[queryset])
 
     group.short_description = "Groups"
 
     list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser")
     list_filter = ("is_active", "is_staff", "is_superuser", "groups")
     actions = [mass_assign_paperwork]
-    change_form_template = 'employee/loginas/change_form.html'
+    change_form_template = "employee/loginas/change_form.html"
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
