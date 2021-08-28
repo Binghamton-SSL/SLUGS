@@ -1,5 +1,20 @@
-# In order to build
-First makemigrations you must remove finance add item to groups and employee model default office hours
+# Getting Started
+## Getting the repo setup
+* Clone Repo
+* `$ cd SLUGS`
+* `$ python3 manage.py makemigrations client employee equipment finance gig location SLUGS theme training unicorn utils`
+* `$ python3 manage.py migrate`
+
+## Before Committing
+* Make sure no sensitive files are to be committed 
+* `$ pip3 freeze > requirements.txt`
+* 
+
+## Deploying
+TBD
+
+## Hard reset the deployment
+TBD
 
 
 # Troubleshooting
@@ -60,6 +75,7 @@ Estimate will not save -> Check if gig has a valid load in/out for every Dept re
     * See previous shifts in a previous pay period
     * Print out a timesheet for an employee
     * Print out a summary for a pay period
+    * Override a shift from one pay-period to another
 * Allow admins to access quick actions
     * Change the status of onboarding
     * Change the status of signup
@@ -67,6 +83,8 @@ Estimate will not save -> Check if gig has a valid load in/out for every Dept re
 * Allow admins to upload and assign paperwork to be filled out
 * Allow admins to create estimates
     * Print out estimates generated
+* Allow admins to create invoices
+    * Print out invoices generated
 * Create Shows (gigs)
     * Staff shows
     * Send a staffing email

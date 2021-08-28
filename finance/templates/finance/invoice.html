@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BSSL {{estimate}}</title>
+    <title>BSSL | {{estimate}}</title>
 
     {% tailwind_css %}
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -65,95 +65,41 @@
                                 </p>
                             </div>
                             <div class="flex-col space-y-4" style="width:6in">
-                                <h1 class="ml-auto mr-4 text-4xl font-bold text-right">Reservation Form</h1>
+                                <h1 class="ml-auto mr-4 text-4xl font-bold text-right">Invoice</h1>
                                 <table class="w-full ml-6">
                                     <thead>
                                         <tr>
                                             <td>
-                                                Event
+                                                Date Invoiced
                                             </td>
                                             <td>
-                                                Location
+                                                Date Due
                                             </td>
                                             <td>
-                                                Event Date
+                                                Invoice #
                                             </td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{estimate.gig.name}}
+                                                {% now "n/j/Y" %}
                                             </td>
                                             <td>
-                                                {{estimate.gig.location}}
+                                                {% if estimate.gig.payment_due %} {{estimate.gig.payment_due|date:"n/j/Y"}} {% else %} Upon Receipt {% endif %}
                                             </td>
                                             <td>
-                                                {{estimate.gig.start|date:"n/j/Y"}}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <table class="w-full ml-6">
-                                    <thead>
-                                        <tr>
-                                            <td>
-                                                Shop Time
-                                            </td>
-                                            <td>
-                                                Arrival Time
-                                            </td>
-                                            <td>
-                                                Setup By
-                                            </td>
-                                            <td>
-                                                Show Start
-                                            </td>
-                                            <td>
-                                                Show End
-                                            </td>
-                                            <td>
-                                                Load Out
-                                            </td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {{shop_time|date:"n/j/Y"}}<br>
-                                                {{shop_time|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{load_in|date:"n/j/Y"}}<br>
-                                                {{load_in|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{estimate.gig.setup_by|date:"n/j/Y"}}<br>
-                                                {{estimate.gig.setup_by|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{estimate.gig.start|date:"n/j/Y"}}<br>
-                                                {{estimate.gig.start|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{estimate.gig.end|date:"n/j/Y"}}<br>
-                                                {{estimate.gig.end|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{load_out|date:"n/j/Y"}}<br>
-                                                {{load_out|date:"f A"}}
+                                                I{{2500|add:estimate.pk}}
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <table class="w-full ml-6">
                                     <colgroup>
-                                        <col span="1" style="width: 40%;">
+                                        <col span="1" style="width: 80%;">
                                         {% if estimate.gig.org.SA_account_num %}
-                                        <col span="1" style="width: 15%;">
-                                        {% endif %}
                                         <col span="1" style="width: 20%;">
-                                        <col span="1" style="width: 25%;">
+                                        {% endif %}
                                     </colgroup>
                                     <thead>
                                         <tr>
@@ -162,15 +108,9 @@
                                             </td>
                                             {% if estimate.gig.org.SA_account_num %}
                                             <td>
-                                                SA Acct #
+                                                SA Account #
                                             </td>
                                             {% endif %}
-                                            <td>
-                                                Estimate Date
-                                            </td>
-                                            <td>
-                                                Reservation Number
-                                            </td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,17 +123,51 @@
                                                 {{estimate.gig.org.SA_account_num}}
                                             </td>
                                             {% endif %}
-                                            <td>
-                                                {% now "n/j/Y" %}
-                                            </td>
-                                            <td>
-                                                E{{2500|add:estimate.pk}}
-                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                        <table class="w-full my-5">
+                            <colgroup>
+                                <col span="1" style="width: 40%;">
+                                <col span="1" style="width: 20%;">
+                                <col span="1" style="width: 20%;">
+                                <col span="1" style="width: 20%;">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <td>
+                                        Event
+                                    </td>
+                                    <td>
+                                        Event Date
+                                    </td>
+                                    <td>
+                                        Event Location
+                                    </td>
+                                    <td>
+                                        Reservation Number
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {{estimate.gig.name}}
+                                    </td>
+                                    <td>
+                                        {{estimate.gig.start|date:"n/j/Y" }}
+                                    </td>
+                                    <td>
+                                        {{estimate.gig.location}}
+                                    </td>
+                                    <td>
+                                        R{{2500|add:estimate.pk}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <div class="mt-2" style="width: 8.75in">
                             {% if estimate.notes %}
                             <div class="p-2 font-mono border-2 border-b-0 border-black">
@@ -297,7 +271,7 @@
                                 </tfoot>
                             </table>
                             {% if estimate.fees.all.count > 0 or estimate.onetimefee_set.all.count > 0 %}
-                            <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
+                            <table style="border-bottom: none; border-top: none;" class="w-full text-sm no-border">
                                 <colgroup>
                                     <col span="1" style="width: 20%;">
                                     <col span="1" style="width: 45%;">
@@ -355,6 +329,51 @@
                                 </tbody>
                             </table>
                             {% endif %}
+                            <table style="border-bottom: none; border-top: none;" class="w-full text-sm no-border">
+                                <colgroup>
+                                    <col span="1" style="width: 65%;">
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            Payment Date
+                                        </td>
+                                        <td>
+                                            Payment Type
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% if estimate.payments_made != 0.00 %}
+                                    {% for payment in estimate.payment_set.all %}
+                                    <tr>
+                                        <td>
+                                            {{payment.payment_date|date:"n/j/Y"}}
+                                        </td>
+                                        <td class="text-xs">
+                                            {{payment.get_payment_type_display}}
+                                        </td>
+                                        <td class="text-center">
+                                           (${{payment.amount}})
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="2" class="text-right" style="border-right:none!important;">
+                                            Payments made:
+                                        </td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            (${{estimate.payments_made}})
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
                             <table class="w-full">
                                 <colgroup>
                                     <col span="1" style="width: 50%;">
@@ -385,147 +404,36 @@
                                         <td class="text-right border-l-0" style="border-right:none!important;">Total:
                                         </td>
                                         <td class="text-center" style="border-left:none!important;">
-                                            ${{estimate.total_amt}}</td>
+                                            ${{estimate.outstanding_balance}}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="dont_break">
-                            <div>
-                                <ul class="mt-4 text-[.6rem] list-disc list-inside">
-                                    <li>
-                                        The Event Coordinator will have the location reserved, and be present at the
-                                        event location, by
-                                        the Shop Time, and will be present for the duration
-                                        of the event. Note: The shop time is for our employees to report to work. It is
-                                        NOT indicative
-                                        of their arrival to the event space.
-                                    </li>
-                                    <li>
-                                        Any music or audio samples that BSSL will play will be on a clearly labeled
-                                        digital audio
-                                        player. Music media will be given to the sound
-                                        engineer far enough in advance of the show so that they can be tested and
-                                        replaced if necessary.
-                                        The promoter will either (1) provide the engineers
-                                        with a playlist or program which clearly lists sound and lighting cues in
-                                        English, or (2)
-                                        provide a representative to stay with the engineers
-                                        throughout the show to cue them.
-                                    </li>
-                                    <li>
-                                        Engineers are not required to work more than 15 minutes past the End Time. If
-                                        the engineers
-                                        agree to work beyond contracted hours, the
-                                        promoter will be billed a $20 late fee, as well as the extra labor per hour at
-                                        the current
-                                        hourly rate.
-                                    </li>
-                                    <li>
-                                        BSSL will not consider refunds on the basis of missed cues, conditions not
-                                        suitable for
-                                        videotaping, etc., unless the promoter has had a production
-                                        meeting with BSSL prior to the event, at which a list of cues was presented.
-                                    </li>
-                                    <li>
-                                        BSSL will not be held responsible for any losses due to equipment failure. The
-                                        promoter shall be
-                                        held responsible for the cost of repairing or
-                                        replacing any equipment damaged or stolen by event participants or audience
-                                        members
-                                    </li>
-                                    <li>
-                                        Changing a system between one and two Mondays prior to the event may be done so
-                                        without
-                                        incurring a fee. Changing a system between one
-                                        Monday and 48 hours prior will incur an additional 15% fee of the cancelled
-                                        system (for example,
-                                        if you have medium lights booked and you
-                                        change to small lights, you will be charged for small lights and 15% of medium
-                                        lights). Systems
-                                        may not be changed within 48 hours of the event.
-                                    </li>
-                                    <li>
-                                        Changing the time/location of your event between one Monday and 48 hours prior
-                                        will incur an
-                                        additional 15% fee. Changing the event
-                                        time/location between one 48 and 24 hours prior to the event will incur a 25%
-                                        fee. Time/location
-                                        cannot be changed within 24 hours of the event.
-                                    </li>
-                                    <li>
-                                        Cancelling an event may be done up to one Monday prior to the event without
-                                        incurring a fee.
-                                        Cancelling an event between one Monday and 48
-                                        hours prior to the event will incur a 25% fee. Cancelling an event between 24
-                                        and 48 hours prior
-                                        to the event will incur a 50% fee. Any
-                                        cancellations done the day of the event, or if the promoter neglects to inform
-                                        BSSL of the event
-                                        being cancelled, the group will be charge an
-                                        additional 100% fee.
-                                    </li>
-                                    <li>
-                                        Accessories can be added up to 48 hours prior to an event. Adding accessories
-                                        between 24 and 48
-                                        hours prior to the event will incur an additional
-                                        50% fee of the accessory price. Adding accessories the day of the event will
-                                        incur an additional
-                                        100% fee of the accessory price.
-                                    </li>
-                                </ul>
+                            <div class="mt-10 text-sm text-center">
+                                <p>
+                                    Payment due upon receipt of Invoice. Cash or checks accepted only.
+                                </p>
+                                <p>
+                                    Make checks payable to: <br>Binghamton Sound, Staging, and Lighting (SA Account #7400) / Student Association of Binghamton University Inc.
+                                </p>
+                                <p>
+                                    Invoices unpaid after two weeks will be subject to late fee.
+                                </p>
                             </div>
-                            <div>
-                                <div class="flex mt-10 text-sm dont_break" style="width: 8.75in;">
-                                    <div class="flex mx-auto">
-                                        <p class="mr-4">BSSL</p>
-                                        <div class="flex flex-col">
-                                            <p class="mx-auto">_________________________________</p>
-                                            <p class="mx-auto">{{request.user.first_name}} {{request.user.last_name}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex mx-auto">
-                                        <p class="mr-4">{{estimate.gig.org}}</p>
-                                        <div class="flex flex-col">
-                                            <p class="mx-auto">_________________________________</p>
-                                            <p class="mx-auto">{{estimate.gig.contact.name}}</p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
-                                            </p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
-                                    have read the contract in
-                                    full
-                                    and agree to the terms and conditions. I agree to pay the
-                                    total amount in full upon receipt of invoice.</p>
-                            </div>
+                            <div class="mt-10 text-sm text-center"><i>
+                                <p>
+                                    Thank you for your business.
+                                </p>
+                                <p>
+                                    If you have any questions or comments, please feel free to contact us.
+                                </p>
+                            </i></div>
                         </div>
                     </div>
                 </td>
             </tr>
         </tbody>
-        <tfoot>
-            <tr style="border: none;">
-                <td style="border: none; padding-top: .25in;">
-                    <div class="flex">
-                        <span class="my-auto">Initial:</span>
-                        <div class="flex ml-4"><span class="my-auto">BSSL</span>
-                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
-                        </div>
-                        <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
-                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
-                        </div>
-                    </div>
-                    </div>
-                </td>
-            </tr>
-        </tfoot>
     </table>
 </body>
 <style>

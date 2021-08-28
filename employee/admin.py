@@ -22,7 +22,7 @@ class PaperworkInline(admin.StackedInline):
     autocomplete_fields = ["form"]
     exclude = []
     extra = 0
-    readonly_fields = ["uploaded"]
+    readonly_fields = ["uploaded", "requested"]
 
 
 @admin.register(Employee)

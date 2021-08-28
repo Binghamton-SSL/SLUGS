@@ -16,13 +16,113 @@ from employee.models import Employee
 import decimal
 
 
-# Create your views here.
 class viewEstimate(SLUGSMixin, TemplateView):
     template_name = "finance/estimate.html"
     added_context = {"systems": {}, "fees": {}}
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context = {"systems": {}, "fees": {}}
+        self.added_context["estimate"] = Estimate.objects.get(pk=kwargs["e_id"])
+        self.added_context["shop_time"] = (
+            self.added_context["estimate"]
+            .gig.loadin_set.order_by("shop_time")
+            .first()
+            .shop_time
+        )
+        self.added_context["load_in"] = (
+            self.added_context["estimate"]
+            .gig.loadin_set.order_by("shop_time")
+            .first()
+            .load_in
+        )
+        self.added_context["load_out"] = (
+            self.added_context["estimate"]
+            .gig.loadin_set.order_by("-load_out")
+            .first()
+            .load_out
+        )
+
+        for system in self.added_context["estimate"].gig.systems.all():
+            dept = system.department
+            rented_start = (
+                self.added_context["estimate"]
+                .gig.loadin_set.filter(department=dept)
+                .order_by("shop_time")
+                .first()
+                .shop_time
+            )
+            rented_end = (
+                self.added_context["estimate"]
+                .gig.loadin_set.filter(department=dept)
+                .order_by("-load_out")
+                .first()
+                .load_out
+            )
+            time_rented = rented_end - rented_start
+            self.added_context["systems"][system] = [
+                system,
+                decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
+                decimal.Decimal(time_rented / timezone.timedelta(hours=1))
+                if system.price_per_hour
+                else 1,
+                round(
+                    system.base_price
+                    + system.price_per_hour
+                    * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
+                    2,
+                ),
+                False,
+            ]
+            addons = SystemInstance.objects.get(
+                gig=self.added_context["estimate"].gig, system=system
+            ).addoninstance_set.all()
+            for addon_set_item in addons:
+                addon = addon_set_item.addon
+                self.added_context["systems"][addon_set_item.pk] = [
+                    addon,
+                    decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
+                    (
+                        addon_set_item.qty
+                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1))
+                    )
+                    if addon.price_per_hour != 0.00
+                    else addon_set_item.qty,
+                    round(
+                        addon.base_price * addon_set_item.qty
+                        + addon.price_per_hour
+                        * addon_set_item.qty
+                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
+                        2,
+                    ),
+                    True,
+                ]
+        for fee in self.added_context["estimate"].fees.all():
+            self.added_context["fees"][fee] = [
+                fee,
+                fee.amount
+                if fee.amount
+                else round(
+                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
+                ),
+            ]
+        for fee in self.added_context["estimate"].onetimefee_set.all():
+            self.added_context["fees"][fee] = [
+                fee,
+                fee.amount
+                if fee.amount
+                else round(
+                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
+                ),
+            ]
+        return super().dispatch(request, *args, **kwargs)
+
+
+class viewInvoice(SLUGSMixin, TemplateView):
+    template_name = "finance/invoice.html"
+    added_context = {}
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context = {"systems": {}, "fees": {}, "payments": {}, "payment_amt": 0.00}
         self.added_context["estimate"] = Estimate.objects.get(pk=kwargs["e_id"])
         self.added_context["shop_time"] = (
             self.added_context["estimate"]
@@ -138,6 +238,46 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         w_num = 1
         w_total = 0
         t_total = 0
+
+        override_shifts = shifts.filter(override_pay_period=pay_period)
+        if len(override_shifts) > 0:
+            override_start = override_shifts.order_by('time_in').first().time_in
+            override_end = override_shifts.order_by('-time_in').first().time_in
+            for d in range(
+                0,
+                int(
+                    ((override_end + timezone.timedelta(days=1)) - override_start)
+                    / timezone.timedelta(days=1)
+                ),
+            ):
+                day = pytz.timezone("America/New_York").localize(
+                    datetime.combine(override_start, datetime.min.time())
+                    + timezone.timedelta(days=d)
+                )
+                s = []
+                for shift in shifts.filter(
+                    time_in__range=(day, day + timezone.timedelta(days=1))
+                ).order_by("time_in"):
+                    s.append(
+                        (
+                            shift,
+                            round(shift.total_time / timezone.timedelta(minutes=15)) / 4,
+                        )
+                    )
+                    w_total += round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                table_rows.append(
+                    {"type": "d", "date": day, "name": day.strftime("%A"), "shifts": s}
+                )
+            table_rows.append(
+                    {
+                        "type": "w",
+                        "name": "Overridden Shifts",
+                        "total": w_total,
+                    }
+            )
+            t_total += w_total
+            w_total = 0
+
         for d in range(
             0,
             int(
@@ -177,7 +317,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         table_rows.append(
             {
                 "type": "t",
-                "name": f"Week {''.join([f'{num}'+ ('' if w_num-1 == num else ', ' if w_num-2 != num else ' & ') for num in range(1,w_num)])}",  # noqa
+                "name": f"Week{'s' if w_num > 1 else ''} {''.join([f'{num}'+ ('' if w_num-1 == num else ', ' if w_num-2 != num else ' & ') for num in range(1,w_num)])}{' + Overridden Shifts' if len(override_shifts) > 0 else ''}",  # noqa
                 "total": t_total,
             }
         )

@@ -7,6 +7,7 @@ from finance.admin import ShiftInlineAdmin
 @admin.register(TrainingRequest)
 class TrainingRequestAdmin(admin.ModelAdmin):
     filter_horizontal = ["systems"]
+    list_filter = ["answered"]
 
 
 class TraineeInlineAdmin(nested_admin.NestedStackedInline):
@@ -20,6 +21,7 @@ class TraineeInlineAdmin(nested_admin.NestedStackedInline):
 class TrainingAdmin(nested_admin.NestedModelAdmin):
     inlines = [TraineeInlineAdmin]
     filter_horizontal = ["trainers", "attendees", "systems"]
+    autocomplete_fields = ["location"]
 
 
 @admin.register(Trainee)

@@ -18,12 +18,12 @@
         {% for form in request.user.paperworkform_set.all %}
             <div class="p-4 text-black {% if form.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
                 <a href="/media/{{form.form.form_pdf}}"><h5 class="text-xl underline">{{form.form.form_name}}</h5></a>
-                {% if form.processed %}<p class="text-center font-bold text-xs">This form has been processed</p>{% endif %}
+                {% if form.processed %}<p class="text-xs font-bold text-center">This form has been processed</p>{% endif %}
                 <div class="flex flex-col">
                     {% if form.form.handed_in %}
-                        <div class="flex space-x-2 p-2 bg-gray-300 rounded-sm">
-                            <div class="mr-2 my-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="flex p-2 space-x-2 bg-gray-300 rounded-sm">
+                            <div class="my-auto mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                 </svg>
                             </div>
@@ -37,7 +37,11 @@
                             </svg>
                             <p>{{form.uploaded}}</p>
                         </div>
-                        <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
+                        {% if form.processed %}
+                            <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
+                        {% else %}
+                            <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
+                        {% endif %}
                         {% else %}
                         <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
                         {% endif %}

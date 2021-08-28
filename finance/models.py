@@ -47,10 +47,10 @@ class Estimate(models.Model):
     INVOICE_STATUSES = [
         ("E", "Estimate"),
         ("B", "Booked"),
-	("O", "Show Concluded"),
+        ("O", "Show Concluded"),
         ("A", "Awaiting Payment"),
         ("C", "Closed"),
-	("X", "Canceled"),
+        ("X", "Canceled"),
     ]
     status = models.CharField(choices=INVOICE_STATUSES, max_length=1, default="E")
     gig = models.ForeignKey("gig.Gig", on_delete=models.CASCADE)
@@ -76,10 +76,17 @@ class Estimate(models.Model):
     total_amt = models.DecimalField(
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
     )
+    outstanding_balance = models.DecimalField(
+        max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
+    )
+    payments_made = models.DecimalField(
+        max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
+    )
 
     def save(self):
         self.subtotal = decimal.Decimal(0.00)
         self.fees_amt = decimal.Decimal(0.00)
+        self.payment_amt = decimal.Decimal(0.00)
 
         if self.status == "B":
             self.gig.published = True
@@ -148,15 +155,37 @@ class Estimate(models.Model):
                 ),
                 2,
             )
+        for payment in self.payment_set.all():
+            self.payment_amt += payment.amount
         self.total_amt = self.subtotal + self.fees_amt + self.adjustments
+        self.outstanding_balance = self.total_amt - self.payment_amt
+        self.payments_made = self.payment_amt
         super().save()
 
     def get_printout_link(self):
         self.save()
-        return format_html(
-            "<a href='%s?time=%s'>%s</a>"
-            % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate")
-        )
+        if self.status == "E":
+            return format_html(
+                "<a href='%s?time=%s'>%s</a>"
+                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate")
+            )
+        elif self.status == "B":
+            return format_html(
+                "<a href='%s?time=%s'>%s</a>"
+                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate")
+            )
+        elif self.status == "Q" or self.status == "A":
+            return format_html(
+                "<a href='%s?time=%s'>%s</a>"
+                % (reverse("finance:invoice", args=(self.id,)), datetime.now(), "Print Invoice")
+            )
+        else:
+            return format_html(
+                "<a href='%s?time=%s'>%s</a>"
+                "<br>"
+                "<a href='%s?time=%s'>%s</a>"
+                % (reverse("finance:estimate", args=(self.id,)), datetime.now(), "Print Estimate", reverse("finance:invoice", args=(self.id,)), datetime.now(), "Print Invoice")
+            )
 
     def __str__(self):
         return f"{self.get_status_display()} - {self.gig} - ${self.total_amt}"
@@ -173,6 +202,8 @@ class Shift(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
+
+    override_pay_period = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
@@ -236,11 +267,32 @@ class PayPeriod(models.Model):
         super().save()
         self.shifts.set(
             Shift.objects.filter(
-                Q(time_in__gte=self.start)
-                & Q(time_out__lte=self.end + timezone.timedelta(days=1))
+                (
+                    Q(time_in__gte=self.start)
+                    & Q(time_out__lte=self.end + timezone.timedelta(days=1))
+                    & Q(override_pay_period=None)
+                )
+                | Q(override_pay_period=self)
             ).order_by("-time_out")
         )
         super().save()
 
     def __str__(self):
         return f"{self.start} - {self.end} (Paid {self.payday})"
+
+
+class Payment(models.Model):
+    PAYMENT_TYPES = [
+        ("C", "Cash"),
+        ("H", "Check"),
+        ("G", "Grant"),
+        ("O", "Other"),
+        ("D", "Discount"),
+    ]
+    payment_date = models.DateField(blank=True, null=True)
+    amount = models.DecimalField(max_digits=7, decimal_places=2)
+    payment_type = models.CharField(choices=PAYMENT_TYPES, max_length=1)
+    estimate = models.ForeignKey("Estimate", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.payment_date} - ${self.amount}'

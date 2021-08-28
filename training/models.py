@@ -48,4 +48,4 @@ class TrainingRequest(models.Model):
     answered = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.employee} - {timezone.localtime(self.submitted).strftime("%a, %d %b %Y %H:%M:%S %Z")}'
+        return f'{"[ANSWERED] " if self.answered else ""}{self.employee} - {timezone.localtime(self.submitted).strftime("%a, %d %b %Y %H:%M:%S %Z")}'
