@@ -117,7 +117,9 @@ class gigList(SLUGSMixin, TemplateView):
     template_name = "gig/list.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context["gigs"] = Gig.objects.filter(published=True).order_by("-start")[:50]
+        self.added_context["gigs"] = Gig.objects.filter(published=True).order_by(
+            "-start"
+        )[:50]
         return super().dispatch(request, *args, **kwargs)
 
 

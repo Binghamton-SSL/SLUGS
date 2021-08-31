@@ -80,14 +80,15 @@
             <col span="1" style="width: 10%;">
             <col span="1" style="width: 20%;">
             {% for rate in rates %}
-                <col span="1" style="width: calc(60% / {{ rates | length }} );">
+                <col span="1" style="width: calc(50% / {{ rates | length }} );">
             {% endfor %}
+            <col span="1" style="width: 10%;">
             <col span="1" style="width: 10%;">
             <thead>
                 <tr>
                     <td class="bg-white" colspan="2"></td>
                     <td class="font-bold text-center" colspan="{{ rates | length }}">Hours</td>
-                    <td class="bg-white"></td>
+                    <td colspan="2" class="bg-white"></td>
                 </tr>
                 <tr class="text-sm font-bold text-center">
                     <td>
@@ -99,6 +100,7 @@
                     {% for rate in rates %}
                     <td>{{rate.name}}</td>
                     {% endfor %}
+                    <td>Total Hours</td>
                     <td>Gross Pay</td>
                 </tr>
                 <tr>
@@ -107,7 +109,7 @@
                         {% for rate in rates %}
                         <td class="text-center">${{rate.hourly_rate}}</td>
                         {% endfor %}
-                        <td class="bg-white"></td>
+                        <td colspan="2" class="bg-white"></td>
                     </tr>
                 </tr>
             </thead>
@@ -119,10 +121,18 @@
                     {% for rate in emp.rates.values %}
                         <td>{% if rate.1 is not 0 %}{{rate.1}}{% else %}-{% endif %}</td>
                     {% endfor %}
+                    <td>{{emp.total_hours}}</td>
                     <td>${{emp.total_amount|floatformat:2|intcomma}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr class="text-lg font-bold ">
+                    <td class="pl-4 " colspan="8">Total:</td>
+                    <td class="text-center">{{total_hours}}</td>
+                    <td class="text-center">${{total_sum|floatformat:2|intcomma}}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
     <div class="mt-auto mb-2 dont_break">
@@ -186,7 +196,7 @@
     }
 </style>
 <script>
-    print()
+    // print()
 </script>
 
 </html>

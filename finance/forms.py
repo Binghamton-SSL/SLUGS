@@ -36,8 +36,7 @@ ShiftFormSet = modelformset_factory(
 
 class rollOverShiftsForm(forms.Form):
     pay_period = forms.ModelChoiceField(
-        queryset=PayPeriod.objects.all(),
-        label="Pay Period to move shifts to"
+        queryset=PayPeriod.objects.all(), label="Pay Period to move shifts to"
     )
     shifts = forms.ModelMultipleChoiceField(
         queryset=Shift.objects.all(),

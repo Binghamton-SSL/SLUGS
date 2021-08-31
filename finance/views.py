@@ -1,9 +1,11 @@
-from copy import deepcopy
+from django.http.response import HttpResponse
+from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 import django.utils.timezone as timezone
 import pytz
+import csv
 from datetime import datetime
 from django.db.models import Q
 from django.views import View
@@ -345,38 +347,58 @@ class viewSummary(SLUGSMixin, TemplateView):
     template_name = "finance/summary.html"
 
     def dispatch(self, request, *args, **kwargs):
-        pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
-        rates = {}
-        for rate in Wage.objects.all().order_by("hourly_rate"):
-            rates[rate] = [rate, 0]
-        employees = {}
-        for employee in Employee.objects.all().filter(is_active=True).order_by('last_name'):
-            employees[employee.bnum] = {
-                "bnum": employee.bnum,
-                "name": f"{employee.first_name} {employee.last_name}",
-                "shifts": [],
-                "rates": deepcopy(rates),
-                "total_amount": 0.00,
-            }
-        for shift in pay_period.shifts.all():
-            if shift.processed:
-                # print(employees[shift.content_object.employee.bnum])
-                print("\n\n\n")
-                employees[shift.content_object.employee.bnum]["shifts"].append(shift)
-                employees[shift.content_object.employee.bnum]["rates"][
-                    shift.content_object.position.hourly_rate
-                ][1] += (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                employees[shift.content_object.employee.bnum]["total_amount"] += float(
-                    shift.content_object.position.hourly_rate.hourly_rate
-                ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+        sumData = prepareSummaryData(kwargs["pp_id"])
 
-        self.added_context["rates"] = rates
-        self.added_context["employees"] = employees
-        self.added_context["pay_period"] = pay_period
-
-        print(employees)
+        self.added_context["rates"] = sumData["rates"]
+        self.added_context["employees"] = sumData["employees"]
+        self.added_context["pay_period"] = sumData["pay_period"]
+        self.added_context["total_sum"] = sumData["total_sum"]
+        self.added_context["total_hours"] = sumData["total_hours"]
 
         return super().dispatch(request, *args, **kwargs)
+
+
+class exportSummaryCSV(SLUGSMixin, View):
+    def dispatch(self, request, *args, **kwargs):
+        sumData = prepareSummaryData(kwargs["pp_id"])
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={
+                "Content-Disposition": f'attachment; filename="Payroll_Summary_{sumData["pay_period"].start}--{sumData["pay_period"].end}.csv"'
+            },
+        )
+
+        writer = csv.writer(response)
+        writer.writerow(
+            ["B-num", "Name"]
+            + [f"{rate.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
+            + ["Total Hours", "Gross Pay"]
+        )
+        for emp in sumData["employees"]:
+            emp = sumData["employees"][emp]
+            writer.writerow(
+                [emp["bnum"], emp["name"]]
+                + [
+                    "-" if emp["rates"][rate][1] == 0 else emp["rates"][rate][1]
+                    for rate in emp["rates"]
+                ]
+                + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]
+            )
+        writer.writerow(
+            [
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "Total",
+                sumData["total_hours"],
+                f'${round(sumData["total_sum"], 2):,}',
+            ]
+        )
+        return response
 
 
 class RollOverAllShifts(SLUGSMixin, FormView):
@@ -385,8 +407,8 @@ class RollOverAllShifts(SLUGSMixin, FormView):
     success_url = "."
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context["pay_period"] = PayPeriod.objects.get(pk=kwargs['pp_id'])
-        self.added_context["emp"] = Employee.objects.get(pk=kwargs['emp_id'])
+        self.added_context["pay_period"] = PayPeriod.objects.get(pk=kwargs["pp_id"])
+        self.added_context["emp"] = Employee.objects.get(pk=kwargs["emp_id"])
         # emp = Employee.objects.get(pk=emp_id)
         # emp_shifts = from_pay_period.shifts.filter(content_object__employee=emp_id)
         # print(emp_shifts)

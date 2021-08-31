@@ -260,7 +260,7 @@ class PayPeriod(models.Model):
 
     def get_summary(self):
         return format_html(
-            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}'>Summary</a></div><br>"
+            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}'>Summary CSV File</a></div><br>"
         )  # noqa
 
     def associated_shifts(self):
