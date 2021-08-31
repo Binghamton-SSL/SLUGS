@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import modelformset_factory
 from django.forms import BaseModelFormSet
-from finance.models import Shift
+from finance.models import PayPeriod, Shift
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit
 
 
 class BaseShiftForm(forms.ModelForm):
@@ -30,3 +32,29 @@ ShiftFormSet = modelformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+class rollOverShiftsForm(forms.Form):
+    pay_period = forms.ModelChoiceField(
+        queryset=PayPeriod.objects.all(),
+        label="Pay Period to move shifts to"
+    )
+    shifts = forms.ModelMultipleChoiceField(
+        queryset=Shift.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label="Shifts you want to rollover",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print(args, kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            "pay_period",
+            "shifts",
+            Submit(
+                "submit",
+                "Roll Over Shifts",
+                css_class="rounded-sm text-white bg-green px-4 py-2",
+            ),
+        )

@@ -23,11 +23,7 @@ from utils.models import signupStatus
 # Create your views here.
 class gigIndex(SLUGSMixin, MultipleFormView):
     template_name = "gig/gig.html"
-    form_classes = {
-        "show_notes": {
-            "form": engineerNotesForm,
-        }
-    }
+    form_classes = {}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,6 +37,11 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
+        self.form_classes = {
+            "show_notes": {
+                "form": engineerNotesForm,
+            }
+        }
         jobs = {}
         self.added_context["helper"] = shiftFormHelper()
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
@@ -116,7 +117,7 @@ class gigList(SLUGSMixin, TemplateView):
     template_name = "gig/list.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context["gigs"] = Gig.objects.filter(published=True)[:50]
+        self.added_context["gigs"] = Gig.objects.filter(published=True).order_by("-start")[:50]
         return super().dispatch(request, *args, **kwargs)
 
 

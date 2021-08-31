@@ -1,4 +1,5 @@
 from copy import deepcopy
+from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 import django.utils.timezone as timezone
@@ -9,6 +10,7 @@ from django.views import View
 from django.conf import settings
 from django.http import FileResponse
 from django.db.models import Sum
+from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
 from finance.models import Estimate, SystemInstance, PayPeriod, Shift, Wage
@@ -348,7 +350,7 @@ class viewSummary(SLUGSMixin, TemplateView):
         for rate in Wage.objects.all().order_by("hourly_rate"):
             rates[rate] = [rate, 0]
         employees = {}
-        for employee in Employee.objects.all().filter(is_active=True):
+        for employee in Employee.objects.all().filter(is_active=True).order_by('last_name'):
             employees[employee.bnum] = {
                 "bnum": employee.bnum,
                 "name": f"{employee.first_name} {employee.last_name}",
@@ -374,6 +376,20 @@ class viewSummary(SLUGSMixin, TemplateView):
 
         print(employees)
 
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RollOverAllShifts(SLUGSMixin, FormView):
+    template_name = "finance/rollover.html"
+    form_class = rollOverShiftsForm
+    success_url = "."
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context["pay_period"] = PayPeriod.objects.get(pk=kwargs['pp_id'])
+        self.added_context["emp"] = Employee.objects.get(pk=kwargs['emp_id'])
+        # emp = Employee.objects.get(pk=emp_id)
+        # emp_shifts = from_pay_period.shifts.filter(content_object__employee=emp_id)
+        # print(emp_shifts)
         return super().dispatch(request, *args, **kwargs)
 
 

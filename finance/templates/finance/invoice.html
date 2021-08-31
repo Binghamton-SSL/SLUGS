@@ -329,6 +329,7 @@
                                 </tbody>
                             </table>
                             {% endif %}
+                            {% if estimate.payment_set.count != 0 %}
                             <table style="border-bottom: none; border-top: none;" class="w-full text-sm no-border">
                                 <colgroup>
                                     <col span="1" style="width: 65%;">
@@ -349,7 +350,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="item_table">
-                                    {% if estimate.payments_made != 0.00 %}
                                     {% for payment in estimate.payment_set.all %}
                                     <tr>
                                         <td>
@@ -371,9 +371,9 @@
                                             (${{estimate.payments_made}})
                                         </td>
                                     </tr>
-                                    {% endif %}
                                 </tbody>
                             </table>
+                            {% endif %}
                             <table class="w-full">
                                 <colgroup>
                                     <col span="1" style="width: 50%;">

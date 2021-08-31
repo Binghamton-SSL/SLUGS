@@ -1,3 +1,9 @@
+###
+* Change admin so styling is consistent if user is using light mode.
+* Order gigs on show list page by most recent / furthest in future
+* Order employees on payroll summary by last name
+* Start work on rollover all shifts from employee
+
 ### 8/28/2021 - Security Update 
 * Bump dependencies for security updates
 * Push new requirements.txt and pipfile

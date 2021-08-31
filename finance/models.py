@@ -278,7 +278,7 @@ class PayPeriod(models.Model):
         return format_html(
             "".join(
                 [
-                    f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:timesheet', args=[self.pk, emp.pk])}'>Get Timesheet: {emp}</a></div><br>"  # noqa
+                    f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:timesheet', args=[self.pk, emp.pk])}'>Get Timesheet: {emp}</a><br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a></div><br>"  # noqa
                     for emp in emps
                 ]
             )
