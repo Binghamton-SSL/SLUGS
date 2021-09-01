@@ -1,8 +1,10 @@
 ### In Progress
+* Rollover all shifts from an employee
+
+### In Next Release
 * Change admin so styling is consistent if user is using light mode.
 * Order gigs on show list page by most recent / furthest in future
 * Order employees on payroll summary by last name
-* Start work on rollover all shifts from employee
 * Add CSV Export to Payroll Summary
 * Add total hours & pay to Payroll Summary
 
