@@ -1,5 +1,6 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
+{% load settings %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,6 +68,7 @@
     <p class="text-xs">Any issues or feedback? <a href="mailto:SLUGS@joebabbitt.com" class="underline">Let us know</a> so we can make <span class="font-stencil">S.L.U.G.S</span> better</p>
     <p class="font-mono text-xs text-gray-300"><span class="font-stencil">S.L.U.G.S</span> is created for the exclusive use of BSSL</p>
     <p class="text-xs text-gray-600">We use Google Analytics to monitor usage and make sure all is well. <br> If you're worried about your privacy contact <a href="mailto:slugs@joebabbitt.com" class="underline">Joe</a></p>
+    <p class="text-xs text-gray-700">S.L.U.G.S. version: {% settings_value "VERSION" %} - {% settings_value "BUILD" %}</p>
 </footer>
 {% endblock %}
 </html>

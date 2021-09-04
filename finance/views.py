@@ -1,3 +1,4 @@
+from finance.estimate_data_utils import calculateGigCost
 from django.http.response import HttpResponse
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
@@ -25,99 +26,7 @@ class viewEstimate(SLUGSMixin, TemplateView):
     added_context = {"systems": {}, "fees": {}}
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context = {"systems": {}, "fees": {}}
-        self.added_context["estimate"] = Estimate.objects.get(pk=kwargs["e_id"])
-        self.added_context["shop_time"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("shop_time")
-            .first()
-            .shop_time
-        )
-        self.added_context["load_in"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("shop_time")
-            .first()
-            .load_in
-        )
-        self.added_context["load_out"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("-load_out")
-            .first()
-            .load_out
-        )
-
-        for system in self.added_context["estimate"].gig.systems.all():
-            dept = system.department
-            rented_start = (
-                self.added_context["estimate"]
-                .gig.loadin_set.filter(department=dept)
-                .order_by("shop_time")
-                .first()
-                .shop_time
-            )
-            rented_end = (
-                self.added_context["estimate"]
-                .gig.loadin_set.filter(department=dept)
-                .order_by("-load_out")
-                .first()
-                .load_out
-            )
-            time_rented = rented_end - rented_start
-            self.added_context["systems"][system] = [
-                system,
-                decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                if system.price_per_hour
-                else 1,
-                round(
-                    system.base_price
-                    + system.price_per_hour
-                    * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                    2,
-                ),
-                False,
-            ]
-            addons = SystemInstance.objects.get(
-                gig=self.added_context["estimate"].gig, system=system
-            ).addoninstance_set.all()
-            for addon_set_item in addons:
-                addon = addon_set_item.addon
-                self.added_context["systems"][addon_set_item.pk] = [
-                    addon,
-                    decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                    (
-                        addon_set_item.qty
-                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                    )
-                    if addon.price_per_hour != 0.00
-                    else addon_set_item.qty,
-                    round(
-                        addon.base_price * addon_set_item.qty
-                        + addon.price_per_hour
-                        * addon_set_item.qty
-                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                        2,
-                    ),
-                    True,
-                ]
-        for fee in self.added_context["estimate"].fees.all():
-            self.added_context["fees"][fee] = [
-                fee,
-                fee.amount
-                if fee.amount
-                else round(
-                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
-                ),
-            ]
-        for fee in self.added_context["estimate"].onetimefee_set.all():
-            self.added_context["fees"][fee] = [
-                fee,
-                fee.amount
-                if fee.amount
-                else round(
-                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
-                ),
-            ]
+        self.added_context = calculateGigCost(Estimate.objects.get(pk=kwargs["e_id"]))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -126,104 +35,7 @@ class viewInvoice(SLUGSMixin, TemplateView):
     added_context = {}
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context = {
-            "systems": {},
-            "fees": {},
-            "payments": {},
-            "payment_amt": 0.00,
-        }
-        self.added_context["estimate"] = Estimate.objects.get(pk=kwargs["e_id"])
-        self.added_context["shop_time"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("shop_time")
-            .first()
-            .shop_time
-        )
-        self.added_context["load_in"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("shop_time")
-            .first()
-            .load_in
-        )
-        self.added_context["load_out"] = (
-            self.added_context["estimate"]
-            .gig.loadin_set.order_by("-load_out")
-            .first()
-            .load_out
-        )
-
-        for system in self.added_context["estimate"].gig.systems.all():
-            dept = system.department
-            rented_start = (
-                self.added_context["estimate"]
-                .gig.loadin_set.filter(department=dept)
-                .order_by("shop_time")
-                .first()
-                .shop_time
-            )
-            rented_end = (
-                self.added_context["estimate"]
-                .gig.loadin_set.filter(department=dept)
-                .order_by("-load_out")
-                .first()
-                .load_out
-            )
-            time_rented = rented_end - rented_start
-            self.added_context["systems"][system] = [
-                system,
-                decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                if system.price_per_hour
-                else 1,
-                round(
-                    system.base_price
-                    + system.price_per_hour
-                    * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                    2,
-                ),
-                False,
-            ]
-            addons = SystemInstance.objects.get(
-                gig=self.added_context["estimate"].gig, system=system
-            ).addoninstance_set.all()
-            for addon_set_item in addons:
-                addon = addon_set_item.addon
-                self.added_context["systems"][addon_set_item.pk] = [
-                    addon,
-                    decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                    (
-                        addon_set_item.qty
-                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                    )
-                    if addon.price_per_hour != 0.00
-                    else addon_set_item.qty,
-                    round(
-                        addon.base_price * addon_set_item.qty
-                        + addon.price_per_hour
-                        * addon_set_item.qty
-                        * decimal.Decimal(time_rented / timezone.timedelta(hours=1)),
-                        2,
-                    ),
-                    True,
-                ]
-        for fee in self.added_context["estimate"].fees.all():
-            self.added_context["fees"][fee] = [
-                fee,
-                fee.amount
-                if fee.amount
-                else round(
-                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
-                ),
-            ]
-        for fee in self.added_context["estimate"].onetimefee_set.all():
-            self.added_context["fees"][fee] = [
-                fee,
-                fee.amount
-                if fee.amount
-                else round(
-                    self.added_context["estimate"].subtotal * (fee.percentage / 100), 2
-                ),
-            ]
+        self.added_context = calculateGigCost(Estimate.objects.get(pk=kwargs["e_id"]))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -373,6 +185,13 @@ class exportSummaryCSV(SLUGSMixin, View):
             ["B-num", "Name"]
             + [f"{rate.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
             + ["Total Hours", "Gross Pay"]
+            + ["Pay Period Start", "Pay Period End", "Payday"]
+        )
+        writer.writerow(
+            ["", ""]
+            + ["" for rate in sumData["rates"]]
+            + ["", ""]
+            + [sumData["pay_period"].start, sumData["pay_period"].end, sumData["pay_period"].payday]
         )
         for emp in sumData["employees"]:
             emp = sumData["employees"][emp]
@@ -385,14 +204,9 @@ class exportSummaryCSV(SLUGSMixin, View):
                 + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]
             )
         writer.writerow(
-            [
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
+            ["", ""]
+            + ["" for rate in sumData["rates"]][:-1]
+            + [
                 "Total",
                 sumData["total_hours"],
                 f'${round(sumData["total_sum"], 2):,}',
@@ -417,7 +231,7 @@ class RollOverAllShifts(SLUGSMixin, FormView):
 
 class EstimateDownload(SLUGSMixin, View):
     def get(self, request, relative_path):
-        path = f"estimates/{relative_path}"
+        path = f"{relative_path}"
         absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
         response = FileResponse(open(absolute_path, "rb"), as_attachment=True)
         return response

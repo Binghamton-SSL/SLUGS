@@ -120,12 +120,12 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{shop_time|date:"n/j/Y"}}<br>
-                                                {{shop_time|date:"f A"}}
+                                                {{first_shop_time|date:"n/j/Y"}}<br>
+                                                {{first_shop_time|date:"f A"}}
                                             </td>
                                             <td>
-                                                {{load_in|date:"n/j/Y"}}<br>
-                                                {{load_in|date:"f A"}}
+                                                {{first_load_in|date:"n/j/Y"}}<br>
+                                                {{first_load_in|date:"f A"}}
                                             </td>
                                             <td>
                                                 {{estimate.gig.setup_by|date:"n/j/Y"}}<br>
@@ -140,8 +140,8 @@
                                                 {{estimate.gig.end|date:"f A"}}
                                             </td>
                                             <td>
-                                                {{load_out|date:"n/j/Y"}}<br>
-                                                {{load_out|date:"f A"}}
+                                                {{last_load_out|date:"n/j/Y"}}<br>
+                                                {{last_load_out|date:"f A"}}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -187,7 +187,8 @@
                                                 {% now "n/j/Y" %}
                                             </td>
                                             <td>
-                                                E{{2500|add:estimate.pk}}
+                                                E{{2500|add:estimate.pk}} 
+                                                <!-- We start at 2500 for historical reasons -->
                                             </td>
                                         </tr>
                                     </tbody>
@@ -245,7 +246,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="item_table">
-                                    {% for system, time_rented, qty, total_price, is_addon in systems.values %}
+                                    {% for system, qty, total_price, is_addon in systems.values %}
                                     <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
                                         <td>
                                             {% if is_addon %}
@@ -258,6 +259,9 @@
                                             {% if system.description %}
                                             <span class="text-xs">{{system.description}}</span><br>
                                             {% endif %}
+                                            {% if system.addl_description %}
+                                            <span class="text-xs">{{system.addl_description}}</span><br>
+                                            {% endif %}
                                             {% if system.base_price %}
                                             Flat Rate
                                             {% endif %}
@@ -265,19 +269,23 @@
                                             Hourly Rate
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {{qty}}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {% if system.base_price %}
                                             {{system.base_price}}
                                             {% elif system.price_per_hour %}
                                             {{system.price_per_hour}}
+                                            {% elif system.price_per_hour_for_duration_of_gig %}
+                                            {{system.price_per_hour_for_duration_of_gig}}
+                                            {% elif system.price_per_hour_for_load_in_out_ONLY %}
+                                            {{system.price_per_hour_for_load_in_out_ONLY}}
                                             {% else %}
                                             0.00
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {{total_price}}
                                         </td>
                                     </tr>

@@ -219,7 +219,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="item_table">
-                                    {% for system, time_rented, qty, total_price, is_addon in systems.values %}
+                                    {% for system, qty, total_price, is_addon in systems.values %}
                                     <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
                                         <td>
                                             {% if is_addon %}
@@ -239,19 +239,23 @@
                                             Hourly Rate
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {{qty}}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {% if system.base_price %}
                                             {{system.base_price}}
                                             {% elif system.price_per_hour %}
                                             {{system.price_per_hour}}
+                                            {% elif system.price_per_hour_for_duration_of_gig %}
+                                            {{system.price_per_hour_for_duration_of_gig}}
+                                            {% elif system.price_per_hour_for_load_in_out_ONLY %}
+                                            {{system.price_per_hour_for_load_in_out_ONLY}}
                                             {% else %}
                                             0.00
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td style="padding: 0;" class="text-center">
                                             {{total_price}}
                                         </td>
                                     </tr>

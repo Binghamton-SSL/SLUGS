@@ -1,5 +1,5 @@
 <div>
-    {% if jobs|length > 0 %}
+    {% if jobs %}
     <div class="flex flex-col m-4 mx-auto md:flex-row w-max">
         {% for id, job in jobs.items %}
         <button unicorn:click="toggleInterest({{job.0.id}})" class="p-4 m-4 rounded text-center
@@ -28,16 +28,20 @@
             </svg>
             </div>
             <div>
-                <p>Unfortunately you can't sign up for any open jobs on the show. Most likely because you need to test up 👀 <br>(or you're not in the department this show is for)
-                </p>
-                <p class="mt-2">The following jobs are assigned to this show:</p>
-                <ul class="list-disc list-inside">
-                    {% for job in all_jobs.values %}
-                    <li>
-                        {{job}}
-                    </li>
-                    {% endfor %}
-                </ul>
+                {% if all_jobs.values > 0 %}
+                    <p>Unfortunately you can't sign up for any open jobs on the show. Most likely because you need to test up 👀 <br>(or you're not in the department this show is for)
+                    </p>
+                    <p class="mt-2">The following jobs are assigned to this show:</p>
+                    <ul class="list-disc list-inside">
+                        {% for job in all_jobs.values %}
+                        <li>
+                            {{job}}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>There appear to be no open positions for this show at this time</p>
+                {% endif %}
             </div>
         </div>
     </div>

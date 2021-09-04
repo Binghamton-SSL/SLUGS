@@ -56,6 +56,7 @@ class EstimateAdmin(admin.ModelAdmin):
     ordering = ["-gig__start"]
     filter_horizontal = ["fees"]
     autocomplete_fields = ["gig", "billing_contact"]
+    search_fields = ("gig__name", "gig__org__name", "gig__org__SA_account_num", "billing_contact__name",)
     readonly_fields = [
         "subtotal",
         "fees_amt",

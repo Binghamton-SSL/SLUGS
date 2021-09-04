@@ -90,6 +90,7 @@ class SystemInstance(models.Model):
 class AddonInstance(models.Model):
     addon = models.ForeignKey("equipment.SystemAddon", on_delete=models.CASCADE)
     systemInstance = models.ForeignKey("gig.SystemInstance", on_delete=models.CASCADE)
+    description = models.CharField(max_length=200, blank=True, null=True)
     qty = models.IntegerField(default=1)
 
     class Meta:

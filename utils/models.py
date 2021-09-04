@@ -53,7 +53,7 @@ class ShowFeed(ICalFeed):
     file_name = "bssl_events.ics"
 
     def items(self):
-        return Gig.objects.all().order_by("-start")
+        return Gig.objects.filter(published=True).order_by("-start") # noqa For now; only show published events
 
     def item_title(self, item):
         return f"{'[TENTATIVE] ' if not item.published else ''}{item.org} - {item.name}"

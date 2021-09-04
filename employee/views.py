@@ -206,7 +206,6 @@ class massAssignPaperwork(SLUGSMixin, FormView):
     success_url = reverse_lazy("admin:employee_employee_changelist")
 
     def dispatch(self, request, *args, **kwargs):
-        # print(kwargs['selected'].split(','))
         self.initial["ids"] = kwargs["selected"]
         self.added_context["selected_ids"] = kwargs["selected"]
         return super().dispatch(request, *args, **kwargs)

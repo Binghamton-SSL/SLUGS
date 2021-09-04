@@ -44,7 +44,7 @@ class LoadInInline(NestedTabularInline):
 
 @admin.register(Gig)
 class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
-    search_fields = ["name", "org", "contact", "location"]
+    search_fields = ["name", "org__name", "contact__name", "location__name"]
     inlines = (SystemInline, LoadInInline)
     autocomplete_fields = ["org", "contact", "location"]
     list_display = (

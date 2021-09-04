@@ -23,11 +23,12 @@ class SystemAddon(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
-    base_price = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
+    base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    price_per_hour_for_duration_of_gig = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00
     )
-    price_per_hour = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
+    price_per_hour_for_load_in_out_ONLY = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00
     )
 
     def __str__(self):

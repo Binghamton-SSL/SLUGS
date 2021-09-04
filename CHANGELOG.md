@@ -1,10 +1,22 @@
 ### In Progress
-* Change admin so styling is consistent if user is using light mode.
+* Rollover entire employee timesheet
+
+### V2.1.0 - 9/5/2021
 * Order gigs on show list page by most recent / furthest in future
 * Order employees on payroll summary by last name
-* Start work on rollover all shifts from employee
 * Add CSV Export to Payroll Summary
 * Add total hours & pay to Payroll Summary
+* Add last login time to employee page
+* Ability to create addons that are only charged during load in/out (Techs)
+* Override description of line item in estimate/invoice
+* Add signed estimate link to ShowView page
+* Search for estimate by: Gig Name, Organization booking event, Organization SA Account #, Billing Contact
+* Add version # to bottom of page for debugging purposes
+<br><br>
+BUG FIXES:
+    * Admin now has consistent coloring across light/dark mode (force dark mode)
+    * Search for gig in estimate admin no longer showing "Cannot show results"
+    * Calendar no longer shows tentative gigs
 
 
 ### 8/28/2021 - Security Update 

@@ -1,3 +1,4 @@
+from finance.estimate_data_utils import calculateGigCost
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import format_html
@@ -52,7 +53,12 @@ class Estimate(models.Model):
         ("C", "Closed"),
         ("X", "Canceled"),
     ]
-    status = models.CharField(choices=INVOICE_STATUSES, max_length=1, default="E")
+    status = models.CharField(
+        choices=INVOICE_STATUSES,
+        max_length=1,
+        default="E",
+        help_text="Changing the estimate to 'Booked' will publish the gig, and 'Show Concluded' will archive the gig",
+    )
     gig = models.ForeignKey("gig.Gig", on_delete=models.CASCADE)
     billing_contact = models.ForeignKey("client.OrgContact", on_delete=models.PROTECT)
     signed_estimate = models.FileField(upload_to="estimates", null=True, blank=True)
@@ -90,80 +96,25 @@ class Estimate(models.Model):
 
         if self.status == "B":
             self.gig.published = True
-        elif self.status == "A":
+        elif self.status == "O":
             self.gig.archived = True
+
         self.gig.save()
 
-        for system in self.gig.systems.all():
-            dept = system.department
-            if len(self.gig.loadin_set.all()) < 1:
-                raise BadRequest()
-            rented_start = (
-                self.gig.loadin_set.filter(department=dept)
-                .order_by("shop_time")
-                .first()
-                .shop_time
-            )
-            rented_end = (
-                self.gig.loadin_set.filter(department=dept)
-                .order_by("-load_out")
-                .first()
-                .load_out
-            )
-            time_rented = rented_end - rented_start
-            system_price = round(
-                system.base_price
-                + (
-                    system.price_per_hour
-                    * decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                ),
-                2,
-            )
-            addons = SystemInstance.objects.get(
-                gig=self.gig, system=system
-            ).addoninstance_set.all()
-            if len(addons) > 0:
-                for addon_set_item in addons:
-                    addon = addon_set_item.addon
-                    system_price += round(
-                        (addon.base_price * addon_set_item.qty)
-                        + (
-                            addon.price_per_hour
-                            * addon_set_item.qty
-                            * decimal.Decimal(time_rented / timezone.timedelta(hours=1))
-                        ),
-                        2,
-                    )
-            self.subtotal += decimal.Decimal(system_price)
-        if self.pk is None:
-            super().save()
-        for fee in self.onetimefee_set.all():
-            self.fees_amt += round(
-                fee.amount
-                + (
-                    decimal.Decimal(fee.percentage / 100 if fee.percentage else 0)
-                    * self.subtotal
-                ),
-                2,
-            )
-        for fee in self.fees.all():
-            self.fees_amt += round(
-                fee.amount
-                + (
-                    decimal.Decimal(fee.percentage / 100 if fee.percentage else 0)
-                    * self.subtotal
-                ),
-                2,
-            )
-        for payment in self.payment_set.all():
-            self.payment_amt += payment.amount
-        self.total_amt = self.subtotal + self.fees_amt + self.adjustments
-        self.outstanding_balance = self.total_amt - self.payment_amt
-        self.payments_made = self.payment_amt
+        super().save()
+
+        ret = calculateGigCost(self)
+
+        self.subtotal = ret["subtotal"]
+        self.fees_amt = ret["fees_amt"]
+        self.payment_amt = ret["payment_amt"]
+        self.total_amt = ret["total_amt"]
+        self.outstanding_balance = ret["outstanding_balance"]
+        self.payments_made = ret["payment_amt"]
+
         super().save()
 
     def get_printout_link(self):
-        self.save()
         if self.status == "E":
             return format_html(
                 "<a href='%s?time=%s'>%s</a>"
@@ -274,11 +225,15 @@ class PayPeriod(models.Model):
         for shift in self.shifts.all():
             if shift.content_object.employee not in emps:
                 emps.append(shift.content_object.employee)
-        print(emps)
         return format_html(
             "".join(
                 [
-                    f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:timesheet', args=[self.pk, emp.pk])}'>Get Timesheet: {emp}</a><br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a></div><br>"  # noqa
+                    (
+                        f"<div style='margin: .25rem 0 .25rem 0'>"
+                        f"<a href='{reverse('finance:timesheet', args=[self.pk, emp.pk])}'>Get Timesheet: {emp}</a>"
+                        # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
+                        f"</div><br>"
+                    )
                     for emp in emps
                 ]
             )

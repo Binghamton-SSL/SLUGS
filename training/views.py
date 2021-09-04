@@ -19,7 +19,6 @@ class index(SLUGSMixin, FormView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        print("hello")
         form.instance.employee = self.request.user
         form.save()
         messages.add_message(

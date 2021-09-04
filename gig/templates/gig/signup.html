@@ -5,7 +5,7 @@
 
 {% block headincludes %}{% unicorn_scripts %}{% endblock %}
 {% block content %}
-<div class="max-w-5xl m-4 md:mx-auto">
+<div class="max-w-5xl m-4 space-y-4 md:mx-auto">
     <h1 class="text-3xl">
         Sign up for upcoming shows!
     </h1>
@@ -31,9 +31,11 @@
         <p>
             Location: {{gig.location}}
         </p>
-        <div class="p-4 m-2 mx-auto bg-gray-300 rounded max-w-prose">
-            {{gig.notes|safe}}
-        </div>
+        {% if gig.notes %}
+            <div class="p-4 m-2 mx-auto bg-gray-300 rounded max-w-prose">
+                {{gig.notes|safe}}
+            </div>
+        {% endif %}
         <div class="flex flex-col mx-auto w-max md:flex-row">
             {% for loadin in gig.loadin_set.all %}
                 <div class="p-4 m-2 border-2 border-black border-solid rounded w-max">
@@ -59,7 +61,7 @@
                 </div>
             {% endfor %}
         </div>
-        <div class="flex flex-col mx-auto mb-4 w-max md:flex-row">
+        <div class="flex flex-col mx-auto mb-4 space-y-2 sm:space-x-4 w-max md:flex-row">
             {% for system in gig.systeminstance_set.all %}
                 <div class="flex flex-col p-4 mx-auto text-black bg-white border-2 border-black rounded-sm">
                     <h3 class="text-2xl text-center">{{system.system.get_department_display}}</h3>

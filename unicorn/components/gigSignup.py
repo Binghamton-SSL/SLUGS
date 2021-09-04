@@ -23,7 +23,6 @@ class GigsignupView(UnicornView):
             .filter(name__in=[g.name for g in probie_positions])
             .exists()
         )
-        print(is_probie, user.groups.all(), probie_positions)
         depts = []
         for dept in DEPARTMENTS:
             if has_group(user, dept[1]):
@@ -47,6 +46,7 @@ class GigsignupView(UnicornView):
             if job.position not in user.groups.all() and job.department in depts:
                 self.jobs[str(job.pk)][2] = False
         # All jobs
+        self.all_jobs = {}
         for job in gig.job_set.all():
             self.all_jobs[str(job.pk)] = job.position
 
