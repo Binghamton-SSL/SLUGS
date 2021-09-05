@@ -61,7 +61,7 @@
                 </div>
             {% endfor %}
         </div>
-        <div class="flex flex-col mx-auto mb-4 space-y-2 sm:space-x-4 w-max md:flex-row">
+        <div class="flex flex-col mx-auto mb-4 space-y-2 sm:space-y-0 sm:space-x-2 w-max md:flex-row">
             {% for system in gig.systeminstance_set.all %}
                 <div class="flex flex-col p-4 mx-auto text-black bg-white border-2 border-black rounded-sm">
                     <h3 class="text-2xl text-center">{{system.system.get_department_display}}</h3>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import reverse
 from tinymce.models import HTMLField
@@ -31,6 +32,7 @@ class Gig(models.Model):
     day_of_show_notes = models.TextField(blank=True)
     archived = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
+    available_for_signup = models.DateField(blank=True, null=True, verbose_name="Date Available for Signup", help_text="If left blank, this value will be set to 7 days prior to the start date.")
     systems = models.ManyToManyField("equipment.System", through="SystemInstance")
 
     def get_staff_link(self):
@@ -56,8 +58,10 @@ class Gig(models.Model):
             + (" [ARCHIVED]" if self.archived else "")
         )  # noop
 
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.available_for_signup is None:
+            self.available_for_signup = (self.start - timezone.timedelta(days=7))
+        super().save(*args, **kwargs)
 
 
 class LoadIn(models.Model):

@@ -1,6 +1,14 @@
 ### In Progress
 * Rollover entire employee timesheet
 
+#### V2.1.1 - 9/5/2021
+* Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event
+<br><br>
+BUG FIXES: 
+    * Show "ticket" no longer has issue where text overflows ticket
+
+<hr>
+
 ### V2.1.0 - 9/5/2021
 * Order gigs on show list page by most recent / furthest in future
 * Order employees on payroll summary by last name
@@ -18,6 +26,7 @@ BUG FIXES:
     * Search for gig in estimate admin no longer showing "Cannot show results"
     * Calendar no longer shows tentative gigs
 
+<hr>
 
 ### 8/28/2021 - Security Update 
 * Bump dependencies for security updates

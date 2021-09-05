@@ -106,8 +106,8 @@ class workSignup(SLUGSMixin, TemplateView):
         self.added_context["gigs"] = list(
             set(
                 Gig.objects.filter(
-                    start__gte=timezone.now(), job__employee=None, published=True
-                )
+                    start__gte=timezone.now(), available_for_signup__lte=timezone.now(), job__employee=None, published=True
+                ).order_by('-start')
             )
         )
         return super().dispatch(request, *args, **kwargs)
