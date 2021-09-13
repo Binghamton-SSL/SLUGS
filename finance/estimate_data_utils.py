@@ -104,7 +104,7 @@ def calculateGigCost(estimate):
         fee_amt = (
             fee.amount
             if fee.amount
-            else round(ret["estimate"].subtotal * (fee.percentage / 100), 2)
+            else round(ret["subtotal"] * (fee.percentage / 100), 2)
         )
         ret["fees"][fee] = [fee, fee_amt]
         ret["fees_amt"] += fee_amt
@@ -113,7 +113,7 @@ def calculateGigCost(estimate):
         fee_amt = (
             fee.amount
             if fee.amount
-            else round(ret["estimate"].subtotal * (fee.percentage / 100), 2)
+            else round(ret["subtotal"] * (fee.percentage / 100), 2)
         )
         ret["fees"][fee] = [fee, fee_amt]
         ret["fees_amt"] += fee_amt

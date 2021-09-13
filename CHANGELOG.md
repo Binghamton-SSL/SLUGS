@@ -1,5 +1,6 @@
 ### In Progress
 * Rollover entire employee timesheet
+* Allow managers to see inattentive employees via admin
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

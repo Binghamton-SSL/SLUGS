@@ -1,0 +1,25 @@
+<div class="loginTimes">
+    <p>
+        <b>
+            Employees that have not logged in since {{sevendayago}}
+        </b>
+    </p>
+    {% for e in emps %}
+        <p>{{e.first_name}} {{e.last_name}}</p>
+    {% endfor %}
+</div>
+<div class="loginTimes">
+    <p>
+        <b>
+            Employees that have yet to login
+        </b>
+    </p>
+    {% for e in empsnopass %}
+        <p>{{e.first_name}} {{e.last_name}}</p>
+    {% endfor %}
+</div>
+<style>
+    .loginTimes b {
+        font-size: .9rem;
+    }
+</style>
