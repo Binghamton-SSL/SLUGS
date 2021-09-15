@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from utils.models import Notification, signupStatus
 from gig.models import Gig, Job
+from SLUGS.templatetags.grouping import has_group
 
 
 def get_closest_to_dt(qs, dt):
@@ -47,6 +48,8 @@ class index(SLUGSMixin, TemplateView):
             else None
         )
         if request.user.is_authenticated:
+            if has_group(request.user, "SA Employee"):
+                return redirect("/admin")
             next_gig_id = (
                 Job.objects.filter(employee=request.user)
                 .filter(gig__end__gte=timezone.now())
