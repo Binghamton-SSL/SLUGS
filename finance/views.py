@@ -77,7 +77,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                 )
                 s = []
                 for shift in shifts.filter(
-                    time_in__range=(day, day + timezone.timedelta(days=1))
+                    time_in__range=(day, day + timezone.timedelta(minutes=1439))
                 ).order_by("time_in"):
                     s.append(
                         (
@@ -115,7 +115,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
             )
             s = []
             for shift in shifts.filter(
-                time_in__range=(day, day + timezone.timedelta(days=1))
+                time_in__range=(day, day + timezone.timedelta(minutes=1439))
             ).order_by("time_in"):
                 s.append(
                     (

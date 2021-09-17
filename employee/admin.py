@@ -3,6 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.template.loader import get_template
 from django.http import HttpResponseRedirect
 from django.urls.base import reverse
+from import_export import resources
+from import_export.admin import ImportExportMixin
 from finance.admin import ShiftInlineAdmin
 from employee.models import PaperworkForm, Paperwork
 from utils.generic_email import send_generic_email
@@ -25,8 +27,15 @@ class PaperworkInline(admin.StackedInline):
     readonly_fields = ["uploaded", "requested"]
 
 
+class EmployeeResource(resources.ModelResource):
+    class Meta:
+        model = Employee
+        exclude = ('password', 'groups', 'user_permissions', 'paperwork')
+
 @admin.register(Employee)
-class EmployeeAdmin(UserAdmin):
+class EmployeeAdmin(ImportExportMixin, UserAdmin):
+    resource_class = EmployeeResource
+
     def group(self, user):
         groups = []
         for group in user.groups.all():

@@ -1,3 +1,4 @@
+from utils.generic_email import send_generic_email
 from SLUGS.views import SLUGSMixin
 from django.views.generic.edit import FormView
 from training.models import Training, TrainingRequest
@@ -21,6 +22,31 @@ class index(SLUGSMixin, FormView):
     def form_valid(self, form):
         form.instance.employee = self.request.user
         form.save()
+        send_generic_email(
+                request=None,
+                title="New Training Request",
+                included_text=f"""
+                Ayo Managers,
+                <br><br>
+                {form.instance.employee.first_name} {form.instance.employee.last_name} has submitted a training request.
+                <br>
+                Here are the details:
+                <br><br>
+                Notes: <br> <code>{form.instance.notes}</code>
+                <br><br>
+                Systems requested: 
+                <br>
+                <ul>
+                {''.join([f"<li>{system.get_department_display()} - {system.name}</li>" for system in form.instance.systems.all()])}
+                </ul>
+                <br>
+                <b>
+                Go to SLUGS to answer the request and create a training.
+                </b>
+                """,  # noqa
+                subject="[SLUGS] New Training Request",
+                to=["bssl@binghamtonsa.org"],
+            )
         messages.add_message(
             self.request,
             messages.SUCCESS,

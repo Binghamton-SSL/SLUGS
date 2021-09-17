@@ -1,6 +1,13 @@
 ### In Progress
-* Rollover entire employee timesheet
 * Allow managers to see inattentive employees via admin
+* Add access for SA Employees
+* Import and Export employees
+* Send an email when a training request is received
+* Track rate shift was paid at irrespective of changes to wages
+<br><br>
+BUG FIXES: 
+    * Show "Signed Reservation" instead of "Signed Estimate"
+    * Get rid of duplicate shifts showing on timesheet when shift started at midnight
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

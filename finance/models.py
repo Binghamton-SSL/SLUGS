@@ -165,6 +165,7 @@ class Shift(models.Model):
     time_in = models.DateTimeField()
     time_out = models.DateTimeField(null=True, blank=True)
     total_time = models.DurationField(default=timedelta())
+    paid_at = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     processed = models.BooleanField(default=False)
     contested = models.BooleanField(default=False)
@@ -179,11 +180,13 @@ class Shift(models.Model):
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
+        if self.paid_at is None:
+            self.paid_at = self.content_object.position.hourly_rate.hourly_rate
         if self.time_in and self.time_out:
             self.total_time = self.time_out - self.time_in
             self.cost = (
                 round(self.total_time / timezone.timedelta(minutes=15)) / 4
-            ) * float(self.content_object.position.hourly_rate.hourly_rate)
+            ) * float(self.paid_at)
         super().save(*args, **kwargs)
 
     def get_admin_url(self):
