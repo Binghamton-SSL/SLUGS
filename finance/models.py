@@ -180,7 +180,7 @@ class Shift(models.Model):
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
-        if self.paid_at is None:
+        if self.paid_at is None or self.paid_at == 0.00:
             self.paid_at = self.content_object.position.hourly_rate.hourly_rate
         if self.time_in and self.time_out:
             self.total_time = self.time_out - self.time_in
