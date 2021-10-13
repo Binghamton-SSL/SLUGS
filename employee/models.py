@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -84,21 +85,6 @@ class OfficeHours(models.Model):
         return "Office Hours"
 
 
-class Paperwork(models.Model):
-    form_name = models.CharField(max_length=256)
-    form_pdf = models.FileField(upload_to="forms/")
-    uploaded = models.DateTimeField(auto_now_add=True)
-    handed_in = models.CharField(max_length=512, null=True, blank=True)
-    edited = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.form_name} {self.edited.year}"
-
-    class Meta:
-        verbose_name = "Paperwork"
-        verbose_name_plural = "Paperwork"
-
-
 class PaperworkForm(models.Model):
     def user_dir_path(instance, filename):
         fileName, fileExtension = os.path.splitext(filename)
@@ -113,3 +99,27 @@ class PaperworkForm(models.Model):
 
     def __str__(self):
         return f"{self.employee} - {self.form}"
+
+class Paperwork(models.Model):
+    form_name = models.CharField(max_length=256)
+    form_pdf = models.FileField(upload_to="forms/")
+    uploaded = models.DateTimeField(auto_now_add=True)
+    handed_in = models.CharField(max_length=512, null=True, blank=True)
+    edited = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.form_name} {self.edited.year}"
+
+    def associated_forms(self):
+        ret = ""
+        for form in PaperworkForm.objects.filter(form=self.pk, employee__is_active=True).all():
+            line = "<div style='margin: .25rem 0 .25rem 0'>"
+            line += f"<a href='/media/{form.pdf}'>{form}</a>" if form.pdf else f"<span>{form}</span>"
+            line += "<b> - NOT PROCESSED</b>" if not form.processed else ""
+            line += "</div><br>"
+            ret += line
+        return format_html(ret)
+
+    class Meta:
+        verbose_name = "Paperwork"
+        verbose_name_plural = "Paperwork"

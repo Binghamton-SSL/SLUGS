@@ -16,13 +16,14 @@ from django.db.models import Sum
 from django.core.exceptions import PermissionDenied
 from employee.forms import (
     massAssignPaperworkForm,
+    addGroupsForm,
     userCreationForm,
     userChangeForm,
     changePasswordForm,
     uploadForm,
 )
 from dev_utils.views import MultipleFormView
-from SLUGS.views import SLUGSMixin
+from SLUGS.views import SLUGSMixin, isAdminMixin
 from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
 from finance.forms import ShiftFormSet
@@ -214,5 +215,22 @@ class massAssignPaperwork(SLUGSMixin, FormView):
         form.add_forms(self.request)
         messages.add_message(
             self.request, messages.SUCCESS, f"Forms assigned and emails sent"
+        )
+        return super().form_valid(form)
+
+class addGroups(SLUGSMixin, isAdminMixin, FormView):
+    form_class = addGroupsForm
+    template_name = "employee/add_groups.html"
+    success_url = reverse_lazy("admin:employee_employee_changelist")
+
+    def dispatch(self, request, *args, **kwargs):
+        self.initial["ids"] = kwargs["selected"]
+        self.added_context["selected_ids"] = kwargs["selected"]
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.add_groups(self.request)
+        messages.add_message(
+            self.request, messages.SUCCESS, f"Groups added"
         )
         return super().form_valid(form)

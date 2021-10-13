@@ -4,6 +4,7 @@ import employee
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.admin import widgets
+from django.contrib.auth.models import Group
 from django.forms.forms import Form
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -209,3 +210,19 @@ class massAssignPaperworkForm(Form):
 
     class Meta:
         fields = ["formstoadd", "ids"]
+
+class addGroupsForm(Form):
+    groups_to_add = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        widget=widgets.FilteredSelectMultiple("Groups to add", is_stacked=False),
+    )
+    ids = forms.CharField(widget=forms.HiddenInput())
+
+    def add_groups(self, request):
+        for empid in self.cleaned_data["ids"].split(","):
+            for group in self.cleaned_data["groups_to_add"]:
+                emp = Employee.objects.get(pk=empid)
+                group.user_set.add(emp);
+
+    class Meta:
+        fields = ["groups_to_add", "ids"]

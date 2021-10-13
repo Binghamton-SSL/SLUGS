@@ -53,7 +53,7 @@ class Gig(models.Model):
             + " - "
             + str(self.org)
             + " - "
-            + str(self.start.date())
+            + str(timezone.localtime(self.start).strftime('%m/%d/%Y'))
             + (" [UNPUBLISHED]" if not self.published else "")
             + (" [ARCHIVED]" if self.archived else "")
         )  # noop

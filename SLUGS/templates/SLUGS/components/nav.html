@@ -48,11 +48,8 @@
         </div>
         {% if request.user|has_group:"Manager" or request.user.is_staff %}
         <div class="flex flex-col mt-5 ml-5 space-y-4">
-            {% if request.user.is_staff %} 
-            <!-- Show admin to all staff (Managers and SA) but not office hours -->
-            <a class="hidden md:inline hover:text-gray-600" href="{% url 'admin:index' %}">Admin</a>
-            {% endif %}
             {% if request.user|has_group:"Manager" %}
+            <a class="text-lg font-bold underline" href="{% url 'admin:index' %}">Admin</a>
             <a class="text-lg font-bold underline" href="{% url 'employee:office_hours' %}">Office Hours</a>
             {% endif %}
             {% if request.user|has_group:"Financial Director/GM" %}<a class="text-lg font-bold underline" href="{% url 'finance:overview' %}">Finance</a>{% endif %}

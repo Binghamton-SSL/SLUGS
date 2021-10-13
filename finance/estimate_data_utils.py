@@ -48,9 +48,8 @@ def calculateGigCost(estimate):
                     )  # noqa Add shop time to gig start if gig start is before load out, otherwise go from shop time to load out
                     + (
                         (loadin.load_out - ret["gig"].end)
-                        if loadin.load_out
-                        > ret["gig"].end  # noqa Add show end to load out if load out is after end of gig, otherwise add nothing
-                        else 0
+                        if loadin.load_out > ret["gig"].end  # noqa Add show end to load out if load out is after end of gig, otherwise add nothing
+                        else timezone.timedelta(minutes=0)
                     )
                 )
                 / timezone.timedelta(minutes=15) / 4

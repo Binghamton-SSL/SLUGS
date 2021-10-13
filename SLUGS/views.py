@@ -16,6 +16,11 @@ def get_closest_to_dt(qs, dt):
     else:
         return greater or less
 
+class isAdminMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return redirect("%s?next=%s" % (reverse("login"), request.path))
+        return super().dispatch(request, *args, **kwargs)
 
 class SLUGSMixin:
     added_context = {}

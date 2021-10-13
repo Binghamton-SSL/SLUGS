@@ -16,6 +16,7 @@ from .models import Employee, OfficeHours
 @admin.register(Paperwork)
 class PaperworkAdmin(admin.ModelAdmin):
     search_fields = ["form_name"]
+    readonly_fields= ["associated_forms"]
     pass
 
 
@@ -30,7 +31,7 @@ class PaperworkInline(admin.StackedInline):
 class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
-        exclude = ('password', 'groups', 'user_permissions', 'paperwork')
+        fields = ('id', 'email', 'first_name', 'last_name', 'bnum', 'phone_number', 'is_grad_student', 'last_login', 'date_joined', 'is_active', 'is_staff', 'is_superuser')
 
 @admin.register(Employee)
 class EmployeeAdmin(ImportExportMixin, UserAdmin):
@@ -99,11 +100,20 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
         )
         return reverse("employee:mass_assign", args=[queryset])
 
+    @admin.action(description="Add Groups")
+    def add_groups(modeladmin, request, queryset):
+        selected = queryset.values_list("pk", flat=True)
+        return HttpResponseRedirect(
+            "/employee/add-groups/%s"
+            % (",".join(str(pk) for pk in selected),)
+        )
+        return reverse("employee:add_groups", args=[queryset])
+
     group.short_description = "Groups"
 
     list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser")
     list_filter = ("is_active", "is_staff", "is_superuser", "groups")
-    actions = [mass_assign_paperwork]
+    actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
     change_form_template = "employee/loginas/change_form.html"
 
@@ -159,8 +169,8 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
             },
         ),
     )
-    search_fields = ("email", "first_name", "last_name", "bnum", "groups__name")
-    ordering = ("email",)
+    search_fields = ("email", "first_name", "last_name", "bnum", "phone_number", "groups__name")
+    ordering = ("-is_active", "last_name", "email",)
     inlines = [PaperworkInline]
     filter_horizontal = (
         "groups",

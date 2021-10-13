@@ -4,10 +4,23 @@
 * Import and Export employees
 * Send an email when a training request is received
 * Track rate shift was paid at irrespective of changes to wages
+* Show all instances of paperwork form on form page in admin
+* Add ability to mass add groups to employees
+* Search employees by phone number
+* Sort employees by active employee, then by last name
+* Add `isAdminMixin` mixin
+* Add cli utility to show outstanding paperwork
+* Separate out tentative event calendar feed
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
     * Get rid of duplicate shifts showing on timesheet when shift started at midnight
+    * Corrected issue where all addons where displayed as "SpotlightSpotlight Operator" in ICS output
+    * Fixed formatting error with addons in ICS output
+    * Fix error where estimate would not save if load out was after show end 
+    * Corrected formatting error where gig str showed date in UTC
+    * Corrected formatting error where training str showed date in UTC
+    * Fixed error where signed estimates could not be viewed via admin
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

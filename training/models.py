@@ -25,7 +25,7 @@ class Training(models.Model):
     systems = models.ManyToManyField("equipment.System", blank=True)
 
     def __str__(self):
-        return f"{self.get_dept_display()} Training - {self.date.strftime('%m/%d/%Y, %H:%M:%S')}"
+        return f"{self.get_dept_display()} Training - {timezone.localtime(self.date).strftime('%m/%d/%Y, %H:%M:%S')}"
 
 
 class Trainee(models.Model):

@@ -51,9 +51,10 @@ class ShowFeed(ICalFeed):
     title = "BSSL Event Calendar"
     description = "Events which are booked via S.L.U.G.S."
     file_name = "bssl_events.ics"
+    hidetentative = True
 
     def items(self):
-        return Gig.objects.filter(published=True).order_by("-start") # noqa For now; only show published events
+        return Gig.objects.filter(published=self.hidetentative).order_by("-start") # noqa For now; only show published events
 
     def item_title(self, item):
         return f"{'[TENTATIVE] ' if not item.published else ''}{item.org} - {item.name}"
@@ -68,7 +69,7 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} {system.get_department_display()+(''.join([' + '+addon.name for addon in system.systeminstance_set.first().addons.all()]))}{nl}" for system in item.systems.all()])}
+{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.all()])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
 Staff:
@@ -107,6 +108,14 @@ Staff:
         return "CONFIRMED" if item.published else "TENTATIVE"
 
 
+class TentativeShowFeed(ShowFeed):
+    product_id = "-//slugs.bssl.binghamtonsa.org//TentativeShows//EN"
+    title = "BSSL Tentative Event Calendar"
+    description = "Events which may be booked via S.L.U.G.S."
+    file_name = "bssl_tenatitive_events.ics"
+    hidetentative = False
+
+
 class DeptFeed(ICalFeed):
     department = (None, None)
 
@@ -121,6 +130,7 @@ class DeptFeed(ICalFeed):
     def items(self):
         return (
             Gig.objects.all()
+            .filter(published=True)
             .filter(systems__department=self.department[0])
             .order_by("-start")
         )
@@ -138,7 +148,7 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} - {system.get_department_display()+(' '.join([addon.name for addon in system.systeminstance_set.first().addons.all()]))}{nl}" for system in item.systems.filter(department=self.department[0])])}
+{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.filter(department=self.department[0])])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
 Staff:
