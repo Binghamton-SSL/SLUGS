@@ -62,7 +62,7 @@ orjson==3.5.2
 packaging==21.0; python_version >= '3.6'
 pathspec==0.8.1
 phonenumberslite==8.12.22
-pillow==8.2.0
+pillow==8.3.2
 poyo==0.5.0
 protobuf==3.16.0
 pyasn1-modules==0.2.8
