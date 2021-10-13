@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 
+from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -51,6 +52,12 @@ class Employee(AbstractUser):
     bnum = models.CharField(null=True, max_length=12, verbose_name="B Number")
     phone_number = PhoneNumberField(null=True)
     is_grad_student = models.BooleanField(default=False)
+    graduation_year = models.IntegerField(blank=True, null=True)
+    employee_notes = HTMLField(
+        blank=True,
+        null=True,
+        help_text="Think of this as a \"permanent record\". Note anything important about this employee that should stick around. DO NOT delete anything from this unless you know what you're doing.",
+    )
     paperwork = models.ManyToManyField(
         to="employee.Paperwork", through="employee.PaperworkForm"
     )

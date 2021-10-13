@@ -31,7 +31,7 @@ class PaperworkInline(admin.StackedInline):
 class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
-        fields = ('id', 'email', 'first_name', 'last_name', 'bnum', 'phone_number', 'is_grad_student', 'last_login', 'date_joined', 'is_active', 'is_staff', 'is_superuser')
+        fields = ('id', 'email', 'first_name', 'last_name', 'bnum', 'phone_number', 'is_grad_student', 'graduation_year', 'last_login', 'date_joined', 'is_active', 'is_staff', 'is_superuser')
 
 @admin.register(Employee)
 class EmployeeAdmin(ImportExportMixin, UserAdmin):
@@ -112,7 +112,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     group.short_description = "Groups"
 
     list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser")
-    list_filter = ("is_active", "is_staff", "is_superuser", "groups")
+    list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
     change_form_template = "employee/loginas/change_form.html"
@@ -145,6 +145,8 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "phone_number",
                         "bnum",
                         "is_grad_student",
+                        "graduation_year",
+                        "employee_notes"
                     )
                 },
             ),
@@ -165,11 +167,12 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "first_name",
                     "last_name",
                     "bnum",
+                    "graduation_year"
                 ),
             },
         ),
     )
-    search_fields = ("email", "first_name", "last_name", "bnum", "phone_number", "groups__name")
+    search_fields = ("email", "first_name", "last_name", "bnum", "graduation_year", "phone_number", "groups__name")
     ordering = ("-is_active", "last_name", "email",)
     inlines = [PaperworkInline]
     filter_horizontal = (

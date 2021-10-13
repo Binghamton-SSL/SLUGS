@@ -1,6 +1,8 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
 {% load static %}
+{% load tz %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -137,7 +139,7 @@
                     <td>
                         {% for shift in row.shifts %}
                         <div>{{shift.0.time_out|date:"h:i A"}}
-                            {% if shift.0.time_in.day != shift.0.time_out.day %}(+1){% endif %}</div>
+                            {% if shift.0.time_in|localtime|date:'d' != shift.0.time_out|localtime|date:'d' %}(+1){% endif %}</div>
                         {% endfor %}
                     </td>
                     <td>

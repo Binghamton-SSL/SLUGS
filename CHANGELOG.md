@@ -21,6 +21,7 @@ BUG FIXES:
     * Corrected formatting error where gig str showed date in UTC
     * Corrected formatting error where training str showed date in UTC
     * Fixed error where signed estimates could not be viewed via admin
+    * Fixed `(+1)` showing on timesheet when shift did not span day (was using UTC time for conversion)
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

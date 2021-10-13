@@ -39,7 +39,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = Employee
-        fields = ("email", "first_name", "last_name", "bnum", "phone_number")
+        fields = ("email", "first_name", "last_name", "bnum", "graduation_year", "phone_number")
         help_texts = {
             "bnum": "Format: BXXXXXXXXX",
         }
@@ -94,6 +94,7 @@ class userCreationForm(UserCreationForm):
                 ),
                 "phone_number",
                 "bnum",
+                "graduation_year",
                 Submit(
                     "submit",
                     "Submit",
@@ -107,7 +108,7 @@ class userCreationForm(UserCreationForm):
 class userChangeForm(ModelForm):
     class Meta:
         model = Employee
-        fields = ["email", "first_name", "last_name", "phone_number"]
+        fields = ["email", "first_name", "last_name", "phone_number", "graduation_year"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -124,6 +125,7 @@ class userChangeForm(ModelForm):
                 <p class="my-2 text-gray-700">{{request.user.bnum}}</p>
             """  # noqa
             ),
+            "graduation_year",
             Div(
                 Div("first_name", css_class="flex-1"),
                 Div("last_name", css_class="flex-1"),
@@ -211,6 +213,7 @@ class massAssignPaperworkForm(Form):
     class Meta:
         fields = ["formstoadd", "ids"]
 
+
 class addGroupsForm(Form):
     groups_to_add = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
@@ -222,7 +225,7 @@ class addGroupsForm(Form):
         for empid in self.cleaned_data["ids"].split(","):
             for group in self.cleaned_data["groups_to_add"]:
                 emp = Employee.objects.get(pk=empid)
-                group.user_set.add(emp);
+                group.user_set.add(emp)
 
     class Meta:
         fields = ["groups_to_add", "ids"]
