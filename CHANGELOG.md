@@ -11,6 +11,7 @@
 * Add `isAdminMixin` mixin
 * Add cli utility to show outstanding paperwork
 * Separate out tentative event calendar feed
+* Security Update: pillow, sqlparse, django-unicorn 
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"

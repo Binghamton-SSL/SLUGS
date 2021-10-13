@@ -69,6 +69,7 @@ Estimate will not save -> Check if gig has a valid load in/out for every Dept re
     * Allow an employee to sign up for training if there is available space
     * Allow an employee to request training for a specific system(s)
     * Allow employees to view static training resources
+    * Send an email to managers when training is requested
 * Allow employees to view and change their personal information in SLUGS (with the exception of bnum)
 * Allow employees to change their password
 * Allow employees to view and upload paperwork
@@ -77,7 +78,6 @@ Estimate will not save -> Check if gig has a valid load in/out for every Dept re
     * Delete/Change submitted form
 * Allow employees to view the last 100 shifts they've worked + any contested or unprocessed shifts.
 * Allow managers to submit office hours
-    [ ] Fix bug
 * Allow GM and FD to access Financial Overview
     * See and act upon all shifts for a given pay period
     * See previous shifts in a previous pay period
@@ -87,12 +87,16 @@ Estimate will not save -> Check if gig has a valid load in/out for every Dept re
 * Allow admins to access quick actions
     * Change the status of onboarding
     * Change the status of signup
+    * See innatentive employees (have not signed in < 1 week)
 * Allow admins to view groups
 * Allow admins to upload and assign paperwork to be filled out
 * Allow admins to create estimates
     * Print out estimates generated
 * Allow admins to create invoices
     * Print out invoices generated
+* Allow admins to manage employees
+    * Import and export employees
 * Create Shows (gigs)
     * Staff shows
     * Send a staffing email
+* ICS Calendar feeds for events and dept specific events
