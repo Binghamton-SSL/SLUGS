@@ -21,7 +21,7 @@ DEPARTMENTS = [
 
 class Gig(models.Model):
     name = models.CharField(max_length=200)
-    notes = HTMLField(blank=True, null=True)
+    notes = HTMLField(blank=True, null=True, help_text="This will show up on the showview page and the estimate as 'ATTN ENG'")
     manager_only_notes = HTMLField(blank=True, null=True)
     setup_by = models.DateTimeField(verbose_name="Setup By")
     start = models.DateTimeField(verbose_name="Gig start time")
@@ -123,3 +123,6 @@ class JobInterest(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     employee = models.ForeignKey(employee.Employee, on_delete=models.CASCADE)
     submitted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.employee} - {self.job.gig}"

@@ -97,7 +97,7 @@
                                 <table class="w-full ml-6">
                                     <colgroup>
                                         <col span="1" style="width: 80%;">
-                                        {% if estimate.gig.org.SA_account_num %}
+                                        {% if estimate.billing_contact.organization.SA_account_num %}
                                         <col span="1" style="width: 20%;">
                                         {% endif %}
                                     </colgroup>
@@ -106,7 +106,7 @@
                                             <td>
                                                 Bill To
                                             </td>
-                                            {% if estimate.gig.org.SA_account_num %}
+                                            {% if estimate.billing_contact.organization.SA_account_num %}
                                             <td>
                                                 SA Account #
                                             </td>
@@ -116,11 +116,11 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{estimate.gig.org.name}}
+                                                {{estimate.billing_contact.organization.name}}
                                             </td>
-                                            {% if estimate.gig.org.SA_account_num %}
+                                            {% if estimate.billing_contact.organization.SA_account_num %}
                                             <td>
-                                                {{estimate.gig.org.SA_account_num}}
+                                                {{estimate.billing_contact.organization.SA_account_num}}
                                             </td>
                                             {% endif %}
                                         </tr>
@@ -193,7 +193,7 @@
                                                 <div class="flex ml-4"><span class="my-auto">BSSL</span>
                                                     <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
                                                 </div>
-                                                <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                                <div class="flex ml-4"><span class="my-auto">{{estimate.billing_contact.organization}}</span>
                                                     <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
                                                 </div>
                                             </div>
@@ -400,7 +400,7 @@
                                             <div class="flex ml-4"><span class="my-auto">BSSL</span>
                                                 <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
                                             </div>
-                                            <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                            <div class="flex ml-4"><span class="my-auto">{{estimate.billing_contact.organization}}</span>
                                                 <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
                                             </div>
                                         </div> -->
@@ -416,7 +416,7 @@
                         <div class="dont_break">
                             <div class="mt-10 text-sm text-center">
                                 <p>
-                                    Payment due upon receipt of Invoice. Cash or checks accepted only.
+                                    Payment due upon receipt of Invoice by way of Check of SA intra-organization transfer.
                                 </p>
                                 <p>
                                     Make checks payable to: <br>Binghamton Sound, Staging, and Lighting (SA Account #7400) / Student Association of Binghamton University Inc.

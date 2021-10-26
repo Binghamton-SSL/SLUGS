@@ -52,7 +52,7 @@ class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
         "get_staff_link",
         "send_staffing_email",
     )
-    list_filter = ["org", "contact", "location"]
+    list_filter = ["org", "location"]
     ordering = ["-start"]
     readonly_fields = ["day_of_show_notes", "get_staff_link", "send_staffing_email"]
     fieldsets_with_inlines = [

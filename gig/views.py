@@ -13,6 +13,7 @@ from django.views.generic.base import TemplateView
 from SLUGS.views import SLUGSMixin
 from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
+from gig.models import Job
 
 from finance.forms import ShiftFormSet
 from gig.forms import shiftFormHelper, engineerNotesForm, StaffShowForm
@@ -148,12 +149,17 @@ class staffShow(SLUGSMixin, MultipleFormView):
     def process_forms(self, form_instances):
         for form in form_instances["forms"]:
             f = form_instances["forms"][form]
-            if f.instance.employee is not None:
-                if not f.instance.employee.groups.filter(
-                    name=f.instance.position
-                ).exists():
-                    f.instance.is_test = True
-            f.save()
+            if Job.objects.get(pk=f.instance.pk).employee is None:
+                if f.instance.employee is not None:
+                    if not f.instance.employee.groups.filter(
+                        name=f.instance.position
+                    ).exists():
+                        f.instance.is_test = True
+                f.save()
+            else:
+                messages.add_message(
+                    self.request, messages.WARNING, f"Job \"{f.instance.get_department_display()} - {f.instance.position}\" not overridden as it was filled by another manager before you submitted your staffing. (RACE CONDITION)"
+                )
         messages.add_message(
             self.request, messages.SUCCESS, "Selected employees staffed"
         )

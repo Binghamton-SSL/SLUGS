@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from gig.models import Gig, Job
+from employee.models import Employee
 import django.forms as forms
 
 
@@ -31,19 +32,16 @@ class StaffModelChoiceField(forms.ModelChoiceField):
         queryset,
         instance,
         *,
-        empty_label="---------",
-        required=True,
+        required=False,
         widget=None,
         label=None,
-        initial=None,
         help_text="",
         to_field_name=None,
         limit_choices_to=None,
-        blank=False,
         **kwargs,
     ):
         self.instance = instance
-        super().__init__(queryset)
+        super().__init__(queryset, empty_label="TBD", required=False)
 
     def label_from_instance(self, obj):
         return f'{obj}{" - TESTING" if not obj.groups.filter(name=self.instance.position).exists()  else ""}'
@@ -53,7 +51,7 @@ class StaffShowForm(forms.ModelForm):
     class Meta:
         model = Job
         fields = ("employee",)
-
+        
     def __init__(self, *args, **kwargs):
         interested_emps = kwargs.pop("interested_employees", "")
         instance = kwargs["instance"]
@@ -72,7 +70,9 @@ class StaffShowForm(forms.ModelForm):
         #     choices=emp_choices, label="Assigned Employee", required=False
         # )
         self.fields["employee"] = StaffModelChoiceField(
-            instance=instance, queryset=interested_emps
+            instance=instance, 
+            queryset=interested_emps,
+            required=False
         )
         # self.fields["employee"] = forms.ModelChoiceField(queryset=interested_emps)
         self.helper = FormHelper()

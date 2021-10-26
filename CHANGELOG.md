@@ -12,6 +12,13 @@
 * Add cli utility to show outstanding paperwork
 * Separate out tentative event calendar feed
 * Security Update: pillow, sqlparse, django-unicorn 
+* Sort paperwork instances by processed or not
+* Show outstanding paperwork for each employee
+* Add "Abandoned" estimate status
+* Add ATTN ENG (gig notes) to printed and virtual estimate
+* Add training department to manager email
+* Add custom 500 error page
+* Add support for multiple types of office hour rates under one employee
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
@@ -23,6 +30,10 @@ BUG FIXES:
     * Corrected formatting error where training str showed date in UTC
     * Fixed error where signed estimates could not be viewed via admin
     * Fixed `(+1)` showing on timesheet when shift did not span day (was using UTC time for conversion)
+    * Allow shows to be partially staffed
+    * Fixed graphical bug where training request notes would expand page width on mobile
+    * Estimate now shows billing contact not booking contact
+    * Race condition handled when multiple managers attempt to staff an event at the same time
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

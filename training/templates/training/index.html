@@ -93,7 +93,7 @@
             </h2>
             <div>
                 {% for request in trainingRequests %}
-                <div class="p-4 m-2 text-black bg-white rounded-sm w-max">
+                <div class="p-4 m-2 text-black bg-white rounded-sm md:w-max sm:w-full">
                     <p class="text-xl">Submitted: {{request.submitted}}</p>
                     <ul>
                         {% for system in request.systems.all %}

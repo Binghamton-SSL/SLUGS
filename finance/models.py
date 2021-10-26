@@ -52,6 +52,7 @@ class Estimate(models.Model):
         ("A", "Awaiting Payment"),
         ("C", "Closed"),
         ("X", "Canceled"),
+        ("N", "Abandoned"),
     ]
     status = models.CharField(
         choices=INVOICE_STATUSES,

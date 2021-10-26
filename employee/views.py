@@ -100,26 +100,36 @@ class userOverview(SLUGSMixin, MultipleFormView):
 
 class officeHours(SLUGSMixin, MultipleFormView):
     template_name = "employee/office_hours.html"
-    form_classes = {"office_hours": {"form": ShiftFormSet}}
+    form_classes = {}
+    added_context = {"form_meta": {}}
 
     def dispatch(self, request, *args, **kwargs):
         if Group.objects.get(name="Manager") not in request.user.groups.all():
             raise PermissionDenied()
-        office_hour_obj = OfficeHours.objects.get_or_create(employee=request.user)[0]
-        self.form_classes["office_hours"]["kwargs"] = {
-            "queryset": Shift.objects.filter(
-                object_id=office_hour_obj.id,
-                content_type_id=ContentType.objects.get(model="officehours").id,
-                processed=False,
-            )
-        }
+        try:
+            OfficeHours.objects.get_or_create(employee=request.user)
+        except Exception:
+            pass
+        for office_hour_obj in OfficeHours.objects.filter(employee=request.user):
+            self.added_context['form_meta'][f"office_hours_{office_hour_obj.pk}"] = {
+                "obj": office_hour_obj,
+                "rate": office_hour_obj.position
+            }
+            self.form_classes[f"office_hours_{office_hour_obj.pk}"] = {
+                "form": ShiftFormSet,
+                "kwargs": {
+                    "queryset": Shift.objects.filter(
+                        object_id=office_hour_obj.id,
+                        content_type_id=ContentType.objects.get(model="officehours").id,
+                        processed=False,
+                    ),
+                }
+            }
         return super().dispatch(request, *args, **kwargs)
 
     def process_forms(self, form_instances):
-        office_hour_obj = OfficeHours.objects.get_or_create(employee=self.request.user)[
-            0
-        ]
         for form in form_instances["forms"]:
+            office_hour_obj = self.added_context['form_meta'][form]['obj']
             for shift in form_instances["forms"][form].forms:
                 if (
                     shift.instance.time_in is not None

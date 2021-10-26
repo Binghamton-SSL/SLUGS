@@ -77,6 +77,12 @@ class Employee(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 
+    def paperwork_outstanding(self):
+        papers = []
+        for form in PaperworkForm.objects.filter(employee=self.pk, processed=False).all():
+            papers.append(form.form.form_name)
+        return ', '.join(papers)
+
 
 class OfficeHours(models.Model):
     position = models.ForeignKey(
@@ -119,7 +125,7 @@ class Paperwork(models.Model):
 
     def associated_forms(self):
         ret = ""
-        for form in PaperworkForm.objects.filter(form=self.pk, employee__is_active=True).all():
+        for form in PaperworkForm.objects.filter(form=self.pk, employee__is_active=True).order_by('processed').all():
             line = "<div style='margin: .25rem 0 .25rem 0'>"
             line += f"<a href='/media/{form.pdf}'>{form}</a>" if form.pdf else f"<span>{form}</span>"
             line += "<b> - NOT PROCESSED</b>" if not form.processed else ""

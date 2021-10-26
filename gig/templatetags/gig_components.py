@@ -16,3 +16,8 @@ def duration(td):
     minutes = (total_seconds % 3600) // 60
 
     return "{} hours {} min".format(hours, minutes)
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

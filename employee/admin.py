@@ -111,7 +111,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
 
     group.short_description = "Groups"
 
-    list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser")
+    list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser", "paperwork_outstanding")
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
@@ -184,3 +184,4 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
 @admin.register(OfficeHours)
 class OfficeHoursAdmin(admin.ModelAdmin):
     inlines = [ShiftInlineAdmin]
+    list_display = ["employee", "position"]

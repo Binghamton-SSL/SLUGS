@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod
 from nested_admin import NestedGenericTabularInline
 
@@ -50,6 +51,10 @@ class EstimateAdmin(admin.ModelAdmin):
     def gig__org(obj):
         return obj.gig.org
 
+    @staticmethod
+    def gig__notes(obj):
+        return format_html(f"<b>This will show up on the estimate as 'ATTN ENG':</b>\n{obj.gig.notes}") if obj.gig.notes else "No ATTN ENG for this gig"
+    
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
     list_filter = ("gig__start", "gig__org")
@@ -63,6 +68,7 @@ class EstimateAdmin(admin.ModelAdmin):
         "total_amt",
         "outstanding_balance",
         "get_printout_link",
+        "gig__notes"
     ]
     fieldsets = (
         (
@@ -73,6 +79,7 @@ class EstimateAdmin(admin.ModelAdmin):
                     "gig",
                     "billing_contact",
                     "signed_estimate",
+                    "gig__notes",
                     "notes",
                     "get_printout_link",
                 ]
