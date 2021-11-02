@@ -57,7 +57,7 @@ class index(SLUGSMixin, TemplateView):
                 return redirect("/admin")
             next_gig_id = (
                 Job.objects.filter(employee=request.user)
-                .filter(gig__end__gte=timezone.now())
+                .filter(gig__end__gte=timezone.now()+timezone.timedelta(hours=5))
                 .values(
                     "gig__id",
                 )

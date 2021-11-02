@@ -115,7 +115,6 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
-    change_form_template = "employee/loginas/change_form.html"
 
     def get_fieldsets(self, request, obj=None):
         if not obj:

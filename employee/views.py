@@ -100,10 +100,10 @@ class userOverview(SLUGSMixin, MultipleFormView):
 
 class officeHours(SLUGSMixin, MultipleFormView):
     template_name = "employee/office_hours.html"
-    form_classes = {}
-    added_context = {"form_meta": {}}
 
     def dispatch(self, request, *args, **kwargs):
+        self.form_classes = {}
+        self.added_context = {"form_meta": {}}
         if Group.objects.get(name="Manager") not in request.user.groups.all():
             raise PermissionDenied()
         try:

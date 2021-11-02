@@ -10,11 +10,11 @@ class BaseShiftForm(forms.ModelForm):
     class Meta:
         widgets = {
             "time_in": forms.DateTimeInput(
-                attrs={"type": "datetime-local", "class": "w-72"},
+                attrs={"type": "datetime-local", "class": "w-72", "step": "1"},
                 format="%Y-%m-%dT%H:%M:%S",
             ),
             "time_out": forms.DateTimeInput(
-                attrs={"type": "datetime-local", "class": "w-72"},
+                attrs={"type": "datetime-local", "class": "w-72", "step": "1"},
                 format="%Y-%m-%dT%H:%M:%S",
             ),
         }

@@ -19,6 +19,7 @@
 * Add training department to manager email
 * Add custom 500 error page
 * Add support for multiple types of office hour rates under one employee
+* View estimate by status
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
@@ -34,6 +35,11 @@ BUG FIXES:
     * Fixed graphical bug where training request notes would expand page width on mobile
     * Estimate now shows billing contact not booking contact
     * Race condition handled when multiple managers attempt to staff an event at the same time
+    * New multi-office hour manager page caching multiple objects
+    * Make event ticket on homepage visisble up to 5 hours after event end time (useful for day of show)
+    * Could not use day of show on mobile due to datetime widget not showing seconds (step="1")
+    * Hopefully solve cross-user caching issue (NOT SECURITY RELATED)
+        * Swap django-loginas for django-hijack
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

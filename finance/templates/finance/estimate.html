@@ -202,10 +202,12 @@
                                 <div class="text-sm">
                                     {{estimate.notes|safe}}
                                 </div>
+                                {% if estimate.gig.notes %}
                                 <h3 class="text-md font-bold">ATTN ENG:</h3>
                                 <div class="text-sm">
                                     {{estimate.gig.notes|safe}}
                                 </div>
+                                {% endif %}
                             </div>
                             {% endif %}
                             <table style="border-bottom: none;" class="w-full text-sm">

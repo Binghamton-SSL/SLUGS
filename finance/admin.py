@@ -57,7 +57,7 @@ class EstimateAdmin(admin.ModelAdmin):
     
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
-    list_filter = ("gig__start", "gig__org")
+    list_filter = ("status", "gig__start", "gig__org",)
     ordering = ["-gig__start"]
     filter_horizontal = ["fees"]
     autocomplete_fields = ["gig", "billing_contact"]
