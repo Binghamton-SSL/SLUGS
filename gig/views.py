@@ -107,8 +107,11 @@ class workSignup(SLUGSMixin, TemplateView):
         self.added_context["gigs"] = list(
             set(
                 Gig.objects.filter(
-                    start__gte=timezone.now(), available_for_signup__lte=timezone.now(), job__employee=None, published=True
-                ).order_by('-start')
+                    start__gte=timezone.now(),
+                    available_for_signup__lte=timezone.now(),
+                    job__employee=None,
+                    published=True,
+                ).order_by("-start")
             )
         )
         return super().dispatch(request, *args, **kwargs)
@@ -158,7 +161,9 @@ class staffShow(SLUGSMixin, MultipleFormView):
                 f.save()
             else:
                 messages.add_message(
-                    self.request, messages.WARNING, f"Job \"{f.instance.get_department_display()} - {f.instance.position}\" not overridden as it was filled by another manager before you submitted your staffing. (RACE CONDITION)"
+                    self.request,
+                    messages.WARNING,
+                    f'Job "{f.instance.get_department_display()} - {f.instance.position}" not overridden as it was filled by another manager before you submitted your staffing. (RACE CONDITION)',
                 )
         messages.add_message(
             self.request, messages.SUCCESS, "Selected employees staffed"

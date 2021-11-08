@@ -39,7 +39,14 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = Employee
-        fields = ("email", "first_name", "last_name", "bnum", "graduation_year", "phone_number")
+        fields = (
+            "email",
+            "first_name",
+            "last_name",
+            "bnum",
+            "graduation_year",
+            "phone_number",
+        )
         help_texts = {
             "bnum": "Format: BXXXXXXXXX",
         }

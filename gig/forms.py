@@ -1,7 +1,9 @@
 from crispy_forms.helper import FormHelper
-from gig.models import Gig, Job
+from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
 import django.forms as forms
+from django.contrib.humanize.templatetags import humanize
+from django.utils import timezone
 
 
 class shiftFormHelper(FormHelper):
@@ -44,14 +46,14 @@ class StaffModelChoiceField(forms.ModelChoiceField):
         super().__init__(queryset, empty_label="TBD", required=False)
 
     def label_from_instance(self, obj):
-        return f'{obj}{" - TESTING" if not obj.groups.filter(name=self.instance.position).exists()  else ""}'
+        return f'{"TESTING - " if not obj.groups.filter(name=self.instance.position).exists()  else ""}{obj}\nStaffed {round(Job.objects.filter(employee=obj).count()/JobInterest.objects.filter(employee=obj).count()*100,2)}% of time, last staffed {str((timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days)+" days ago" if (timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days > 0 else "in the future" if Job.objects.filter(employee=obj).order_by("-gig__start").first() is not None else "never" }'
 
 
 class StaffShowForm(forms.ModelForm):
     class Meta:
         model = Job
         fields = ("employee",)
-        
+
     def __init__(self, *args, **kwargs):
         interested_emps = kwargs.pop("interested_employees", "")
         instance = kwargs["instance"]
@@ -70,9 +72,7 @@ class StaffShowForm(forms.ModelForm):
         #     choices=emp_choices, label="Assigned Employee", required=False
         # )
         self.fields["employee"] = StaffModelChoiceField(
-            instance=instance, 
-            queryset=interested_emps,
-            required=False
+            instance=instance, queryset=interested_emps, required=False
         )
         # self.fields["employee"] = forms.ModelChoiceField(queryset=interested_emps)
         self.helper = FormHelper()

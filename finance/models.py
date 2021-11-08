@@ -78,7 +78,11 @@ class Estimate(models.Model):
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
     )
     adjustments = models.DecimalField(
-        max_digits=7, decimal_places=2, null=True, default=0.00
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        default=0.00,
+        help_text="Only use in cases where there is a numerical descrepency that cannot be traced. For all discounts, refunds, and clerical errors, input a 'One Time Fee'",
     )
     total_amt = models.DecimalField(
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
@@ -167,6 +171,11 @@ class Shift(models.Model):
     time_out = models.DateTimeField(null=True, blank=True)
     total_time = models.DurationField(default=timedelta())
     paid_at = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    description = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text="Only required if abnormal shift needs explaination to finance",
+    )
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     processed = models.BooleanField(default=False)
     contested = models.BooleanField(default=False)
@@ -183,6 +192,8 @@ class Shift(models.Model):
         self.total_time = timedelta()
         if self.paid_at is None or self.paid_at == 0.00:
             self.paid_at = self.content_object.position.hourly_rate.hourly_rate
+        if self.description is None:
+            self.description = self.__str__()
         if self.time_in and self.time_out:
             self.total_time = self.time_out - self.time_in
             self.cost = (

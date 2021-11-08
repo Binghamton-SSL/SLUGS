@@ -42,17 +42,19 @@ def calculateGigCost(estimate):
                         (ret["gig"].setup_by - loadin.shop_time)
                         if ret["gig"].setup_by < loadin.load_out
                         and ret["gig"].end > loadin.shop_time
-                        else (
-                            loadin.load_out - loadin.shop_time
-                        )
+                        else (loadin.load_out - loadin.shop_time)
                     )  # noqa Add shop time to gig start if gig start is before load out, otherwise go from shop time to load out
                     + (
                         (loadin.load_out - ret["gig"].end)
-                        if loadin.load_out > ret["gig"].end  # noqa Add show end to load out if load out is after end of gig, otherwise add nothing
+                        if loadin.load_out
+                        > ret[
+                            "gig"
+                        ].end  # noqa Add show end to load out if load out is after end of gig, otherwise add nothing
                         else timezone.timedelta(minutes=0)
                     )
                 )
-                / timezone.timedelta(minutes=15) / 4
+                / timezone.timedelta(minutes=15)
+                / 4
             )
 
         system_subtotal += round(
@@ -66,7 +68,9 @@ def calculateGigCost(estimate):
             system_subtotal,
             False,
         ]
-        addons = system.systeminstance_set.get(gig_id=ret["gig"].pk).addoninstance_set.all()
+        addons = system.systeminstance_set.get(
+            gig_id=ret["gig"].pk
+        ).addoninstance_set.all()
         for addon_set_item in addons:
             addon = addon_set_item.addon
             addon.addl_description = addon_set_item.description
@@ -98,28 +102,31 @@ def calculateGigCost(estimate):
                 True,
             ]
         ret["subtotal"] += system_subtotal
-
-    for fee in ret["estimate"].fees.all():
-        fee_amt = (
-            fee.amount
-            if fee.amount
-            else round(ret["subtotal"] * (fee.percentage / 100), 2)
-        )
-        ret["fees"][fee] = [fee, fee_amt]
-        ret["fees_amt"] += fee_amt
+        ret["total_amt"] += system_subtotal
 
     for fee in ret["estimate"].onetimefee_set.all():
         fee_amt = (
             fee.amount
             if fee.amount
-            else round(ret["subtotal"] * (fee.percentage / 100), 2)
+            else round(ret["total_amt"] * (fee.percentage / 100), 2)
         )
         ret["fees"][fee] = [fee, fee_amt]
         ret["fees_amt"] += fee_amt
+        ret["total_amt"] += fee_amt
+
+    for fee in ret["estimate"].fees.all():
+        fee_amt = (
+            fee.amount
+            if fee.amount
+            else round(ret["total_amt"] * (fee.percentage / 100), 2)
+        )
+        ret["fees"][fee] = [fee, fee_amt]
+        ret["fees_amt"] += fee_amt
+        ret["total_amt"] += fee_amt
 
     for payment in ret["estimate"].payment_set.all():
         ret["payment_amt"] += payment.amount
 
-    ret["total_amt"] = ret["subtotal"] + ret["fees_amt"] + ret["estimate"].adjustments
+    ret["total_amt"] = ret["total_amt"] + ret["estimate"].adjustments
     ret["outstanding_balance"] = ret["total_amt"] - ret["payment_amt"]
     return ret

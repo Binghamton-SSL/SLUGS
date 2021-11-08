@@ -16,11 +16,13 @@ def get_closest_to_dt(qs, dt):
     else:
         return greater or less
 
+
 class isAdminMixin:
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             return redirect("%s?next=%s" % (reverse("login"), request.path))
         return super().dispatch(request, *args, **kwargs)
+
 
 class SLUGSMixin:
     added_context = {}
@@ -47,7 +49,7 @@ class index(SLUGSMixin, TemplateView):
                 Job.objects.all()
                 .filter(employee=request.user)
                 .select_related("gig")
-                .order_by("-gig__start")[:5]
+                .order_by("-gig__start")
             )
             if request.user.is_authenticated
             else None
@@ -57,7 +59,7 @@ class index(SLUGSMixin, TemplateView):
                 return redirect("/admin")
             next_gig_id = (
                 Job.objects.filter(employee=request.user)
-                .filter(gig__end__gte=timezone.now()+timezone.timedelta(hours=5))
+                .filter(gig__end__gte=timezone.now() + timezone.timedelta(hours=5))
                 .values(
                     "gig__id",
                 )

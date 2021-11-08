@@ -23,9 +23,9 @@ class index(SLUGSMixin, FormView):
         form.instance.employee = self.request.user
         form.save()
         send_generic_email(
-                request=None,
-                title=f"New Training Request - {form.instance.systems.all()[0].get_department_display()}",
-                included_text=f"""
+            request=None,
+            title=f"New Training Request - {form.instance.systems.all()[0].get_department_display()}",
+            included_text=f"""
                 Ayo Managers,
                 <br><br>
                 {form.instance.employee.first_name} {form.instance.employee.last_name} has submitted a training request.
@@ -44,9 +44,9 @@ class index(SLUGSMixin, FormView):
                 Go to SLUGS to answer the request and create a training.
                 </b>
                 """,  # noqa
-                subject=f"[SLUGS] New Training Request - {form.instance.systems.all()[0].get_department_display()}",
-                to=["bssl@binghamtonsa.org"],
-            )
+            subject=f"[SLUGS] New Training Request - {form.instance.systems.all()[0].get_department_display()}",
+            to=["bssl@binghamtonsa.org"],
+        )
         messages.add_message(
             self.request,
             messages.SUCCESS,

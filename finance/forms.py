@@ -33,6 +33,15 @@ ShiftFormSet = modelformset_factory(
     can_delete=True,
 )
 
+OfficeHoursShiftFormSet = modelformset_factory(
+    Shift,
+    fields=("time_in", "time_out", "description"),
+    form=BaseShiftForm,
+    formset=BaseShiftFormset,
+    extra=1,
+    can_delete=True,
+)
+
 
 class rollOverShiftsForm(forms.Form):
     pay_period = forms.ModelChoiceField(

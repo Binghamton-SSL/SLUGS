@@ -16,7 +16,7 @@ from .models import Employee, OfficeHours
 @admin.register(Paperwork)
 class PaperworkAdmin(admin.ModelAdmin):
     search_fields = ["form_name"]
-    readonly_fields= ["associated_forms"]
+    readonly_fields = ["associated_forms"]
     pass
 
 
@@ -31,7 +31,22 @@ class PaperworkInline(admin.StackedInline):
 class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
-        fields = ('id', 'email', 'first_name', 'last_name', 'bnum', 'phone_number', 'is_grad_student', 'graduation_year', 'last_login', 'date_joined', 'is_active', 'is_staff', 'is_superuser')
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "bnum",
+            "phone_number",
+            "is_grad_student",
+            "graduation_year",
+            "last_login",
+            "date_joined",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        )
+
 
 @admin.register(Employee)
 class EmployeeAdmin(ImportExportMixin, UserAdmin):
@@ -104,14 +119,20 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     def add_groups(modeladmin, request, queryset):
         selected = queryset.values_list("pk", flat=True)
         return HttpResponseRedirect(
-            "/employee/add-groups/%s"
-            % (",".join(str(pk) for pk in selected),)
+            "/employee/add-groups/%s" % (",".join(str(pk) for pk in selected),)
         )
         return reverse("employee:add_groups", args=[queryset])
 
     group.short_description = "Groups"
 
-    list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser", "paperwork_outstanding")
+    list_display = (
+        "__str__",
+        "group",
+        "is_active",
+        "is_staff",
+        "is_superuser",
+        "paperwork_outstanding",
+    )
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
@@ -145,7 +166,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "bnum",
                         "is_grad_student",
                         "graduation_year",
-                        "employee_notes"
+                        "employee_notes",
                     )
                 },
             ),
@@ -166,13 +187,25 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "first_name",
                     "last_name",
                     "bnum",
-                    "graduation_year"
+                    "graduation_year",
                 ),
             },
         ),
     )
-    search_fields = ("email", "first_name", "last_name", "bnum", "graduation_year", "phone_number", "groups__name")
-    ordering = ("-is_active", "last_name", "email",)
+    search_fields = (
+        "email",
+        "first_name",
+        "last_name",
+        "bnum",
+        "graduation_year",
+        "phone_number",
+        "groups__name",
+    )
+    ordering = (
+        "-is_active",
+        "last_name",
+        "email",
+    )
     inlines = [PaperworkInline]
     filter_horizontal = (
         "groups",

@@ -13,5 +13,5 @@ class WeekloginView(UnicornView):
         super().__init__(**kwargs)
         self.emps = Employee.objects.filter(is_active=True)
         self.sevendayago = self.sevendayago - timezone.timedelta(days=7)
-        self.empsnopass = self.emps.filter(Q(password='') | Q(password__isnull=True))
+        self.empsnopass = self.emps.filter(Q(password="") | Q(password__isnull=True))
         self.emps = self.emps.filter(last_login__lte=self.sevendayago)

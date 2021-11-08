@@ -56,7 +56,7 @@ class Employee(AbstractUser):
     employee_notes = HTMLField(
         blank=True,
         null=True,
-        help_text="Think of this as a \"permanent record\". Note anything important about this employee that should stick around. DO NOT delete anything from this unless you know what you're doing.",
+        help_text='Think of this as a "permanent record". Note anything important about this employee that should stick around. DO NOT delete anything from this unless you know what you\'re doing.',
     )
     paperwork = models.ManyToManyField(
         to="employee.Paperwork", through="employee.PaperworkForm"
@@ -79,9 +79,11 @@ class Employee(AbstractUser):
 
     def paperwork_outstanding(self):
         papers = []
-        for form in PaperworkForm.objects.filter(employee=self.pk, processed=False).all():
+        for form in PaperworkForm.objects.filter(
+            employee=self.pk, processed=False
+        ).all():
             papers.append(form.form.form_name)
-        return ', '.join(papers)
+        return ", ".join(papers)
 
 
 class OfficeHours(models.Model):
@@ -113,6 +115,7 @@ class PaperworkForm(models.Model):
     def __str__(self):
         return f"{self.employee} - {self.form}"
 
+
 class Paperwork(models.Model):
     form_name = models.CharField(max_length=256)
     form_pdf = models.FileField(upload_to="forms/")
@@ -125,9 +128,17 @@ class Paperwork(models.Model):
 
     def associated_forms(self):
         ret = ""
-        for form in PaperworkForm.objects.filter(form=self.pk, employee__is_active=True).order_by('processed').all():
+        for form in (
+            PaperworkForm.objects.filter(form=self.pk, employee__is_active=True)
+            .order_by("processed")
+            .all()
+        ):
             line = "<div style='margin: .25rem 0 .25rem 0'>"
-            line += f"<a href='/media/{form.pdf}'>{form}</a>" if form.pdf else f"<span>{form}</span>"
+            line += (
+                f"<a href='/media/{form.pdf}'>{form}</a>"
+                if form.pdf
+                else f"<span>{form}</span>"
+            )
             line += "<b> - NOT PROCESSED</b>" if not form.processed else ""
             line += "</div><br>"
             ret += line

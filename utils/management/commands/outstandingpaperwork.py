@@ -8,9 +8,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--forms',
-            action='store_true',
-            help='Show forms that are missing for each individual',
+            "--forms",
+            action="store_true",
+            help="Show forms that are missing for each individual",
         )
 
     def handle(self, *args, **options):
@@ -18,8 +18,12 @@ class Command(BaseCommand):
             is_good = True
             paperwork_missing = []
             for paperwork in emp.paperworkform_set.all():
-                if  not paperwork.processed:
+                if not paperwork.processed:
                     is_good = False
                     paperwork_missing.append(paperwork.form.form_name)
             if not is_good:
-                print(f'{emp.first_name} {emp.last_name}' if not options['forms'] else f'{emp.first_name} {emp.last_name} - {", ".join(paperwork_missing)}')
+                print(
+                    f"{emp.first_name} {emp.last_name}"
+                    if not options["forms"]
+                    else f'{emp.first_name} {emp.last_name} - {", ".join(paperwork_missing)}'
+                )

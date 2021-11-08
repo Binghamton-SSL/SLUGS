@@ -20,6 +20,10 @@
 * Add custom 500 error page
 * Add support for multiple types of office hour rates under one employee
 * View estimate by status
+* Add description to shifts (applicable for office hours)
+* Show shifts on "You" page sorted by most recent
+* Add one time fees prior to regular fees and convert %'s to running totals
+* Add employee staffing stats to staffing page
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
@@ -40,6 +44,7 @@ BUG FIXES:
     * Could not use day of show on mobile due to datetime widget not showing seconds (step="1")
     * Hopefully solve cross-user caching issue (NOT SECURITY RELATED)
         * Swap django-loginas for django-hijack
+    * Don't show meta-data in admin (paid-at)
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

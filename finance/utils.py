@@ -30,7 +30,12 @@ def prepareSummaryData(pp_id):
     for rate in Wage.objects.all().order_by("hourly_rate"):
         rates[rate] = [rate, 0]
     employees = {}
-    for employee in Employee.objects.all().filter(is_active=True).exclude(groups__name__in=["SA Employee","Awaiting Paperwork"]).order_by("last_name"):
+    for employee in (
+        Employee.objects.all()
+        .filter(is_active=True)
+        .exclude(groups__name__in=["SA Employee", "Awaiting Paperwork"])
+        .order_by("last_name")
+    ):
         employees[employee.bnum] = {
             "bnum": employee.bnum,
             "name": f"{employee.first_name} {employee.last_name}",

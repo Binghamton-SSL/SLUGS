@@ -76,7 +76,17 @@ class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
         SystemInline,
         LoadInInline,
         ("Day of Show Info", {"fields": ("day_of_show_notes",)}),
-        (None, {"fields": ("archived", "published", "available_for_signup", "manager_only_notes")}),
+        (
+            None,
+            {
+                "fields": (
+                    "archived",
+                    "published",
+                    "available_for_signup",
+                    "manager_only_notes",
+                )
+            },
+        ),
     ]
 
     def save_formset(self, request, form, formset, change):
@@ -112,9 +122,12 @@ class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
+    search_fields = ["employee__first_name", "employee__last_name"]
+    list_display = ["__str__", "employee"]
     pass
 
 
 @admin.register(JobInterest)
 class JobInterestAdmin(admin.ModelAdmin):
+    search_fields = ["employee__first_name", "employee__last_name"]
     pass

@@ -21,6 +21,7 @@ class ShiftAdmin(admin.ModelAdmin):
 
 class ShiftInlineAdmin(NestedGenericTabularInline):
     readonly_fields = ["total_time", "cost"]
+    exclude = ["paid_at"]
     model = Shift
     extra = 0
 
@@ -53,22 +54,37 @@ class EstimateAdmin(admin.ModelAdmin):
 
     @staticmethod
     def gig__notes(obj):
-        return format_html(f"<b>This will show up on the estimate as 'ATTN ENG':</b>\n{obj.gig.notes}") if obj.gig.notes else "No ATTN ENG for this gig"
-    
+        return (
+            format_html(
+                f"<b>This will show up on the estimate as 'ATTN ENG':</b>\n{obj.gig.notes}"
+            )
+            if obj.gig.notes
+            else "No ATTN ENG for this gig"
+        )
+
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
-    list_filter = ("status", "gig__start", "gig__org",)
+    list_filter = (
+        "status",
+        "gig__start",
+        "gig__org",
+    )
     ordering = ["-gig__start"]
     filter_horizontal = ["fees"]
     autocomplete_fields = ["gig", "billing_contact"]
-    search_fields = ("gig__name", "gig__org__name", "gig__org__SA_account_num", "billing_contact__name",)
+    search_fields = (
+        "gig__name",
+        "gig__org__name",
+        "gig__org__SA_account_num",
+        "billing_contact__name",
+    )
     readonly_fields = [
         "subtotal",
         "fees_amt",
         "total_amt",
         "outstanding_balance",
         "get_printout_link",
-        "gig__notes"
+        "gig__notes",
     ]
     fieldsets = (
         (

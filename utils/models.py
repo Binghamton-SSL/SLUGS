@@ -54,7 +54,9 @@ class ShowFeed(ICalFeed):
     hidetentative = True
 
     def items(self):
-        return Gig.objects.filter(published=self.hidetentative).order_by("-start") # noqa For now; only show published events
+        return Gig.objects.filter(published=self.hidetentative).order_by(
+            "-start"
+        )  # noqa For now; only show published events
 
     def item_title(self, item):
         return f"{'[TENTATIVE] ' if not item.published else ''}{item.org} - {item.name}"

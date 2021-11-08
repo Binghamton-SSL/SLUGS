@@ -128,7 +128,7 @@
                     </td>
                     <td class="pl-2 text-left">
                         {% for shift in row.shifts %}
-                        <div>{{shift.0.content_object}}</div>
+                        <div {% if row.shifts|length > 1 %}style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 3.25in;"{% endif %}>{{shift.0.content_object}} {% if shift.0.description %} - <sub>{{shift.0.description}}</sub>{% endif %}</div>
                         {% endfor %}
                     </td>
                     <td>
