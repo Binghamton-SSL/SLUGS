@@ -43,7 +43,7 @@ class Trainee(models.Model):
 class TrainingRequest(models.Model):
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
     systems = models.ManyToManyField("equipment.System", blank=True)
-    notes = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True, help_text="Be sure to include when you're free in the upcoming weeks to schedule the training")
     submitted = models.DateTimeField(auto_now_add=True)
     answered = models.BooleanField(default=False)
 

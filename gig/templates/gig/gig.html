@@ -9,6 +9,11 @@
 <div class="m-5 mt-10">
     {% ticket gig %}
 </div>
+<div class="flex">
+    <span class="p-4 bg-red-300 text-mono mx-auto my-1 text-black font-bold">
+        Setup by: {{gig.setup_by|date:"H:i"}} 
+    </span>
+</div>
 {% if gig.estimate_set.first.signed_estimate %}
 <div class="flex my-4">
      <a class="mx-auto" href="{% url 'download_estimate' gig.estimate_set.first.signed_estimate %}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>

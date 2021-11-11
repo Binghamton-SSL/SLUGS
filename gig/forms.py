@@ -4,6 +4,7 @@ from employee.models import Employee
 import django.forms as forms
 from django.contrib.humanize.templatetags import humanize
 from django.utils import timezone
+import functools
 
 
 class shiftFormHelper(FormHelper):
@@ -46,7 +47,13 @@ class StaffModelChoiceField(forms.ModelChoiceField):
         super().__init__(queryset, empty_label="TBD", required=False)
 
     def label_from_instance(self, obj):
-        return f'{"TESTING - " if not obj.groups.filter(name=self.instance.position).exists()  else ""}{obj}\nStaffed {round(Job.objects.filter(employee=obj).count()/JobInterest.objects.filter(employee=obj).count()*100,2)}% of time, last staffed {str((timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days)+" days ago" if (timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days > 0 else "in the future" if Job.objects.filter(employee=obj).order_by("-gig__start").first() is not None else "never" }'
+        return (
+            f'{"TESTING - " if not obj.groups.filter(name=self.instance.position).exists()  else ""}'
+            f'{obj}'
+            f'staffing score: {functools.reduce(lambda a, b: a+(1 if (b.job.employee.pk if b.job.employee is not None else 0) == obj.pk else 0 if b.job.employee is None else -1), JobInterest.objects.filter(employee=obj).all(), 0)*(timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days}, ' # Reduce all job interests, add 1 for every time staffed and -1 for every time skipped (no change for all jobs unstaffed). Multiply by last time staffed to account for multiple jobs on same gig (can't be staffed more than once)
+            # f'Staffed {round(Job.objects.filter(employee=obj).count()/JobInterest.objects.filter(employee=obj).count()*100,2)}% of time,' # Old percentage based score
+            f'last staffed {str((timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days)+" days ago" if (timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days > 0 else "in the future" if Job.objects.filter(employee=obj).order_by("-gig__start").first() is not None else "never" }'
+        )
 
 
 class StaffShowForm(forms.ModelForm):

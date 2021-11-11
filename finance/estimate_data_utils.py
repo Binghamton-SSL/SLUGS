@@ -41,15 +41,15 @@ def calculateGigCost(estimate):
                     (
                         (ret["gig"].setup_by - loadin.shop_time)
                         if ret["gig"].setup_by < loadin.load_out
-                        and ret["gig"].end > loadin.shop_time
+                        and ret["gig"].start > loadin.shop_time
                         else (loadin.load_out - loadin.shop_time)
                     )  # noqa Add shop time to gig start if gig start is before load out, otherwise go from shop time to load out
                     + (
-                        (loadin.load_out - ret["gig"].end)
-                        if loadin.load_out
-                        > ret[
-                            "gig"
-                        ].end  # noqa Add show end to load out if load out is after end of gig, otherwise add nothing
+                        # Ignore loadin that starts during show and ends after show (handled above), if not, check if load out is before gig starts else add 0
+                        timezone.timedelta(minutes=0)
+                        if loadin.shop_time > ret["gig"].start
+                        else (loadin.load_out - ret["gig"].end)
+                        if loadin.load_out > ret["gig"].end
                         else timezone.timedelta(minutes=0)
                     )
                 )
@@ -104,7 +104,7 @@ def calculateGigCost(estimate):
         ret["subtotal"] += system_subtotal
         ret["total_amt"] += system_subtotal
 
-    for fee in ret["estimate"].onetimefee_set.all():
+    for fee in ret["estimate"].onetimefee_set.order_by("percentage").all():
         fee_amt = (
             fee.amount
             if fee.amount
@@ -114,7 +114,7 @@ def calculateGigCost(estimate):
         ret["fees_amt"] += fee_amt
         ret["total_amt"] += fee_amt
 
-    for fee in ret["estimate"].fees.all():
+    for fee in ret["estimate"].fees.order_by("percentage").all():
         fee_amt = (
             fee.amount
             if fee.amount

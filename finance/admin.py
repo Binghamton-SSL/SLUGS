@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod
+from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod, CannedNote
 from nested_admin import NestedGenericTabularInline
 
 
@@ -70,7 +70,7 @@ class EstimateAdmin(admin.ModelAdmin):
         "gig__org",
     )
     ordering = ["-gig__start"]
-    filter_horizontal = ["fees"]
+    filter_horizontal = ["fees", "canned_notes"]
     autocomplete_fields = ["gig", "billing_contact"]
     search_fields = (
         "gig__name",
@@ -96,6 +96,7 @@ class EstimateAdmin(admin.ModelAdmin):
                     "billing_contact",
                     "signed_estimate",
                     "gig__notes",
+                    "canned_notes",
                     "notes",
                     "get_printout_link",
                 ]
@@ -114,3 +115,9 @@ class PayPeriodAdmin(admin.ModelAdmin):
     readonly_fields = ["get_summary", "associated_employees", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
+
+
+@admin.register(CannedNote)
+class CannedNoteAdmin(admin.ModelAdmin):
+    ordering = ["ordering"]
+    search_fields = ["name", "note"]

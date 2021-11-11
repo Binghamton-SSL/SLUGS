@@ -196,9 +196,14 @@
                             </div>
                         </div>
                         <div class="mt-2" style="width: 8.75in">
-                            {% if estimate.notes or estimate.gig.notes %}
+                            {% if estimate.notes or estimate.canned_notes.count > 0 or estimate.gig.notes %}
                             <div class="p-2 font-mono border-2 border-b-0 border-black">
                                 <h1 class="text-lg font-bold">NOTE:</h1>
+                                {% for note in estimate.canned_notes.values|dictsort:"ordering" %}
+                                <div class="text-sm">
+                                    {{note.note|safe}}
+                                </div>
+                                {% endfor %}
                                 <div class="text-sm">
                                     {{estimate.notes|safe}}
                                 </div>

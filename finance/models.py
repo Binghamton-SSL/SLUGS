@@ -63,6 +63,7 @@ class Estimate(models.Model):
     gig = models.ForeignKey("gig.Gig", on_delete=models.CASCADE)
     billing_contact = models.ForeignKey("client.OrgContact", on_delete=models.PROTECT)
     signed_estimate = models.FileField(upload_to="estimates", null=True, blank=True)
+    canned_notes = models.ManyToManyField('CannedNote', blank=True, help_text="These notes will appear above any notes you enter manually below. These are common notes added to estimates.")
     notes = HTMLField(
         blank=True,
         null=True,
@@ -166,6 +167,15 @@ class Estimate(models.Model):
         return f"{self.get_status_display()} - {self.gig} - ${self.total_amt}"
 
 
+class CannedNote(models.Model):
+    name = models.CharField(max_length=100)
+    ordering = models.PositiveIntegerField(default=0)
+    note = HTMLField()
+
+    def __str__(self):
+        return self.name
+
+
 class Shift(models.Model):
     time_in = models.DateTimeField()
     time_out = models.DateTimeField(null=True, blank=True)
@@ -215,7 +225,10 @@ Group.add_to_class(
     "hourly_rate",
     models.ForeignKey(Wage, on_delete=models.PROTECT, null=True, blank=True),
 )
-
+Group.add_to_class(
+    "description",
+    models.TextField(blank=True, null=True)
+)
 
 class PayPeriod(models.Model):
     start = models.DateField()

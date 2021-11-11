@@ -24,6 +24,9 @@
 * Show shifts on "You" page sorted by most recent
 * Add one time fees prior to regular fees and convert %'s to running totals
 * Add employee staffing stats to staffing page
+* Add "pre-canned" messages to estimates for commonly added notes
+* Show setup by time on showview page
+* Gigs are now sortable by system rented
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
@@ -45,6 +48,7 @@ BUG FIXES:
     * Hopefully solve cross-user caching issue (NOT SECURITY RELATED)
         * Swap django-loginas for django-hijack
     * Don't show meta-data in admin (paid-at)
+    * Error calculating edge case load in/out times
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event
