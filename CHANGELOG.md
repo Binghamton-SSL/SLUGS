@@ -49,6 +49,8 @@ BUG FIXES:
         * Swap django-loginas for django-hijack
     * Don't show meta-data in admin (paid-at)
     * Error calculating edge case load in/out times
+    * Update staffing score function + provide explaination
+    * Current show ticket disappearing too soon
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

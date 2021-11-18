@@ -169,9 +169,14 @@
                             </tbody>
                         </table>
                         <div class="mt-2" style="width: 8.75in">
-                            {% if estimate.notes %}
+                            {% if estimate.notes or estimate.canned_notes.count > 0 %}
                             <div class="p-2 font-mono border-2 border-b-0 border-black">
                                 <h1 class="text-lg">NOTE:</h1>
+                                {% for note in estimate.canned_notes.values|dictsort:"ordering" %}
+                                <div class="text-sm">
+                                    {{note.note|safe}}
+                                </div>
+                                {% endfor %}
                                 <div class="text-sm">
                                     {{estimate.notes|safe}}
                                 </div>
@@ -416,7 +421,7 @@
                         <div class="dont_break">
                             <div class="mt-10 text-sm text-center">
                                 <p>
-                                    Payment due upon receipt of Invoice by way of Check of SA intra-organization transfer.
+                                    Payment due upon receipt of Invoice by way of Check of SA inter-organization transfer.
                                 </p>
                                 <p>
                                     Make checks payable to: <br>Binghamton Sound, Staging, and Lighting (SA Account #7400) / Student Association of Binghamton University Inc.

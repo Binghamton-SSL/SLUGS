@@ -28,6 +28,15 @@
     <form class="user-form" method="POST" action="{% url 'admin:gig_gig_staff' object_id=gig.pk %}">
         {% csrf_token %}
         {% if unfilled_positions %}
+        <div>
+            <h3>
+                What is a staffing score?
+            </h3>
+            <p>Staffing scores are a metric that can be used to see how often a person is staffed compared to how often they sign up in relation to the last time they worked.</p>
+            <p>If a staffing score is positive that means the person is staffed more than 50% of the time they've asked to be staffed. A negative score means they're staffed less than 50% of the time</p>
+            <p>This also means the higher the score, the less you probably want to staff them as they've either worked very recently or get staffed often</p>
+            <p>Staffing should be a holistic process but generally, the lower the score, the more you should consider them.</p>
+        </div>
         {% for pos in unfilled_positions %}
             <fieldset class="module aligned">
                 <h2>{{pos.0.get_department_display}} - {{pos.0.position}}</h2>
