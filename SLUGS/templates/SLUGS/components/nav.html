@@ -1,5 +1,6 @@
 {% load static %}
 {% load grouping %}
+{% load timeline %}
 <nav class="flex px-4 text-black bg-white">
     <a href="/">
         <img class="w-14 h-14 sm:w-20 sm:h-20 filter hover:invert-[.5]" src="{% static 'img/logo/logo.svg' %}" />
@@ -39,7 +40,7 @@
 </nav>
 {% if signup_open %}
 <a class="text-black" href="{% url 'gig:signup' %}">
-    <div class="h-10 w-full bg-red-300 flex">
+    <div class="flex w-full h-10 bg-red-300">
         <div class="flex mx-auto my-auto space-x-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -56,6 +57,7 @@
     </div>
 </a>
 {% endif %}
+{% timeline request.user %}
 <div onclick="closeMenu()" class="absolute top-0 z-40 hidden w-screen h-screen transition-all bg-black opacity-75 menubackground"></div>
 <div class="fixed top-0 right-0 z-50 w-4/6 h-screen text-black transition-all transform translate-x-full bg-white shadow mobile-nav">
     <div class="flex flex-col mt-10">

@@ -27,6 +27,7 @@
 * Add "pre-canned" messages to estimates for commonly added notes
 * Show setup by time on showview page
 * Gigs are now sortable by system rented
+* Add next/current show timeline
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
