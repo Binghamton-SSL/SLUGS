@@ -6,14 +6,14 @@ class FinanceapproveallshiftsView(UnicornView):
     shifts = None
     allAccepted = False
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.shifts = kwargs["shiftset"]
-        # self.allAccepted =  self.shfits.filter(processed=False).count() == 0
+        self.allAccepted = kwargs["shiftset"].filter(processed=False).count() == 0
 
-    def acceptAll():
+    def acceptAll(self):
         for shift in self.shifts:
-            shift.processed = True if not self.allAccepted else False
-            shift.save()
-        self.allAccepted = True if self.allAccepted == False else False
+            s = Shift.objects.get(pk=shift.pk)
+            s.processed = True if not self.allAccepted else False
+            s.save()
+        self.allAccepted = True if self.allAccepted is False else False
