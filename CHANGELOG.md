@@ -28,6 +28,7 @@
 * Show setup by time on showview page
 * Gigs are now sortable by system rented
 * Add next/current show timeline
+* Accept all button for financial overview
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
@@ -52,6 +53,8 @@ BUG FIXES:
     * Error calculating edge case load in/out times
     * Update staffing score function + provide explaination
     * Current show ticket disappearing too soon
+    * Changed logic for showing gigs staffed on to exclude duplicate gigs resulting from multiple jobs on same gig
+    * Timeline starting gig early
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

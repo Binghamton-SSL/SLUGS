@@ -1,30 +1,77 @@
+{% load static %}
 {% if next_job %}
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="{% static 'css/timeline.css'%}" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #visualization {
+        width: 600px;
+        height: 400px;
+        border: 1px solid lightgray;
+        }
+    </style>
     {% if gig_happening %}
-    <div class="flex text-black bg-white">
-        <div class="mx-auto text-mono">
-            <h5 class="font-bold">{{next_gig.name}}</h5>
-            <h4>The show ends at: {{next_gig.end}}</h4>
-            <h4>Your load out ends at: {{your_load_ins.last.load_out}}</h4>
+    <div class="flex text-black bg-gray-300">
+        <div class="mx-auto text-mono w-full">
+            <div class="text-center">
+                <h3>You are currently working:</h3>
+                <h5 class="font-bold">{{next_gig.name}}</h5>
+            </div>
+            <div id="timeline" class="w-full"></div>
         </div>
     </div>
+    <script type="text/javascript">
+        // DOM element where the Timeline will be attached
+        var container = document.getElementById('timeline');
+      
+        // Create Groups
+        const gs = {{your_depts|safe}}
+        const groups = []
+        for (i=0;i < gs.length; i++) {
+            groups.push({
+                id: i,
+                content: gs[i]
+            })
+        }
+
+        const events = {{events|safe}}
+
+        // Create a DataSet of items
+        var items = new vis.DataSet(events);
+      
+        // Configuration for the Timeline
+        var options = {
+            zoomable: true,
+            moveable: true,
+            rollingMode: {
+                follow: true,
+                offset: .4,
+            },
+            zoomMax: 43200000
+        };
+      
+        // Create a Timeline
+        var timeline = new vis.Timeline(container, items, groups, options);
+    </script>
     {% else %}
-    <div class="flex flex-col text-black bg-gray-300">
-        <div class="mx-auto text-center text-mono">
-            <h3>Your next show is:</h3>
-            <h5 class="font-bold">{{next_gig.name}}</h5>
-            <h4>Your load in is at: {{your_load_ins.first.load_in}}</h4>
+    <a href="{% url 'gig:showView' next_gig.id %}">
+        <div class="flex flex-col text-black bg-gray-300">
+            <div class="mx-auto text-center text-mono">
+                <h3>Your next show is:</h3>
+                <h5 class="font-bold">{{next_gig.name}}</h5>
+                <h4>Your shop time is: {{your_load_ins.first.shop_time}}</h4>
+            </div>
+            <!-- <div class="relative w-full p-2 mx-2 overflow-y-scroll">
+                {% for loadin in load_in_info %}
+                    <div class="relative p-2 text-white bg-black rounded-lg opacity-0" style="left: {{loadin.relative_start}}rem; width: {{loadin.realtive_end}}rem;">
+                        {{loadin.loadin.get_department_display}}
+                    </div>
+                    <div class="absolute top-0 p-2 text-white bg-black rounded-lg" style="left: {{loadin.relative_start}}rem; width: {{loadin.realtive_end}}rem;">
+                        <div class="sticky m-0 w-min" style="left:0px;">{{loadin.loadin.get_department_display}}</div>
+                    </div>
+                {% endfor %}
+            </div> -->
         </div>
-        <!-- <div class="relative w-full p-2 mx-2 overflow-y-scroll">
-            {% for loadin in load_in_info %}
-                <div class="relative p-2 text-white bg-black rounded-lg opacity-0" style="left: {{loadin.relative_start}}rem; width: {{loadin.realtive_end}}rem;">
-                    {{loadin.loadin.get_department_display}}
-                </div>
-                <div class="absolute top-0 p-2 text-white bg-black rounded-lg" style="left: {{loadin.relative_start}}rem; width: {{loadin.realtive_end}}rem;">
-                    <div class="sticky m-0 w-min" style="left:0px;">{{loadin.loadin.get_department_display}}</div>
-                </div>
-            {% endfor %}
-        </div> -->
-    </div>
+    </a>
     {% endif %}
 {% else %}
 {% endif %}

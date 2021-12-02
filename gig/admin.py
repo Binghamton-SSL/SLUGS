@@ -122,7 +122,7 @@ class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    search_fields = ["employee__first_name", "employee__last_name"]
+    search_fields = ["employee__first_name", "employee__last_name", "gig__name"]
     list_display = ["__str__", "employee"]
     pass
 

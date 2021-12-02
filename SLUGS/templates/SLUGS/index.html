@@ -63,7 +63,7 @@
                 My shows
             </h1>
             <div class="my-4 md:mx-20">
-                {% if jobs.count > 0 %}
+                {% if gigs.count > 0 %}
                 <table style="border-spacing: 1rem 1rem;" class="w-full table-auto">
                     <thead class="border-b-2 border-white">
                         <tr>
@@ -82,19 +82,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for job in jobs %}
-                        <tr tabindex="0" onclick="window.location='{% url 'gig:showView' job.gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
+                        {% for gig in gigs %}
+                        <tr tabindex="0" onclick="window.location='{% url 'gig:showView' gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
                             <td class="pl-2">
-                                {{job.gig.name}}
+                                {{gig.name}}
                             </td>
                             <td class="hidden pl-2 md:table-cell">
-                                {{job.gig.org}}
+                                {{gig.org}}
                             </td>
                             <td class="py-4 pl-2">
-                                {{job.gig.location}}
+                                {{gig.location}}
                             </td>
                             <td class="pl-2">
-                                {{job.gig.start}}
+                                {{gig.start}}
                             </td>
                         </tr>
                         {% endfor %}

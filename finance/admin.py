@@ -62,6 +62,10 @@ class EstimateAdmin(admin.ModelAdmin):
             else "No ATTN ENG for this gig"
         )
 
+    @staticmethod
+    def gig__day_of_show_notes(obj):
+        return obj.gig.day_of_show_notes
+
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
     list_filter = (
@@ -85,6 +89,7 @@ class EstimateAdmin(admin.ModelAdmin):
         "outstanding_balance",
         "get_printout_link",
         "gig__notes",
+        "gig__day_of_show_notes",
     ]
     fieldsets = (
         (
@@ -102,7 +107,7 @@ class EstimateAdmin(admin.ModelAdmin):
                 ]
             },
         ),
-        ("Billing info", {"fields": ["payment_due", "paid", "fees", "adjustments"]}),
+        ("Billing info", {"fields": ["gig__day_of_show_notes", "payment_due", "paid", "fees", "adjustments"]}),
         (
             "Bill",
             {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},

@@ -44,12 +44,13 @@ class index(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.added_context["notifications"] = Notification.objects.all()
         self.added_context["signup_open"] = signupStatus.objects.first().is_open
-        self.added_context["jobs"] = (
+        self.added_context["gigs"] = (
             (
-                Job.objects.all()
-                .filter(employee=request.user)
-                .select_related("gig")
-                .order_by("-gig__start")
+                Gig.objects.filter(job__employee=request.user).distinct().order_by("-start")
+                # Job.objects.all()
+                # .filter(employee=request.user)
+                # .select_related("gig")
+                # .order_by("-gig__start")
             )
             if request.user.is_authenticated
             else None
