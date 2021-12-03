@@ -10,11 +10,11 @@ class BaseShiftForm(forms.ModelForm):
     class Meta:
         widgets = {
             "time_in": forms.DateTimeInput(
-                attrs={"type": "datetime-local", "class": "w-72"},
+                attrs={"type": "datetime-local", "class": "w-72", "step": "1"},
                 format="%Y-%m-%dT%H:%M:%S",
             ),
             "time_out": forms.DateTimeInput(
-                attrs={"type": "datetime-local", "class": "w-72"},
+                attrs={"type": "datetime-local", "class": "w-72", "step": "1"},
                 format="%Y-%m-%dT%H:%M:%S",
             ),
         }
@@ -27,6 +27,15 @@ class BaseShiftFormset(BaseModelFormSet):
 ShiftFormSet = modelformset_factory(
     Shift,
     fields=("time_in", "time_out"),
+    form=BaseShiftForm,
+    formset=BaseShiftFormset,
+    extra=1,
+    can_delete=True,
+)
+
+OfficeHoursShiftFormSet = modelformset_factory(
+    Shift,
+    fields=("time_in", "time_out", "description"),
     form=BaseShiftForm,
     formset=BaseShiftFormset,
     extra=1,

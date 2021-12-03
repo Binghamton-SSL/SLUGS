@@ -3,6 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.template.loader import get_template
 from django.http import HttpResponseRedirect
 from django.urls.base import reverse
+from import_export import resources
+from import_export.admin import ImportExportMixin
 from finance.admin import ShiftInlineAdmin
 from employee.models import PaperworkForm, Paperwork
 from utils.generic_email import send_generic_email
@@ -14,6 +16,7 @@ from .models import Employee, OfficeHours
 @admin.register(Paperwork)
 class PaperworkAdmin(admin.ModelAdmin):
     search_fields = ["form_name"]
+    readonly_fields = ["associated_forms"]
     pass
 
 
@@ -25,8 +28,30 @@ class PaperworkInline(admin.StackedInline):
     readonly_fields = ["uploaded", "requested"]
 
 
+class EmployeeResource(resources.ModelResource):
+    class Meta:
+        model = Employee
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "bnum",
+            "phone_number",
+            "is_grad_student",
+            "graduation_year",
+            "last_login",
+            "date_joined",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+        )
+
+
 @admin.register(Employee)
-class EmployeeAdmin(UserAdmin):
+class EmployeeAdmin(ImportExportMixin, UserAdmin):
+    resource_class = EmployeeResource
+
     def group(self, user):
         groups = []
         for group in user.groups.all():
@@ -90,13 +115,27 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
         )
         return reverse("employee:mass_assign", args=[queryset])
 
+    @admin.action(description="Add Groups")
+    def add_groups(modeladmin, request, queryset):
+        selected = queryset.values_list("pk", flat=True)
+        return HttpResponseRedirect(
+            "/employee/add-groups/%s" % (",".join(str(pk) for pk in selected),)
+        )
+        return reverse("employee:add_groups", args=[queryset])
+
     group.short_description = "Groups"
 
-    list_display = ("__str__", "group", "is_active", "is_staff", "is_superuser")
-    list_filter = ("is_active", "is_staff", "is_superuser", "groups")
-    actions = [mass_assign_paperwork]
+    list_display = (
+        "__str__",
+        "group",
+        "is_active",
+        "is_staff",
+        "is_superuser",
+        "paperwork_outstanding",
+    )
+    list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
+    actions = [mass_assign_paperwork, add_groups]
     readonly_fields = ["last_login"]
-    change_form_template = "employee/loginas/change_form.html"
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -126,6 +165,8 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "phone_number",
                         "bnum",
                         "is_grad_student",
+                        "graduation_year",
+                        "employee_notes",
                     )
                 },
             ),
@@ -146,12 +187,25 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "first_name",
                     "last_name",
                     "bnum",
+                    "graduation_year",
                 ),
             },
         ),
     )
-    search_fields = ("email", "first_name", "last_name", "bnum", "groups__name")
-    ordering = ("email",)
+    search_fields = (
+        "email",
+        "first_name",
+        "last_name",
+        "bnum",
+        "graduation_year",
+        "phone_number",
+        "groups__name",
+    )
+    ordering = (
+        "-is_active",
+        "last_name",
+        "email",
+    )
     inlines = [PaperworkInline]
     filter_horizontal = (
         "groups",
@@ -162,3 +216,4 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
 @admin.register(OfficeHours)
 class OfficeHoursAdmin(admin.ModelAdmin):
     inlines = [ShiftInlineAdmin]
+    list_display = ["employee", "position"]

@@ -3,6 +3,7 @@ from django.contrib.admin.models import LogEntry, DELETION
 from django.utils.html import escape
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.contrib.auth.models import Group
 
 
 @admin.register(LogEntry)
@@ -49,3 +50,13 @@ class LogEntryAdmin(admin.ModelAdmin):
 
     object_link.admin_order_field = "object_repr"
     object_link.short_description = "object"
+
+
+admin.site.unregister(Group)
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ["name", "hourly_rate","description"]
+    ordering = ["name"]
+    search_fields = ["name", "description"]
+    pass

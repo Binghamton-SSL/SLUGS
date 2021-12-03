@@ -53,7 +53,7 @@
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
                                     <span class="text-xs text-center">Binghamton Sound Stage and Lighting</span><br>
-                                    <a href="tel:6077774144">(607) 777-4144</a><br>
+                                    <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
                                     <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
                                     <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
                                 </h1>
@@ -196,12 +196,23 @@
                             </div>
                         </div>
                         <div class="mt-2" style="width: 8.75in">
-                            {% if estimate.notes %}
+                            {% if estimate.notes or estimate.canned_notes.count > 0 or estimate.gig.notes %}
                             <div class="p-2 font-mono border-2 border-b-0 border-black">
-                                <h1 class="text-lg">NOTE:</h1>
+                                <h1 class="text-lg font-bold">NOTE:</h1>
+                                {% for note in estimate.canned_notes.values|dictsort:"ordering" %}
+                                <div class="text-sm">
+                                    {{note.note|safe}}
+                                </div>
+                                {% endfor %}
                                 <div class="text-sm">
                                     {{estimate.notes|safe}}
                                 </div>
+                                {% if estimate.gig.notes %}
+                                <h3 class="text-md font-bold">ATTN ENG:</h3>
+                                <div class="text-sm">
+                                    {{estimate.gig.notes|safe}}
+                                </div>
+                                {% endif %}
                             </div>
                             {% endif %}
                             <table style="border-bottom: none;" class="w-full text-sm">
@@ -508,7 +519,7 @@
                                     </div>
                                 </div>
                                 <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
-                                    have read the contract in
+                                    have read the contract and BSSL Reservation Policy in
                                     full
                                     and agree to the terms and conditions. I agree to pay the
                                     total amount in full upon receipt of invoice.</p>

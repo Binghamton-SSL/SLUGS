@@ -1,5 +1,6 @@
 from django.contrib import admin
-from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod
+from django.utils.html import format_html
+from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod, CannedNote
 from nested_admin import NestedGenericTabularInline
 
 
@@ -20,6 +21,7 @@ class ShiftAdmin(admin.ModelAdmin):
 
 class ShiftInlineAdmin(NestedGenericTabularInline):
     readonly_fields = ["total_time", "cost"]
+    exclude = ["paid_at"]
     model = Shift
     extra = 0
 
@@ -50,19 +52,44 @@ class EstimateAdmin(admin.ModelAdmin):
     def gig__org(obj):
         return obj.gig.org
 
+    @staticmethod
+    def gig__notes(obj):
+        return (
+            format_html(
+                f"<b>This will show up on the estimate as 'ATTN ENG':</b>\n{obj.gig.notes}"
+            )
+            if obj.gig.notes
+            else "No ATTN ENG for this gig"
+        )
+
+    @staticmethod
+    def gig__day_of_show_notes(obj):
+        return obj.gig.day_of_show_notes
+
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
-    list_filter = ("gig__start", "gig__org")
+    list_filter = (
+        "status",
+        "gig__start",
+        "gig__org",
+    )
     ordering = ["-gig__start"]
-    filter_horizontal = ["fees"]
+    filter_horizontal = ["fees", "canned_notes"]
     autocomplete_fields = ["gig", "billing_contact"]
-    search_fields = ("gig__name", "gig__org__name", "gig__org__SA_account_num", "billing_contact__name",)
+    search_fields = (
+        "gig__name",
+        "gig__org__name",
+        "gig__org__SA_account_num",
+        "billing_contact__name",
+    )
     readonly_fields = [
         "subtotal",
         "fees_amt",
         "total_amt",
         "outstanding_balance",
         "get_printout_link",
+        "gig__notes",
+        "gig__day_of_show_notes",
     ]
     fieldsets = (
         (
@@ -73,12 +100,14 @@ class EstimateAdmin(admin.ModelAdmin):
                     "gig",
                     "billing_contact",
                     "signed_estimate",
+                    "gig__notes",
+                    "canned_notes",
                     "notes",
                     "get_printout_link",
                 ]
             },
         ),
-        ("Billing info", {"fields": ["payment_due", "paid", "fees", "adjustments"]}),
+        ("Billing info", {"fields": ["gig__day_of_show_notes", "payment_due", "paid", "fees", "adjustments"]}),
         (
             "Bill",
             {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},
@@ -91,3 +120,9 @@ class PayPeriodAdmin(admin.ModelAdmin):
     readonly_fields = ["get_summary", "associated_employees", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
+
+
+@admin.register(CannedNote)
+class CannedNoteAdmin(admin.ModelAdmin):
+    ordering = ["ordering"]
+    search_fields = ["name", "note"]

@@ -1,5 +1,6 @@
 {% extends "theme/base.html" %} {% load grouping %} {% load crispy_forms_tags %} {% load static %}
 {% block title %}- Office Hours{% endblock %}
+{% load gig_components %}
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -9,10 +10,16 @@
     <h2 class="text-xl">Don't worry if it looks like your shifts are dissapearing! Only shifts that are unprocessed will show up here. If they're contested or processed they'll be on your <a class="underline" href="{% url 'employee:overview'%}">User</a> page but not here</h2>
     <form method="POST">
         {% csrf_token %}
-        <div id="{{forms.office_hours.prefix}}" class="p-4 m-2 bg-[#333333] rounded-sm">
-            {{ forms.office_hours.management_form|crispy }}
-            {% for form in forms.office_hours.forms %}
-            <div class="{% cycle 'row1' 'row2' %} formset row-{{forms.office_hours.prefix}} flex">
+        {% for ofform in forms.values %}
+        <div id="{{ofform.prefix}}" class="p-4 m-2 bg-[#333333] rounded-sm">
+            {% with formname=form_meta|get_item:ofform.prefix %}
+            <h2>
+                Paid at <code class="p-1 bg-black">{{formname.rate}}</code> Rate
+            </h2>
+            {% endwith %}
+            {{ ofform.management_form|crispy }}
+            {% for form in ofform.forms %}
+            <div class="{% cycle 'row1' 'row2' %} formset row-{{ofform.prefix}} flex">
                 <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     {% for field in form.visible_fields %}
                     <div>
@@ -30,17 +37,18 @@
             </div>
             {% endfor %}
         </div>
+        <script type="text/javascript">
+            $('.row-{{ofform.prefix}}').formset({
+                addText: 'Add Shift',
+                deleteText: '✕',
+                deleteCssClass: 'delete-row my-auto bg-black w-min px-4 py-2',
+                prefix: '{{ ofform.prefix }}',
+                hideLastAddForm: true,
+            });;
+        </script>
+        {% endfor %}
         <button class="m-2 bg-[#009961] py-4 px-2" type="submit">Submit</button>
     </form>
-    <script type="text/javascript">
-        $('.row-{{forms.office_hours.prefix}}').formset({
-            addText: 'Add Shift',
-            deleteText: '✕',
-            deleteCssClass: 'delete-row my-auto bg-black w-min px-4 py-2',
-            prefix: '{{ forms.office_hours.prefix }}',
-            hideLastAddForm: true,
-        });;
-    </script>
 </div>
 <style>
     label {
@@ -53,6 +61,10 @@
         display: block;
         width: max-content;
         margin: .5rem 0;
+    }
+    .text-gray-600 {
+        color: white!important;
+        font-size: .5rem;
     }
 
     @media (min-width: 768px) {

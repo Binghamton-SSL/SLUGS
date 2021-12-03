@@ -93,7 +93,7 @@
             </h2>
             <div>
                 {% for request in trainingRequests %}
-                <div class="p-4 m-2 text-black bg-white rounded-sm w-max">
+                <div class="p-4 m-2 text-black bg-white rounded-sm md:w-max sm:w-full">
                     <p class="text-xl">Submitted: {{request.submitted}}</p>
                     <ul>
                         {% for system in request.systems.all %}
@@ -131,6 +131,16 @@
                             src="https://drive.google.com/embeddedfolderview?id=1RE8u9tS6FmksGi7_mRRS0jjejvAi8acV#grid"
                             style="width:100%; height:600px; border:0;"></iframe>
                     </div>
+                </div>
+            </div>
+            <div class="my-5">
+                <h1 class="text-4xl text-bold">
+                    SLUGS Guides
+                </h1>
+                <div>
+                    <h2>
+                        Want to know more about SLUGS and how to use it? No problem, we set up an entire <a class="underline" href="https://github.com/Binghamton-SSL/SLUGS/wiki">wiki (https://github.com/Binghamton-SSL/SLUGS/wiki)</a> describing it!
+                    </h2>
                 </div>
             </div>
             {% endblock %}

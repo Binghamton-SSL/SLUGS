@@ -16,16 +16,17 @@ from django.db.models import Sum
 from django.core.exceptions import PermissionDenied
 from employee.forms import (
     massAssignPaperworkForm,
+    addGroupsForm,
     userCreationForm,
     userChangeForm,
     changePasswordForm,
     uploadForm,
 )
 from dev_utils.views import MultipleFormView
-from SLUGS.views import SLUGSMixin
+from SLUGS.views import SLUGSMixin, isAdminMixin
 from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
-from finance.forms import ShiftFormSet
+from finance.forms import OfficeHoursShiftFormSet
 from finance.models import Shift
 from employee.models import OfficeHours, PaperworkForm
 
@@ -82,43 +83,57 @@ class userOverview(SLUGSMixin, MultipleFormView):
         self.added_context["timeworked"] = self.added_context["shifts"].aggregate(
             Sum("total_time")
         )
-        self.added_context["processed_shifts"] = self.added_context["shifts"].filter(
-            processed=True
-        )[:100]
+        self.added_context["processed_shifts"] = (
+            self.added_context["shifts"]
+            .order_by("-time_out")
+            .filter(processed=True)[:500]
+        )
         self.added_context["amount_made"] = self.added_context[
             "processed_shifts"
         ].aggregate(Sum("cost"))
-        self.added_context["unprocessed_shifts"] = self.added_context["shifts"].filter(
-            processed=False, contested=False
+        self.added_context["unprocessed_shifts"] = (
+            self.added_context["shifts"]
+            .order_by("-time_out")
+            .filter(processed=False, contested=False)
         )
-        self.added_context["contested_shifts"] = self.added_context["shifts"].filter(
-            contested=True
+        self.added_context["contested_shifts"] = (
+            self.added_context["shifts"].order_by("-time_out").filter(contested=True)
         )
         return super().dispatch(request, *args, **kwargs)
 
 
 class officeHours(SLUGSMixin, MultipleFormView):
     template_name = "employee/office_hours.html"
-    form_classes = {"office_hours": {"form": ShiftFormSet}}
 
     def dispatch(self, request, *args, **kwargs):
+        self.form_classes = {}
+        self.added_context = {"form_meta": {}}
         if Group.objects.get(name="Manager") not in request.user.groups.all():
             raise PermissionDenied()
-        office_hour_obj = OfficeHours.objects.get_or_create(employee=request.user)[0]
-        self.form_classes["office_hours"]["kwargs"] = {
-            "queryset": Shift.objects.filter(
-                object_id=office_hour_obj.id,
-                content_type_id=ContentType.objects.get(model="officehours").id,
-                processed=False,
-            )
-        }
+        try:
+            OfficeHours.objects.get_or_create(employee=request.user)
+        except Exception:
+            pass
+        for office_hour_obj in OfficeHours.objects.filter(employee=request.user):
+            self.added_context["form_meta"][f"office_hours_{office_hour_obj.pk}"] = {
+                "obj": office_hour_obj,
+                "rate": office_hour_obj.position,
+            }
+            self.form_classes[f"office_hours_{office_hour_obj.pk}"] = {
+                "form": OfficeHoursShiftFormSet,
+                "kwargs": {
+                    "queryset": Shift.objects.filter(
+                        object_id=office_hour_obj.id,
+                        content_type_id=ContentType.objects.get(model="officehours").id,
+                        processed=False,
+                    ),
+                },
+            }
         return super().dispatch(request, *args, **kwargs)
 
     def process_forms(self, form_instances):
-        office_hour_obj = OfficeHours.objects.get_or_create(employee=self.request.user)[
-            0
-        ]
         for form in form_instances["forms"]:
+            office_hour_obj = self.added_context["form_meta"][form]["obj"]
             for shift in form_instances["forms"][form].forms:
                 if (
                     shift.instance.time_in is not None
@@ -215,4 +230,20 @@ class massAssignPaperwork(SLUGSMixin, FormView):
         messages.add_message(
             self.request, messages.SUCCESS, f"Forms assigned and emails sent"
         )
+        return super().form_valid(form)
+
+
+class addGroups(SLUGSMixin, isAdminMixin, FormView):
+    form_class = addGroupsForm
+    template_name = "employee/add_groups.html"
+    success_url = reverse_lazy("admin:employee_employee_changelist")
+
+    def dispatch(self, request, *args, **kwargs):
+        self.initial["ids"] = kwargs["selected"]
+        self.added_context["selected_ids"] = kwargs["selected"]
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.add_groups(self.request)
+        messages.add_message(self.request, messages.SUCCESS, f"Groups added")
         return super().form_valid(form)

@@ -1,6 +1,8 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
 {% load static %}
+{% load tz %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -126,7 +128,7 @@
                     </td>
                     <td class="pl-2 text-left">
                         {% for shift in row.shifts %}
-                        <div>{{shift.0.content_object}}</div>
+                        <div {% if row.shifts|length > 1 %}style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 3.25in;"{% endif %}>{{shift.0.content_object}} {% if shift.0.description %} - <sub>{{shift.0.description}}</sub>{% endif %}</div>
                         {% endfor %}
                     </td>
                     <td>
@@ -137,7 +139,7 @@
                     <td>
                         {% for shift in row.shifts %}
                         <div>{{shift.0.time_out|date:"h:i A"}}
-                            {% if shift.0.time_in.day != shift.0.time_out.day %}(+1){% endif %}</div>
+                            {% if shift.0.time_in|localtime|date:'d' != shift.0.time_out|localtime|date:'d' %}(+1){% endif %}</div>
                         {% endfor %}
                     </td>
                     <td>

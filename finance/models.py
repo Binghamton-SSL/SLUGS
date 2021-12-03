@@ -52,6 +52,7 @@ class Estimate(models.Model):
         ("A", "Awaiting Payment"),
         ("C", "Closed"),
         ("X", "Canceled"),
+        ("N", "Abandoned"),
     ]
     status = models.CharField(
         choices=INVOICE_STATUSES,
@@ -62,6 +63,7 @@ class Estimate(models.Model):
     gig = models.ForeignKey("gig.Gig", on_delete=models.CASCADE)
     billing_contact = models.ForeignKey("client.OrgContact", on_delete=models.PROTECT)
     signed_estimate = models.FileField(upload_to="estimates", null=True, blank=True)
+    canned_notes = models.ManyToManyField('CannedNote', blank=True, help_text="These notes will appear above any notes you enter manually below. These are common notes added to estimates.")
     notes = HTMLField(
         blank=True,
         null=True,
@@ -77,7 +79,11 @@ class Estimate(models.Model):
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
     )
     adjustments = models.DecimalField(
-        max_digits=7, decimal_places=2, null=True, default=0.00
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        default=0.00,
+        help_text="Only use in cases where there is a numerical descrepency that cannot be traced. For all discounts, refunds, and clerical errors, input a 'One Time Fee'",
     )
     total_amt = models.DecimalField(
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
@@ -161,10 +167,25 @@ class Estimate(models.Model):
         return f"{self.get_status_display()} - {self.gig} - ${self.total_amt}"
 
 
+class CannedNote(models.Model):
+    name = models.CharField(max_length=100)
+    ordering = models.PositiveIntegerField(default=0)
+    note = HTMLField()
+
+    def __str__(self):
+        return self.name
+
+
 class Shift(models.Model):
     time_in = models.DateTimeField()
     time_out = models.DateTimeField(null=True, blank=True)
     total_time = models.DurationField(default=timedelta())
+    paid_at = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    description = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text="Only required if abnormal shift needs explaination to finance",
+    )
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     processed = models.BooleanField(default=False)
     contested = models.BooleanField(default=False)
@@ -179,11 +200,15 @@ class Shift(models.Model):
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
+        if self.paid_at is None or self.paid_at == 0.00:
+            self.paid_at = self.content_object.position.hourly_rate.hourly_rate
+        if self.description is None:
+            self.description = self.__str__()
         if self.time_in and self.time_out:
             self.total_time = self.time_out - self.time_in
             self.cost = (
                 round(self.total_time / timezone.timedelta(minutes=15)) / 4
-            ) * float(self.content_object.position.hourly_rate.hourly_rate)
+            ) * float(self.paid_at)
         super().save(*args, **kwargs)
 
     def get_admin_url(self):
@@ -200,7 +225,10 @@ Group.add_to_class(
     "hourly_rate",
     models.ForeignKey(Wage, on_delete=models.PROTECT, null=True, blank=True),
 )
-
+Group.add_to_class(
+    "description",
+    models.TextField(blank=True, null=True)
+)
 
 class PayPeriod(models.Model):
     start = models.DateField()

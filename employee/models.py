@@ -5,7 +5,9 @@ from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html
 
+from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -50,6 +52,12 @@ class Employee(AbstractUser):
     bnum = models.CharField(null=True, max_length=12, verbose_name="B Number")
     phone_number = PhoneNumberField(null=True)
     is_grad_student = models.BooleanField(default=False)
+    graduation_year = models.IntegerField(blank=True, null=True)
+    employee_notes = HTMLField(
+        blank=True,
+        null=True,
+        help_text='Think of this as a "permanent record". Note anything important about this employee that should stick around. DO NOT delete anything from this unless you know what you\'re doing.',
+    )
     paperwork = models.ManyToManyField(
         to="employee.Paperwork", through="employee.PaperworkForm"
     )
@@ -69,6 +77,14 @@ class Employee(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 
+    def paperwork_outstanding(self):
+        papers = []
+        for form in PaperworkForm.objects.filter(
+            employee=self.pk, processed=False
+        ).all():
+            papers.append(form.form.form_name)
+        return ", ".join(papers)
+
 
 class OfficeHours(models.Model):
     position = models.ForeignKey(
@@ -82,21 +98,6 @@ class OfficeHours(models.Model):
 
     def __str__(self):
         return "Office Hours"
-
-
-class Paperwork(models.Model):
-    form_name = models.CharField(max_length=256)
-    form_pdf = models.FileField(upload_to="forms/")
-    uploaded = models.DateTimeField(auto_now_add=True)
-    handed_in = models.CharField(max_length=512, null=True, blank=True)
-    edited = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.form_name} {self.edited.year}"
-
-    class Meta:
-        verbose_name = "Paperwork"
-        verbose_name_plural = "Paperwork"
 
 
 class PaperworkForm(models.Model):
@@ -113,3 +114,36 @@ class PaperworkForm(models.Model):
 
     def __str__(self):
         return f"{self.employee} - {self.form}"
+
+
+class Paperwork(models.Model):
+    form_name = models.CharField(max_length=256)
+    form_pdf = models.FileField(upload_to="forms/")
+    uploaded = models.DateTimeField(auto_now_add=True)
+    handed_in = models.CharField(max_length=512, null=True, blank=True)
+    edited = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.form_name} {self.edited.year}"
+
+    def associated_forms(self):
+        ret = ""
+        for form in (
+            PaperworkForm.objects.filter(form=self.pk, employee__is_active=True)
+            .order_by("processed")
+            .all()
+        ):
+            line = "<div style='margin: .25rem 0 .25rem 0'>"
+            line += (
+                f"<a href='/media/{form.pdf}'>{form}</a>"
+                if form.pdf
+                else f"<span>{form}</span>"
+            )
+            line += "<b> - NOT PROCESSED</b>" if not form.processed else ""
+            line += "</div><br>"
+            ret += line
+        return format_html(ret)
+
+    class Meta:
+        verbose_name = "Paperwork"
+        verbose_name_plural = "Paperwork"

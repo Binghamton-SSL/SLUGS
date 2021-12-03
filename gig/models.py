@@ -21,7 +21,11 @@ DEPARTMENTS = [
 
 class Gig(models.Model):
     name = models.CharField(max_length=200)
-    notes = HTMLField(blank=True, null=True)
+    notes = HTMLField(
+        blank=True,
+        null=True,
+        help_text="This will show up on the showview page and the estimate as 'ATTN ENG'",
+    )
     manager_only_notes = HTMLField(blank=True, null=True)
     setup_by = models.DateTimeField(verbose_name="Setup By")
     start = models.DateTimeField(verbose_name="Gig start time")
@@ -32,7 +36,12 @@ class Gig(models.Model):
     day_of_show_notes = models.TextField(blank=True)
     archived = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
-    available_for_signup = models.DateField(blank=True, null=True, verbose_name="Date Available for Signup", help_text="If left blank, this value will be set to 7 days prior to the start date.")
+    available_for_signup = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Date Available for Signup",
+        help_text="If left blank, this value will be set to 7 days prior to the start date.",
+    )
     systems = models.ManyToManyField("equipment.System", through="SystemInstance")
 
     def get_staff_link(self):
@@ -53,14 +62,14 @@ class Gig(models.Model):
             + " - "
             + str(self.org)
             + " - "
-            + str(self.start.date())
+            + str(timezone.localtime(self.start).strftime("%m/%d/%Y"))
             + (" [UNPUBLISHED]" if not self.published else "")
             + (" [ARCHIVED]" if self.archived else "")
         )  # noop
 
     def save(self, *args, **kwargs):
         if self.available_for_signup is None:
-            self.available_for_signup = (self.start - timezone.timedelta(days=7))
+            self.available_for_signup = self.start - timezone.timedelta(days=7)
         super().save(*args, **kwargs)
 
 
@@ -123,3 +132,6 @@ class JobInterest(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     employee = models.ForeignKey(employee.Employee, on_delete=models.CASCADE)
     submitted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.employee} - {self.job.gig}"

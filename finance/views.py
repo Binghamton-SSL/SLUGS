@@ -26,6 +26,7 @@ class viewEstimate(SLUGSMixin, TemplateView):
     added_context = {"systems": {}, "fees": {}}
 
     def dispatch(self, request, *args, **kwargs):
+        Estimate.objects.get(pk=kwargs["e_id"]).save()
         self.added_context = calculateGigCost(Estimate.objects.get(pk=kwargs["e_id"]))
         return super().dispatch(request, *args, **kwargs)
 
@@ -77,7 +78,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                 )
                 s = []
                 for shift in shifts.filter(
-                    time_in__range=(day, day + timezone.timedelta(days=1))
+                    time_in__range=(day, day + timezone.timedelta(minutes=1439))
                 ).order_by("time_in"):
                     s.append(
                         (
@@ -115,7 +116,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
             )
             s = []
             for shift in shifts.filter(
-                time_in__range=(day, day + timezone.timedelta(days=1))
+                time_in__range=(day, day + timezone.timedelta(minutes=1439))
             ).order_by("time_in"):
                 s.append(
                     (
@@ -191,7 +192,11 @@ class exportSummaryCSV(SLUGSMixin, View):
             ["", ""]
             + ["" for rate in sumData["rates"]]
             + ["", ""]
-            + [sumData["pay_period"].start, sumData["pay_period"].end, sumData["pay_period"].payday]
+            + [
+                sumData["pay_period"].start,
+                sumData["pay_period"].end,
+                sumData["pay_period"].payday,
+            ]
         )
         for emp in sumData["employees"]:
             emp = sumData["employees"][emp]

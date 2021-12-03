@@ -1,0 +1,18 @@
+{% extends "theme/base.html" %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - 500 - We done goofed{% endblock %}
+
+{% block nav %}{% endblock %}
+{% block content %}
+<div class="flex flex-col max-w-5xl mx-auto">
+    <h1 class="m-4 text-4xl">Hey bestie...</h1>
+    <img class="w-24 h-24 mx-auto my-4" src="{% static 'img/index/vibe_check.png' %}"/>
+    <h1 class="text-6xl text-center">👉👈</h1>
+    <h2 class="mx-auto text-2xl text-center">It appears as tho something got messed up.</h2>
+    <h4 class="text-xl text-center">I'd encourage you to go back and try again. If that doesn't work, maybe try again later?</h4>
+    <h6 class="text-center text-gray-700">
+        If all else fails email us thx.
+    </h6>
+</div>
+{% endblock %}
+{% block footer %}{% endblock %}

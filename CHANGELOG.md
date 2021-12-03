@@ -1,5 +1,62 @@
 ### In Progress
-* Rollover entire employee timesheet
+* Allow managers to see inattentive employees via admin
+* Add access for SA Employees
+* Import and Export employees
+* Send an email when a training request is received
+* Track rate shift was paid at irrespective of changes to wages
+* Show all instances of paperwork form on form page in admin
+* Add ability to mass add groups to employees
+* Search employees by phone number
+* Sort employees by active employee, then by last name
+* Add `isAdminMixin` mixin
+* Add cli utility to show outstanding paperwork
+* Separate out tentative event calendar feed
+* Security Update: pillow, sqlparse, django-unicorn 
+* Sort paperwork instances by processed or not
+* Show outstanding paperwork for each employee
+* Add "Abandoned" estimate status
+* Add ATTN ENG (gig notes) to printed and virtual estimate
+* Add training department to manager email
+* Add custom 500 error page
+* Add support for multiple types of office hour rates under one employee
+* View estimate by status
+* Add description to shifts (applicable for office hours)
+* Show shifts on "You" page sorted by most recent
+* Add one time fees prior to regular fees and convert %'s to running totals
+* Add employee staffing stats to staffing page
+* Add "pre-canned" messages to estimates for commonly added notes
+* Show setup by time on showview page
+* Gigs are now sortable by system rented
+* Add next/current show timeline
+* Accept all button for financial overview
+* Add DEV mode indicator for superusers
+<br><br>
+BUG FIXES: 
+    * Show "Signed Reservation" instead of "Signed Estimate"
+    * Get rid of duplicate shifts showing on timesheet when shift started at midnight
+    * Corrected issue where all addons where displayed as "SpotlightSpotlight Operator" in ICS output
+    * Fixed formatting error with addons in ICS output
+    * Fix error where estimate would not save if load out was after show end 
+    * Corrected formatting error where gig str showed date in UTC
+    * Corrected formatting error where training str showed date in UTC
+    * Fixed error where signed estimates could not be viewed via admin
+    * Fixed `(+1)` showing on timesheet when shift did not span day (was using UTC time for conversion)
+    * Allow shows to be partially staffed
+    * Fixed graphical bug where training request notes would expand page width on mobile
+    * Estimate now shows billing contact not booking contact
+    * Race condition handled when multiple managers attempt to staff an event at the same time
+    * New multi-office hour manager page caching multiple objects
+    * Make event ticket on homepage visisble up to 5 hours after event end time (useful for day of show)
+    * Could not use day of show on mobile due to datetime widget not showing seconds (step="1")
+    * Hopefully solve cross-user caching issue (NOT SECURITY RELATED)
+        * Swap django-loginas for django-hijack
+    * Don't show meta-data in admin (paid-at)
+    * Error calculating edge case load in/out times
+    * Update staffing score function + provide explaination
+    * Current show ticket disappearing too soon
+    * Changed logic for showing gigs staffed on to exclude duplicate gigs resulting from multiple jobs on same gig
+    * Timeline starting gig early
+    * Scroll lockout added while using mobile menu
 
 #### V2.1.1 - 9/5/2021
 * Add "available for signup" field - denotes at what date the gig will show on the signup page. Automatically set to 7 days prior to event

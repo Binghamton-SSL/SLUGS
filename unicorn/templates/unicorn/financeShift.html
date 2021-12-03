@@ -7,6 +7,7 @@
             <span>{{shift.content_object}}</span>
             <span class="mt-2">Start: {{shift.time_in}}</span>
             <span>End: {{shift.time_out}}</span>
+            {% if shift.description %}<span>Description: {{shift.description}}</span> {% endif %}
             {% if not has_parent %}
             <button class="flex w-20 h-10 pl-4 mt-5 overflow-hidden text-white transition-all duration-75 bg-red-500 rounded-sm focus-within:w-max">
                 <span class="pr-3 my-auto">Delete</span>
@@ -21,7 +22,7 @@
             <span>Duration: {{shift.total_time|duration}}</span>
             <span>Total: ${{shift.cost|floatformat:2}}</span>
             {% if not has_parent %}
-                <button unicorn:click="accept" class="{% if shift.processed %} bg-[#009961] text-white {% else %} bg-[#AEFFE1] text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if shift.processed %} Accepted {% else %} Accept {% endif %}</button>
+                <button unicorn:click="accept" class="{% if shift.processed %} bg-[#009961] text-white {% else %} bg-[#AEFFE1] text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if shift.processed %} Processed {% else %} Accept {% endif %}</button>
                 <button unicorn:click="contest" class="{% if shift.contested %} bg-yellow-600 text-white {% else %} bg-yellow-100 text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if shift.contested %} Contested {% else %} Contest {% endif %}</button>
             {% else %}
                 {% if shift.processed %}

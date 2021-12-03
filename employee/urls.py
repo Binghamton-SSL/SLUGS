@@ -14,4 +14,9 @@ urlpatterns = [
         views.massAssignPaperwork.as_view(),
         name="mass_assign",
     ),
+    path(
+        "add-groups/<selected>",
+        views.addGroups.as_view(),
+        name="add_groups",
+    ),
 ]

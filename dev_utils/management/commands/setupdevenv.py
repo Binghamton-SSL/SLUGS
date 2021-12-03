@@ -143,7 +143,7 @@ class Command(BaseCommand):
                 description=sys_desc,
                 department=sys_dept,
                 base_price=sys_price,
-                price_per_hour=sys_hourly,
+                price_per_hour_for_duration_of_gig=sys_hourly,
             )
         # PERMISSIONS_FOR_MANAGERS = [
         #     12,
