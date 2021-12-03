@@ -49,6 +49,13 @@
 
 <body class="leading-normal tracking-normal font-brand bg-black text-white {% block body_classes %} {% endblock %}">
     {% block nav %} {% nav request %} {% endblock %}
+    <!-- Show if DEV version (only for superusers) -->
+    {% settings_value "DEBUG" as debugValue %}
+    {% if request.user.is_superuser and debugValue %}
+    <div class="w-full p-4 text-center bg-red-500">
+        <p class="text-xl text-white">DEBUG MODE IS ON</p>
+    </div>
+    {% endif %}
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
