@@ -1,4 +1,4 @@
-### In Progress
+### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin
 * Add access for SA Employees
 * Import and Export employees
