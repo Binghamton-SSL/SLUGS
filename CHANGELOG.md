@@ -29,6 +29,7 @@
 * Gigs are now sortable by system rented
 * Add next/current show timeline
 * Accept all button for financial overview
+* Add DEV mode indicator for superusers
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"
