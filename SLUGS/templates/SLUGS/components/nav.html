@@ -87,9 +87,11 @@
     const openMenu = () => {
         document.querySelector('.menubackground').classList.remove('hidden')
         document.querySelector('.mobile-nav').classList.remove('translate-x-full')
+        document.querySelector('body').classList.add('overflow-hidden')
     }
     const closeMenu = () => {
         document.querySelector('.menubackground').classList.add('hidden')
         document.querySelector('.mobile-nav').classList.add('translate-x-full')
+        document.querySelector('body').classList.remove('overflow-hidden')
     }
 </script>
