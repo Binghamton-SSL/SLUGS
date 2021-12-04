@@ -1,3 +1,10 @@
+### V2.2.1 - In Progress
+<br><br>
+* Add Djangoql Admin Search
+* Add DEBUG banner to admin
+BUG FIXES:
+    * Fix formatting error in estimate signature box
+
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin
 * Add access for SA Employees
