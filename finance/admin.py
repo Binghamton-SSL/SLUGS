@@ -1,6 +1,15 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from finance.models import Payment, Wage, Shift, Estimate, Fee, OneTimeFee, PayPeriod, CannedNote
+from finance.models import (
+    Payment,
+    Wage,
+    Shift,
+    Estimate,
+    Fee,
+    OneTimeFee,
+    PayPeriod,
+    CannedNote,
+)
 from nested_admin import NestedGenericTabularInline
 
 
@@ -107,7 +116,18 @@ class EstimateAdmin(admin.ModelAdmin):
                 ]
             },
         ),
-        ("Billing info", {"fields": ["gig__day_of_show_notes", "payment_due", "paid", "fees", "adjustments"]}),
+        (
+            "Billing info",
+            {
+                "fields": [
+                    "gig__day_of_show_notes",
+                    "payment_due",
+                    "paid",
+                    "fees",
+                    "adjustments",
+                ]
+            },
+        ),
         (
             "Bill",
             {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},

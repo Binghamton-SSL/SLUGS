@@ -22,24 +22,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
-    SECRET_KEY=(str, ''),
+    SECRET_KEY=(str, ""),
     ALLOWED_HOSTS=(list, []),
     INTERNAL_IPS=(list, []),
 )
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
-INTERNAL_IPS = env('INTERNAL_IPS')
+INTERNAL_IPS = env("INTERNAL_IPS")
 
 # Application definition
 
@@ -80,7 +80,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -95,20 +95,20 @@ ROOT_URLCONF = "SLUGS.urls"
 
 TEMPLATE_DIRS = [
     os.path.join("SLUGS", "templates"),
-    os.path.join(BASE_DIR, 'SLUGS/templates'),
+    os.path.join(BASE_DIR, "SLUGS/templates"),
 ]
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': TEMPLATE_DIRS,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": TEMPLATE_DIRS,
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -164,11 +164,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.dirname(BASE_DIR) + '/public/static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.dirname(BASE_DIR) + "/public/static/"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -208,7 +208,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "contextmenu": "formats | link image",
     "menubar": True,
     "statusbar": True,
-    "font_formats": "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Rubik=rubik,sans-serif; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats", # noqa
+    "font_formats": "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Rubik=rubik,sans-serif; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",  # noqa
 }
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
@@ -218,18 +218,18 @@ CRISPY_TEMPLATE_PACK = "tailwind"
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_REGION = "US"
 
-LOGIN_URL = '/auth/login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = "/auth/login"
+LOGIN_REDIRECT_URL = "/"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = env('SLUGS_EMAIL_ADDRESS')
-EMAIL_HOST_PASSWORD = env('SLUGS_EMAIL_PASSWORD')
+EMAIL_HOST_USER = env("SLUGS_EMAIL_ADDRESS")
+EMAIL_HOST_PASSWORD = env("SLUGS_EMAIL_PASSWORD")
 
-init_py = open(os.path.join(Path(__file__).resolve().parent, '__init__.py')).read()
-VERSION = "v"+re.match("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
+init_py = open(os.path.join(Path(__file__).resolve().parent, "__init__.py")).read()
+VERSION = "v" + re.match("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 now = timezone.now()
 BUILD = f'b.{now.strftime("%m.%d.%y.%H.%M.%S")}UTC'
 

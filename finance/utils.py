@@ -30,7 +30,7 @@ def prepareSummaryData(pp_id):
     for rate in Wage.objects.all().order_by("hourly_rate"):
         rates[rate] = [rate, 0]
     employees = {}
-    
+
     try:
         for employee in (
             Employee.objects.all()
@@ -59,7 +59,9 @@ def prepareSummaryData(pp_id):
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                 )
 
-                total_hours += round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                total_hours += (
+                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                )
                 total_sum += float(
                     shift.content_object.position.hourly_rate.hourly_rate
                 ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
@@ -100,7 +102,9 @@ def prepareSummaryData(pp_id):
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                 )
 
-                total_hours += round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                total_hours += (
+                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                )
                 total_sum += float(
                     shift.content_object.position.hourly_rate.hourly_rate
                 ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)

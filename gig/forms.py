@@ -49,8 +49,8 @@ class StaffModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return (
             f'{"TESTING - " if not obj.groups.filter(name=self.instance.position).exists()  else ""}'
-            f'{obj}'
-            f'staffing score: {functools.reduce(lambda a, b: a+(1 if Job.objects.filter(employee=obj, gig__pk=b[0]).first() is not None else -1), JobInterest.objects.filter(employee=obj).values_list("job__gig").distinct(), 0)*(timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days}, ' # Reduce all job interests, add 1 for every gig staffed and -1 for every gig skipped. Multiply by last time staffed to account for multiple jobs on same gig (can't be staffed more than once)
+            f"{obj}"
+            f'staffing score: {functools.reduce(lambda a, b: a+(1 if Job.objects.filter(employee=obj, gig__pk=b[0]).first() is not None else -1), JobInterest.objects.filter(employee=obj).values_list("job__gig").distinct(), 0)*(timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days}, '  # Reduce all job interests, add 1 for every gig staffed and -1 for every gig skipped. Multiply by last time staffed to account for multiple jobs on same gig (can't be staffed more than once)
             # f'Staffed {round(Job.objects.filter(employee=obj).count()/JobInterest.objects.filter(employee=obj).count()*100,2)}% of time,' # Old percentage based score
             f'last staffed {str((timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days)+" days ago" if (timezone.now() - Job.objects.filter(employee=obj).order_by("-gig__start").first().gig.start).days > 0 else "in the future" if Job.objects.filter(employee=obj).order_by("-gig__start").first() is not None else "never" }'
         )

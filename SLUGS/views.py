@@ -46,7 +46,9 @@ class index(SLUGSMixin, TemplateView):
         self.added_context["signup_open"] = signupStatus.objects.first().is_open
         self.added_context["gigs"] = (
             (
-                Gig.objects.filter(job__employee=request.user).distinct().order_by("-start")
+                Gig.objects.filter(job__employee=request.user)
+                .distinct()
+                .order_by("-start")
                 # Job.objects.all()
                 # .filter(employee=request.user)
                 # .select_related("gig")
