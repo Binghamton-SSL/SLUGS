@@ -30,6 +30,7 @@ django-recurrence==1.10.3
 django-tailwind==2.2.0
 django-tinymce==3.4.0
 django-unicorn==0.36.1
+djangoql==0.16.0
 et-xmlfile==1.1.0
 flake8==3.9.2
 google-api-core==1.26.3
@@ -56,6 +57,7 @@ pathspec==0.8.1
 phonenumberslite==8.12.22
 Pillow==8.3.2
 pkg_resources==0.0.0
+ply==3.11
 poyo==0.5.0
 protobuf==3.16.0
 pyasn1==0.4.8

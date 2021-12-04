@@ -8,6 +8,7 @@ from import_export.admin import ImportExportMixin
 from finance.admin import ShiftInlineAdmin
 from employee.models import PaperworkForm, Paperwork
 from utils.generic_email import send_generic_email
+from djangoql.admin import DjangoQLSearchMixin
 
 
 from .models import Employee, OfficeHours
@@ -49,7 +50,7 @@ class EmployeeResource(resources.ModelResource):
 
 
 @admin.register(Employee)
-class EmployeeAdmin(ImportExportMixin, UserAdmin):
+class EmployeeAdmin(DjangoQLSearchMixin, ImportExportMixin, UserAdmin):
     resource_class = EmployeeResource
 
     def group(self, user):
@@ -201,6 +202,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
         "phone_number",
         "groups__name",
     )
+    djangoql_completion_enabled_by_default = False
     ordering = (
         "-is_active",
         "last_name",

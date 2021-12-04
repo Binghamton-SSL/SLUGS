@@ -1,4 +1,5 @@
-{% load i18n static %}<!DOCTYPE html>
+{% load i18n static %}{% load settings %}
+<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
@@ -64,7 +65,34 @@
     </div>
     {% endblock %}
     {% endif %}
-
+    {% settings_value "DEBUG" as debugValue %}
+    {% if user.is_superuser and debugValue %}
+    <div style="-webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: Rubik,sans-serif;
+    line-height: 1.5;
+    letter-spacing: 0;
+    --tw-text-opacity: 1;
+    color: rgba(255,255,255,var(--tw-text-opacity));
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: #e5e7eb;
+    --tw-shadow: 0 0 #0000;
+    --tw-ring-inset: var(--tw-empty, );
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: rgba(59, 130, 246, 0.5);
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+    width: 100%;
+    --tw-bg-opacity: 1;
+    background-color: rgba(239,68,68,var(--tw-bg-opacity));
+    padding: 1rem;
+    text-align: center;">
+        <p class="text-xl text-white">DEBUG MODE IS ON</p>
+    </div>
+    {% endif %}
     {% block messages %}
         {% if messages %}
         <ul class="messagelist">{% for message in messages %}
