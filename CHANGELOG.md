@@ -1,7 +1,7 @@
 ### V2.2.1 - In Progress
-<br><br>
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
+<br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
 
