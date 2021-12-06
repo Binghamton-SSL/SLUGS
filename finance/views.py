@@ -19,6 +19,10 @@ from SLUGS.templatetags.grouping import has_group
 from finance.models import Estimate, SystemInstance, PayPeriod, Shift, Wage
 from employee.models import Employee
 import decimal
+from collections import defaultdict
+import calendar
+
+
 
 
 class viewEstimate(SLUGSMixin, TemplateView):
@@ -218,6 +222,33 @@ class exportSummaryCSV(SLUGSMixin, View):
             ]
         )
         return response
+
+    
+class saBillingSummary(SLUGSMixin, TemplateView):
+    template_name = "finance/sa_billing_summary.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        month = kwargs["month"]
+        year = kwargs["year"]
+        estimates = Estimate.objects.filter(gig__start__year__gte=year, gig__start__month=month, gig__start__year=year, billing_contact__organization__SA_account_num__isnull=False).order_by('billing_contact__organization')
+        groups = {}
+        grand_total = decimal.Decimal(0)
+        for e in estimates:
+            if e.billing_contact.organization.name not in groups:
+                groups[e.billing_contact.organization] = {
+                    "estimates": [e],
+                    "total": decimal.Decimal(e.outstanding_balance),
+                }
+            else:
+                groups[e.billing_contact.organization.name]['estimates'].append(e)
+                groups[e.billing_contact.organization.name]['total'] += e.outstanding_balance
+            grand_total += e.outstanding_balance
+        self.added_context["groups"] = groups
+        self.added_context["grand_total"] = grand_total
+        self.added_context["month"] = month
+        self.added_context["year"] = year
+        self.added_context["month_name"] = calendar.month_name[int(month)]
+        return super().dispatch(request, *args, **kwargs)
 
 
 class RollOverAllShifts(SLUGSMixin, FormView):
