@@ -8,19 +8,22 @@
     <h1 class="text-4xl">Financial Overview</h1>
     <h2 class="mt-5 text-2xl">Generate SA Group Billing Summary</h2>
     <div class="p-4 text-black bg-white rounded">
-        <p>This will generate a SA Billing Summary for events that have their billing contact set to a person who's organization has a valid SA Account number.</p>
+        <p>Generate a monthly Billing Summary for all published estimates (invoices) which have a billing contact belonging to an organization containing an SA Account #.</p>
         <div>
-            <input type="number" id="saBillingSummaryMonth" placeholder="Month"/>
-            <input type="number" id="saBillingSummaryYear" placeholder="Year"/>
+            <input type="number" class="w-24" max="12" min="1" id="saBillingSummaryMonth" placeholder="Month"/>
+            <input type="number" class="w-24" id="saBillingSummaryYear" placeholder="Year"/>
             <button onclick="javascript:generateSaBillingSummary()" class="px-2 py-2 m-2 text-white bg-black cursor-pointer">Generate</button>
         </div>
         <script>
+            const month = document.getElementById('saBillingSummaryMonth');
+            const year = document.getElementById('saBillingSummaryYear');
+            month.value = (new Date()).getMonth();
+            year.value = (new Date()).getFullYear();
+
             const generateSaBillingSummary = () => {
-                const month = document.getElementById('saBillingSummaryMonth').value;
-                const year = document.getElementById('saBillingSummaryYear').value;
-                let url = "{%url 'finance:sa_billing_summary' month="-1" year="-2" %}"
-                url = url.replace('-1', month);
-                url = url.replace('-2', year);
+                let url = "{%url 'finance:sa_billing_summary' month="-1" year="-2" %}";
+                url = url.replace('-1', month.value);
+                url = url.replace('-2', year.value);
                 window.location.href = url;
             }
         </script>
@@ -41,6 +44,9 @@
             </div>
         </div>
         <div>
+            {% for shift in shifts %}
+                {% unicorn 'financeShift' shift=shift %}
+            {% endfor %}
         </div>
     </div>
     <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>

@@ -28,7 +28,7 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                'stencil': ['Allerta Stencil', 'sans-serif'],
+                'stencil': ['Stardos Stencil', 'sans-serif'],
                 'brand': ['Rubik', 'sans-serif'],
             },
             transitionProperty: {

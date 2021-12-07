@@ -33,24 +33,29 @@
     <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
     <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
     {% block headincludes %} {% endblock %}
+
 </head>
 
 <body>
     <table class="w-full border-0">
         <thead>
-            <div class="relative flex w-full">
-                <div class="absolute">
-                    <p>{% now "h:i A" %}</p>
-                    <p>{% now "m/d/y" %}</p>
-                    <p>Accrual Basis</p>
-                </div>
-                <div class="mx-auto font-bold text-center">
-                    <h2 class="text-xl">BSSL</h2>
-                    <h2 class="text-xl">SA Group Billing Summary</h2>
-                    <h4>{{month_name}} {{year}}</h4>
-                </div>
-            </div>
-            <hr>
+            <tr>
+                <td>
+                    <div class="relative flex w-full">
+                        <div class="absolute">
+                            <p>{% now "h:i A" %}</p>
+                            <p>{% now "m/d/y" %}</p>
+                            <p>Accrual Basis</p>
+                        </div>
+                        <div class="mx-auto font-bold text-center">
+                            <h2 class="text-xl">BSSL</h2>
+                            <h2 class="text-xl">SA Group Billing Summary</h2>
+                            <h4>{{month_name}} {{year}}</h4>
+                        </div>
+                    </div>
+                    <hr>
+                </td>
+            </tr>
         </thead>
         <tbody class="w-full">
             <tr>
@@ -60,8 +65,8 @@
                             <col width="75%">
                             <col width="25%">
                         </colgroup>
-                        <tbody>
                         {% for group, details in groups.items %}
+                        <tbody class="dont_break">
                             <tr>
                                 <td>
                                     <p>
@@ -72,7 +77,7 @@
                             {% for e in details.estimates %}
                             <tr>
                                 <td>&nbsp;&nbsp;&nbsp;&nbsp;{{e.gig.name}}</td>
-                                <td style="border-bottom-width: 1px;" class="border-b-black">{{e.outstanding_balance}}</td>
+                                <td style="border-bottom-width: 1px;" class="border-black">{{e.outstanding_balance}}</td>
                             </tr>
                             {% endfor %}
                             <tr>
@@ -83,7 +88,9 @@
                                     {{details.total}}
                                 </td>
                             </tr>
+                        </tbody>
                         {% endfor %}
+                        <tbody>
                         <tr>
                             <td>
                                 TOTAL
@@ -97,21 +104,23 @@
                 </td>
             </tr>
         </tbody>
-        <tfoot></tfoot>
+        <tfoot>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </body>
 <style>
     @page {
-        size: 8.5in 11in;
+        size: letter;
         counter-increment: page;
-
     }
-
     @media print {
         .dont_break {
             break-inside: avoid;
         }
-    }
 
     body {
         width: 8.5in;
@@ -122,11 +131,6 @@
     hr {
         border-color: black;
         border-top-width: 4px;
-    }
-    
-    #pageFooter:after {
-        counter-increment: page;
-        content: counter(page);
     }
 </style>
 <script>
