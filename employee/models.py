@@ -6,6 +6,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
+from django.utils import timezone
 
 from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -55,7 +56,7 @@ class Employee(AbstractUser):
     phone_number = PhoneNumberField(null=True)
     is_grad_student = models.BooleanField(default=False)
     graduation_year = models.IntegerField(blank=True, null=True)
-    signature = JSignatureField(null=True, blank=True)
+    signature = JSignatureField(null=True, blank=True, help_text="If on a mobile device, please turn it sideways to sign on a larger surface")
     employee_notes = HTMLField(
         blank=True,
         null=True,
@@ -70,6 +71,9 @@ class Employee(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    date_joined = models.DateTimeField(default=timezone.now, verbose_name="Date Hired", help_text="Defaults to datetime the employee signed up for SLUGS")
+
 
     class Meta:
         verbose_name = "Employee"

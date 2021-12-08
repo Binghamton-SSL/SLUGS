@@ -162,7 +162,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
             perm_fields = ("is_active", "is_staff", "groups")
 
         return [
-            (None, {"fields": ("email", "password", "last_login")}),
+            (None, {"fields": ("email", "password", "last_login", "date_joined")}),
             (
                 "Personal info",
                 {

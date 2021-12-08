@@ -1,6 +1,7 @@
 import ast
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
 from PyPDF4 import PdfFileWriter, PdfFileReader
 from jsignature.utils import draw_signature
 import os
@@ -17,7 +18,10 @@ def processAutoSignForm(paperworkForm, user):
                 c.setFont("Times-Roman", element['font_size'])
                 c.drawString(element['x']*inch, element['y']*inch, eval(element['text']))
             elif element['type'] == 'Signature':
-                c.drawImage(draw_signature(user.signature, as_file=True), element['x']*inch, element['y']*inch, width=element['width']*inch, height=(element['width']/2.5)*inch, mask='auto')
+                sig_image = ImageReader(draw_signature(user.signature))
+                (sig_width,sig_height) = sig_image.getSize()
+                img_height = (element['width']/(sig_width/sig_height))*inch
+                c.drawImage(sig_image, element['x']*inch, ((element['y']*inch)-img_height), width=element['width']*inch, height=img_height, mask='auto')
         c.showPage()
     c.save()
 
@@ -33,7 +37,9 @@ def processAutoSignForm(paperworkForm, user):
 
     with open(f'{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf', "wb+") as outputStream:
         output_file.write(outputStream)
-        paperworkForm.pdf.save(f'{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf', outputStream)
+        paperworkForm.pdf.save(f'{paperworkForm.form}-{user.last_name}_{user.first_name}_{datetime.now().strftime("%H:%M:%S")}-signed.pdf', outputStream)
+        paperworkForm.uploaded = datetime.now()
+        paperworkForm.save()
 
     os.remove(f"signed_copy-{user.pk}.pdf")
     os.remove(f'{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf')
