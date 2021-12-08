@@ -115,7 +115,7 @@ class userCreationForm(UserCreationForm):
 class userChangeForm(ModelForm):
     class Meta:
         model = Employee
-        fields = ["email", "first_name", "last_name", "phone_number", "graduation_year"]
+        fields = ["email", "first_name", "last_name", "phone_number", "graduation_year", "signature"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -139,6 +139,10 @@ class userChangeForm(ModelForm):
                 css_class="md:flex md:space-x-2",
             ),
             "phone_number",
+            Div(
+                "signature",
+                css_class="border-black border-2 m-2 p-2 rounded-sm"
+            ),
             Submit(
                 "submit",
                 "Update",
@@ -185,6 +189,20 @@ class uploadForm(ModelForm):
                     css_class="bg-white text-black rounded-sm py-2 mt-2 px-4",
                 ),
             )
+        )
+
+
+class signPaperworkForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Submit(
+                "submit",
+                "Sign Form using Signature on File",
+                css_class="bg-white text-black rounded-sm py-2 mt-2 px-4",
+            ),
         )
 
 

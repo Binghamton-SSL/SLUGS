@@ -1,6 +1,7 @@
 ### V2.2.1 - In Progress
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
+* Add ability to automatically sign forms using user signature
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box

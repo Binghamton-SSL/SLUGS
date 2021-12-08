@@ -17,6 +17,7 @@ from django.core.exceptions import PermissionDenied
 from employee.forms import (
     massAssignPaperworkForm,
     addGroupsForm,
+    signPaperworkForm,
     userCreationForm,
     userChangeForm,
     changePasswordForm,
@@ -24,6 +25,7 @@ from employee.forms import (
 )
 from dev_utils.views import MultipleFormView
 from SLUGS.views import SLUGSMixin, isAdminMixin
+from employee.utils import processAutoSignForm
 from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
 from finance.forms import OfficeHoursShiftFormSet
@@ -191,6 +193,27 @@ class uploadForm(SLUGSMixin, FormView):
         form.save()
         messages.add_message(
             self.request, messages.SUCCESS, f"{form.instance.form} uploaded"
+        )
+        return super().form_valid(form)
+
+
+class automaticallySignForm(SLUGSMixin, FormView):
+    form_class = signPaperworkForm
+    template_name = "employee/automatically_sign_form.html"
+    success_url = reverse_lazy("employee:overview")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.pk is not None:
+            self.form_id = PaperworkForm.objects.get(pk=kwargs["form_id"])
+            if self.form_id.employee.pk != request.user.pk:
+                raise PermissionDenied()
+            self.added_context["paperwork"] = self.form_id
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        processAutoSignForm(self.added_context["paperwork"], self.request.user)
+        messages.add_message(
+            self.request, messages.SUCCESS, f"{self.added_context['paperwork'].form} has been signed and uploaded"
         )
         return super().form_valid(form)
 

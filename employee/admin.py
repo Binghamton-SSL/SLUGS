@@ -59,6 +59,12 @@ class EmployeeAdmin(DjangoQLSearchMixin, ImportExportMixin, UserAdmin):
             groups.append(group.name)
         return ", ".join(groups)
 
+    def signature_on_file(self, user):
+        if user.signature:
+            return "Signature Stored"
+        else:
+            return "No Signature"
+
     def save_model(self, request, obj, form, change):
         if "is_active" in form.changed_data and form.instance.is_active:
             send_generic_email(
@@ -136,7 +142,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     )
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
-    readonly_fields = ["last_login"]
+    readonly_fields = ["last_login", "signature_on_file"]
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -167,6 +173,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "bnum",
                         "is_grad_student",
                         "graduation_year",
+                        "signature_on_file",
                         "employee_notes",
                     )
                 },

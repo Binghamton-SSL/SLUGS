@@ -1,7 +1,6 @@
 {% extends "theme/base.html" %}
 {% load grouping %} {% load crispy_forms_tags %} {% load static %}
-{% block title %} - {{request.user.first_name}} {{request.user.last_name}} - Change Password{% endblock %}
-
+{% block title %} - {{request.user.first_name}} {{request.user.last_name}} - Upload Form{% endblock %}
 {% block content %}
 <div class="flex flex-col max-w-5xl mx-auto mt-10">
     <h1 class="text-3xl">Upload {{paperwork.form}}</h1>

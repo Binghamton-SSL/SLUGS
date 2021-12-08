@@ -9,6 +9,8 @@ from django.utils.html import format_html
 
 from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
+from jsignature.fields import JSignatureField
+from jsignature.utils import draw_signature
 
 
 class EmployeeManager(BaseUserManager):
@@ -53,6 +55,7 @@ class Employee(AbstractUser):
     phone_number = PhoneNumberField(null=True)
     is_grad_student = models.BooleanField(default=False)
     graduation_year = models.IntegerField(blank=True, null=True)
+    signature = JSignatureField(null=True, blank=True)
     employee_notes = HTMLField(
         blank=True,
         null=True,
@@ -121,6 +124,8 @@ class Paperwork(models.Model):
     form_pdf = models.FileField(upload_to="forms/")
     uploaded = models.DateTimeField(auto_now_add=True)
     handed_in = models.CharField(max_length=512, null=True, blank=True)
+    can_auto_sign = models.BooleanField(default=False)
+    auto_sign_layout = models.TextField(blank=True, default="[]")
     edited = models.DateTimeField(auto_now=True)
 
     def __str__(self):

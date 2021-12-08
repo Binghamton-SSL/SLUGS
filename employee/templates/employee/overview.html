@@ -3,7 +3,13 @@
 {% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
 {% block title %} - Overview - {{request.user.first_name}} {{request.user.last_name}}{% endblock %}
 
-{% block headincludes %}{% unicorn_scripts %}{% endblock %}
+{% block headincludes %}
+{% unicorn_scripts %}
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-4 mt-10 sm:mx-auto">
     <h1 class="text-4xl">
@@ -37,13 +43,20 @@
                             </svg>
                             <p>{{form.uploaded}}</p>
                         </div>
-                        {% if form.processed %}
-                            <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
-                        {% else %}
-                            <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
-                        {% endif %}
+                            {% if form.processed %}
+                                <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
+                            {% else %}
+                                <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
+                            {% endif %}
                         {% else %}
                         <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
+                            {% if form.form.can_auto_sign %}
+                                {% if user.signature %}
+                                    <a class="mx-auto" href="{% url 'employee:sign_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Automatically Sign Form</button></a>
+                                {% else %}
+                                    <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically fill out this form by putting your signature on file. Check out your user information above.</p>
+                                {% endif %}
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </div>

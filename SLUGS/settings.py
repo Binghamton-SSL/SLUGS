@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "hijack",
     "hijack.contrib.admin",
     "djangoql",
+    "jsignature",
 ]
 
 MIDDLEWARE = [
@@ -235,3 +236,7 @@ BUILD = f'b.{now.strftime("%m.%d.%y.%H.%M.%S")}UTC'
 
 SESSION_COOKIE_AGE = 518400
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+JSIGNATURE_JQUERY = 'admin'
+JSIGNATURE_WIDTH = 1000
+JSIGNATURE_HEIGHT = 400
