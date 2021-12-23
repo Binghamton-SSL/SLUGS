@@ -34,6 +34,9 @@ module.exports = {
             transitionProperty: {
                 'height': 'height',
                 'width': 'width',
+            },
+            screens: {
+                'xs-landscape': '500px'
             }
         },
     },

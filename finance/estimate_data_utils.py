@@ -104,7 +104,7 @@ def calculateGigCost(estimate):
         ret["subtotal"] += system_subtotal
         ret["total_amt"] += system_subtotal
 
-    for fee in ret["estimate"].onetimefee_set.order_by("percentage").all():
+    for fee in ret["estimate"].onetimefee_set.order_by("pk").all():
         fee_amt = (
             fee.amount
             if fee.amount
@@ -114,7 +114,7 @@ def calculateGigCost(estimate):
         ret["fees_amt"] += fee_amt
         ret["total_amt"] += fee_amt
 
-    for fee in ret["estimate"].fees.order_by("percentage").all():
+    for fee in ret["estimate"].fees.order_by("ordering").all():
         fee_amt = (
             fee.amount
             if fee.amount

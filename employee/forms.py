@@ -141,7 +141,16 @@ class userChangeForm(ModelForm):
             "phone_number",
             Div(
                 "signature",
-                css_class="border-black border-2 m-2 p-2 rounded-sm"
+                css_class="border-black border-2 m-2 p-2 rounded-sm hidden xs-landscape:block"
+            ),
+            Div(
+                HTML("""
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Signature
+                </label>
+                <p>Please turn your device sideways to activate the signature module. This screen is too small!!!</p>
+                """),
+                css_class="border-black border-2 m-2 p-2 rounded-sm xs-landscape:hidden"
             ),
             Submit(
                 "submit",

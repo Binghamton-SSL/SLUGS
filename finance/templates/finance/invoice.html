@@ -86,7 +86,7 @@
                                                 {% now "n/j/Y" %}
                                             </td>
                                             <td>
-                                                {% if estimate.gig.payment_due %} {{estimate.gig.payment_due|date:"n/j/Y"}} {% else %} Upon Receipt {% endif %}
+                                                {% if estimate.payment_due %} {{estimate.payment_due|date:"n/j/Y"}} {% else %} Upon Receipt {% endif %}
                                             </td>
                                             <td>
                                                 SA7400-I{{2500|add:estimate.pk}}
@@ -424,7 +424,7 @@
                                     Payment due upon receipt of Invoice by way of Check of SA inter-organization transfer.
                                 </p>
                                 <p>
-                                    Make checks payable to: <br>Binghamton Sound, Staging, and Lighting (SA Account #7400) / Student Association of Binghamton University Inc.
+                                    Make checks payable to: <br>Binghamton University Student Association inc. <br>Memo: SA Acct # 7400 - SA BSSL
                                 </p>
                                 <p>
                                     Invoices unpaid after two weeks will be subject to late fee.

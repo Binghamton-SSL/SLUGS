@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html
 from finance.models import (
     Payment,
@@ -11,6 +11,8 @@ from finance.models import (
     CannedNote,
 )
 from nested_admin import NestedGenericTabularInline
+from djangoql.admin import DjangoQLSearchMixin
+
 
 
 # Register your models here.
@@ -42,6 +44,7 @@ class OneTimeFeeInline(admin.StackedInline):
 
 @admin.register(Fee)
 class FeeAdmin(admin.ModelAdmin):
+    ordering = ['ordering']
     pass
 
 
@@ -52,7 +55,36 @@ class PaymentInlineAdmin(admin.StackedInline):
 
 
 @admin.register(Estimate)
-class EstimateAdmin(admin.ModelAdmin):
+class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+
+    @admin.action(description='Mark selected estimates as Show Concluded')
+    def make_concluded(modeladmin, request, queryset):
+        queryset.update(status='O')
+        messages.add_message(
+            request, messages.SUCCESS, "Estimates marked as concluded 👍"
+        )
+
+    @admin.action(description='Mark selected estimates as Awaiting Payment')
+    def make_awaiting_payment(modeladmin, request, queryset):
+        queryset.update(status='A')
+        messages.add_message(
+            request, messages.SUCCESS, "Estimates awaiting payment 👍"
+        )
+    
+    @admin.action(description='Mark selected estimates as Closed')
+    def make_closed(modeladmin, request, queryset):
+        queryset.update(status='C')
+        messages.add_message(
+            request, messages.SUCCESS, "Estimates closed 👍"
+        )
+
+    @admin.action(description='Mark selected estimates as Abandoned')
+    def make_abandoned(modeladmin, request, queryset):
+        queryset.update(status='N')
+        messages.add_message(
+            request, messages.SUCCESS, "Estimates abandoned 👍"
+        )
+
     @staticmethod
     def gig__start(obj):
         return obj.gig.start
@@ -75,6 +107,7 @@ class EstimateAdmin(admin.ModelAdmin):
     def gig__day_of_show_notes(obj):
         return obj.gig.day_of_show_notes
 
+    actions = [make_concluded, make_awaiting_payment, make_closed, make_abandoned]
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
     list_filter = (
@@ -133,6 +166,7 @@ class EstimateAdmin(admin.ModelAdmin):
             {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},
         ),
     )
+    djangoql_completion_enabled_by_default = False
 
 
 @admin.register(PayPeriod)
