@@ -8,20 +8,28 @@ import os
 from datetime import datetime
 
 
-
 def processAutoSignForm(paperworkForm, user):
     c = canvas.Canvas(f"signed_copy-{user.pk}.pdf")
     pages = ast.literal_eval(paperworkForm.form.auto_sign_layout)
     for page in pages:
         for element in page:
-            if element['type'] == 'Text':
-                c.setFont("Times-Roman", element['font_size'])
-                c.drawString(element['x']*inch, element['y']*inch, eval(element['text']))
-            elif element['type'] == 'Signature':
+            if element["type"] == "Text":
+                c.setFont("Times-Roman", element["font_size"])
+                c.drawString(
+                    element["x"] * inch, element["y"] * inch, eval(element["text"])
+                )
+            elif element["type"] == "Signature":
                 sig_image = ImageReader(draw_signature(user.signature))
-                (sig_width,sig_height) = sig_image.getSize()
-                img_height = (element['width']/(sig_width/sig_height))*inch
-                c.drawImage(sig_image, element['x']*inch, ((element['y']*inch)-img_height), width=element['width']*inch, height=img_height, mask='auto')
+                (sig_width, sig_height) = sig_image.getSize()
+                img_height = (element["width"] / (sig_width / sig_height)) * inch
+                c.drawImage(
+                    sig_image,
+                    element["x"] * inch,
+                    ((element["y"] * inch) - img_height),
+                    width=element["width"] * inch,
+                    height=img_height,
+                    mask="auto",
+                )
         c.showPage()
     c.save()
 
@@ -35,11 +43,16 @@ def processAutoSignForm(paperworkForm, user):
         input_page.mergePage(signed_file.getPage(page_number))
         output_file.addPage(input_page)
 
-    with open(f'{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf', "wb+") as outputStream:
+    with open(
+        f"{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf", "wb+"
+    ) as outputStream:
         output_file.write(outputStream)
-        paperworkForm.pdf.save(f'{paperworkForm.form}-{user.last_name}_{user.first_name}_{datetime.now().strftime("%H:%M:%S")}-signed.pdf', outputStream)
+        paperworkForm.pdf.save(
+            f'{paperworkForm.form}-{user.last_name}_{user.first_name}_{datetime.now().strftime("%H:%M:%S")}-signed.pdf',
+            outputStream,
+        )
         paperworkForm.uploaded = datetime.now()
         paperworkForm.save()
 
     os.remove(f"signed_copy-{user.pk}.pdf")
-    os.remove(f'{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf')
+    os.remove(f"{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf")

@@ -2,6 +2,9 @@
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
 * Add ability to automatically sign forms using user signature
+* Email sent when broken equipment report is filed
+* Add action to restart the server via admin
+* Add chosen/preferred name
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box

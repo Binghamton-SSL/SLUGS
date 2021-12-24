@@ -6,6 +6,7 @@ from fieldsets_with_inlines import FieldsetsInlineMixin
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
+from djangoql.admin import DjangoQLSearchMixin
 
 
 class JobSubInline(NestedTabularInline):
@@ -43,7 +44,8 @@ class LoadInInline(NestedTabularInline):
 
 
 @admin.register(Gig)
-class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
+class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
+    djangoql_completion_enabled_by_default = False
     search_fields = ["name", "org__name", "contact__name", "location__name"]
     inlines = (SystemInline, LoadInInline)
     autocomplete_fields = ["org", "contact", "location"]

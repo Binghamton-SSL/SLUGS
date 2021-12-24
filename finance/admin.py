@@ -14,7 +14,6 @@ from nested_admin import NestedGenericTabularInline
 from djangoql.admin import DjangoQLSearchMixin
 
 
-
 # Register your models here.
 @admin.register(Wage)
 class WageAdmin(admin.ModelAdmin):
@@ -44,7 +43,7 @@ class OneTimeFeeInline(admin.StackedInline):
 
 @admin.register(Fee)
 class FeeAdmin(admin.ModelAdmin):
-    ordering = ['ordering']
+    ordering = ["ordering"]
     pass
 
 
@@ -56,34 +55,27 @@ class PaymentInlineAdmin(admin.StackedInline):
 
 @admin.register(Estimate)
 class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
-
-    @admin.action(description='Mark selected estimates as Show Concluded')
+    @admin.action(description="Mark selected estimates as Show Concluded")
     def make_concluded(modeladmin, request, queryset):
-        queryset.update(status='O')
+        queryset.update(status="O")
         messages.add_message(
             request, messages.SUCCESS, "Estimates marked as concluded 👍"
         )
 
-    @admin.action(description='Mark selected estimates as Awaiting Payment')
+    @admin.action(description="Mark selected estimates as Awaiting Payment")
     def make_awaiting_payment(modeladmin, request, queryset):
-        queryset.update(status='A')
-        messages.add_message(
-            request, messages.SUCCESS, "Estimates awaiting payment 👍"
-        )
-    
-    @admin.action(description='Mark selected estimates as Closed')
-    def make_closed(modeladmin, request, queryset):
-        queryset.update(status='C')
-        messages.add_message(
-            request, messages.SUCCESS, "Estimates closed 👍"
-        )
+        queryset.update(status="A")
+        messages.add_message(request, messages.SUCCESS, "Estimates awaiting payment 👍")
 
-    @admin.action(description='Mark selected estimates as Abandoned')
+    @admin.action(description="Mark selected estimates as Closed")
+    def make_closed(modeladmin, request, queryset):
+        queryset.update(status="C")
+        messages.add_message(request, messages.SUCCESS, "Estimates closed 👍")
+
+    @admin.action(description="Mark selected estimates as Abandoned")
     def make_abandoned(modeladmin, request, queryset):
-        queryset.update(status='N')
-        messages.add_message(
-            request, messages.SUCCESS, "Estimates abandoned 👍"
-        )
+        queryset.update(status="N")
+        messages.add_message(request, messages.SUCCESS, "Estimates abandoned 👍")
 
     @staticmethod
     def gig__start(obj):

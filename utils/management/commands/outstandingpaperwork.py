@@ -23,7 +23,7 @@ class Command(BaseCommand):
                     paperwork_missing.append(paperwork.form.form_name)
             if not is_good:
                 print(
-                    f"{emp.first_name} {emp.last_name}"
+                    f"{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name}"
                     if not options["forms"]
-                    else f'{emp.first_name} {emp.last_name} - {", ".join(paperwork_missing)}'
+                    else f'{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name} - {", ".join(paperwork_missing)}'
                 )

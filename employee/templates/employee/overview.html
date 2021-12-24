@@ -1,7 +1,7 @@
 {% extends "theme/base.html" %}
 {% load unicorn %}
 {% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
-{% block title %} - Overview - {{request.user.first_name}} {{request.user.last_name}}{% endblock %}
+{% block title %} - Overview - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}}{% endblock %}
 
 {% block headincludes %}
 {% unicorn_scripts %}

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import models
+from . import views
 
 app_name = "utils"
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
     path("latest/lighting_work.ics", models.LightingFeed(), name="lightingFeed"),
     path("latest/sound_work.ics", models.SoundFeed(), name="soundFeed"),
     path("latest/stage_work.ics", models.StageFeed(), name="stageFeed"),
+    path("server/restart", views.restartServer.as_view(), name="restartServer"),
 ]

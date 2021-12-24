@@ -28,7 +28,7 @@ class index(SLUGSMixin, FormView):
             included_text=f"""
                 Ayo Managers,
                 <br><br>
-                {form.instance.employee.first_name} {form.instance.employee.last_name} has submitted a training request.
+                {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)} {form.instance.employee.last_name} has submitted a training request.
                 <br>
                 Here are the details:
                 <br><br>

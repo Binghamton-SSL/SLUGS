@@ -75,7 +75,7 @@ Systems:
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
 Staff:
-{''.join([f"{staff.department} - {staff.position}: {staff.employee.first_name if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
+{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
         """  # noqa
 
     def item_link(self, item):
@@ -95,7 +95,7 @@ Staff:
             if job.employee is not None:
                 attendee = vCalAddress(f"MAILTO:{job.employee.email}")
                 attendee.params["cn"] = vText(
-                    f"{job.employee.first_name} {job.employee.last_name}"
+                    f"{(job.employee.preferred_name if job.employee.preferred_name else job.employee.first_name)} {job.employee.last_name}"
                 )
                 attendees.append(attendee)
         return attendees
@@ -154,7 +154,7 @@ Systems:
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
 Staff:
-{''.join([f"{staff.department} - {staff.position}: {staff.employee.first_name if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
+{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
         """  # noqa
 
     def item_link(self, item):
@@ -174,7 +174,7 @@ Staff:
             if job.employee is not None:
                 attendee = vCalAddress(f"MAILTO:{job.employee.email}")
                 attendee.params["cn"] = vText(
-                    f"{job.employee.first_name} {job.employee.last_name}"
+                    f"{(job.employee.preferred_name if job.employee.preferred_name else job.employee.first_name)} {job.employee.last_name}"
                 )
                 attendees.append(attendee)
         return attendees

@@ -21,7 +21,7 @@
     <div class="my-auto ml-auto mr-0">
         <div class="relative hidden md:block">
             <a href="#"><span>Hey there,</span>
-                {{request.user.first_name}}</a>
+                {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %}</a>
             <div
                 class="absolute w-full h-0 mt-5 overflow-hidden transition-all duration-75 bg-white shadow focused-within-parent:h-28">
                 <div class="flex flex-col py-5">

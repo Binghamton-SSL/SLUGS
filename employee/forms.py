@@ -41,6 +41,7 @@ class UserCreationForm(forms.ModelForm):
         model = Employee
         fields = (
             "email",
+            "preferred_name",
             "first_name",
             "last_name",
             "bnum",
@@ -96,6 +97,7 @@ class userCreationForm(UserCreationForm):
                     css_class="flex w-full",
                 ),
                 Div(
+                    "preferred_name",
                     "first_name",
                     "last_name",
                 ),
@@ -105,7 +107,7 @@ class userCreationForm(UserCreationForm):
                 Submit(
                     "submit",
                     "Submit",
-                    css_class="bg-white text-black rounded-sm py-2 px-4",
+                    css_class="bg-white text-black rounded-sm py-2 px-4 mt-2",
                 ),
                 css_class="max-w-5xl my-4 mx-auto",
             ),
@@ -115,7 +117,15 @@ class userCreationForm(UserCreationForm):
 class userChangeForm(ModelForm):
     class Meta:
         model = Employee
-        fields = ["email", "first_name", "last_name", "phone_number", "graduation_year", "signature"]
+        fields = [
+            "email",
+            "preferred_name",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "graduation_year",
+            "signature",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -134,6 +144,7 @@ class userChangeForm(ModelForm):
             ),
             "graduation_year",
             Div(
+                Div("preferred_name", css_class="flex-1"),
                 Div("first_name", css_class="flex-1"),
                 Div("last_name", css_class="flex-1"),
                 css_class="md:flex md:space-x-2",
@@ -141,16 +152,18 @@ class userChangeForm(ModelForm):
             "phone_number",
             Div(
                 "signature",
-                css_class="border-black border-2 m-2 p-2 rounded-sm hidden xs-landscape:block"
+                css_class="border-black border-2 m-2 p-2 rounded-sm hidden xs-landscape:block",
             ),
             Div(
-                HTML("""
-                <label class="block text-gray-700 text-sm font-bold mb-2">
+                HTML(
+                    """
+                <label class="block mb-2 text-sm font-bold text-gray-700">
                     Signature
                 </label>
                 <p>Please turn your device sideways to activate the signature module. This screen is too small!!!</p>
-                """),
-                css_class="border-black border-2 m-2 p-2 rounded-sm xs-landscape:hidden"
+                """
+                ),
+                css_class="border-black border-2 m-2 p-2 rounded-sm xs-landscape:hidden",
             ),
             Submit(
                 "submit",
@@ -202,7 +215,6 @@ class uploadForm(ModelForm):
 
 
 class signPaperworkForm(Form):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -239,7 +251,7 @@ class massAssignPaperworkForm(Form):
                 subject=f"[ACTION REQUIRED] New forms to fill out on SLUGS",
                 title=f"Paperwork needed: {', '.join([f.form.form_name for f in forms])}",
                 included_html=email_template,
-                included_text=f"How's it going {emp.first_name}, <br><br> Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>",  # noqa
+                included_text=f"How's it going {(emp.preferred_name if emp.preferred_name else emp.first_name)}, <br><br> Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>",  # noqa
                 to=[emp.email],
                 attachments=attachments,
             )

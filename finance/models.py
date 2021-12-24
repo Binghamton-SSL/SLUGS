@@ -2,7 +2,7 @@ from finance.estimate_data_utils import calculateGigCost
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import format_html
-from django.core.exceptions import BadRequest
+from django.core.exceptions import NON_FIELD_ERRORS, BadRequest
 from django.urls import reverse
 from django.db.models import Q
 import django.utils.timezone as timezone
@@ -12,9 +12,8 @@ from django.contrib.auth.models import Group
 from gig.models import SystemInstance
 from tinymce.models import HTMLField
 import decimal
+from django.core.validators import ValidationError
 
-
-# Create your models here.
 class Wage(models.Model):
     name = models.CharField(max_length=64)
     hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
@@ -28,7 +27,12 @@ class Fee(models.Model):
     amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     description = models.CharField(max_length=512, blank=True, null=True)
-    ordering = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Relative order of fee, 0 is top importance. Does not have to be unique. I suggest\n 0=before booking, 1=during booking, 2=during show, 3=during invoice, 4=after invoice.")
+    ordering = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        help_text="Relative order of fee, 0 is top importance. Does not have to be unique. I suggest\n 0=before booking, 1=during booking, 2=during show, 3=during invoice, 4=after invoice.",
+    )
 
     def __str__(self):
         return f"{self.name} - {f'${self.amount}' if self.amount else f'{self.percentage}%' if self.percentage else ''}"  # noqa

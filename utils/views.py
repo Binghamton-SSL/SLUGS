@@ -1,19 +1,21 @@
-from django.http import HttpResponse
-from .render import Render
+from django.http.response import HttpResponse
+from django.views.generic.base import View
+import os
+from django.contrib import messages
+from SLUGS.views import isAdminMixin
 
 
-class RenderPDF(Render):
+class restartServer(View, isAdminMixin):
+    def dispatch(self, request, *args, **kwargs):
+        os.system("touch ~/slugs.bssl.binghamtonsa.org/tmp/restart.txt")
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            "Server will restart momentarily. Expect a 15-30 second interruption to service.",
+        )
+        return super().dispatch(request, *args, **kwargs)
 
-    params: dict = None
-    template: str = None
-    email: bool = False
-    to: str = None
-
-
-class RenderPDFMixin(RenderPDF):
-    def get(self, request, *args, **kwargs):
-        if True:
-            self.added_context["request"] = request
-            return Render.render(self.template_name, self.get_context_data())
-        else:
-            return HttpResponse("Email")
+    def get(self, request):
+        return HttpResponse(
+            "Server will restart momentarily. Expect a 15-30 second interruption to service."
+        )

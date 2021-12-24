@@ -213,7 +213,9 @@ class automaticallySignForm(SLUGSMixin, FormView):
     def form_valid(self, form):
         processAutoSignForm(self.added_context["paperwork"], self.request.user)
         messages.add_message(
-            self.request, messages.SUCCESS, f"{self.added_context['paperwork'].form} has been signed and uploaded"
+            self.request,
+            messages.SUCCESS,
+            f"{self.added_context['paperwork'].form} has been signed and uploaded",
         )
         return super().form_valid(form)
 

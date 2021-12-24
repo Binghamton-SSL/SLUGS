@@ -318,7 +318,7 @@
                                                         {% if job|isEngineer %}
                                                         <li
                                                             style="font-size: 14px; line-height: 1.2; mso-line-height-alt: 17px;">
-                                                            {{job.employee.first_name}} {{job.employee.last_name}} </li>
+                                                            {% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}} </li>
                                                         {% endif %}
                                                         {% endfor %}
                                                     </ul>
@@ -412,7 +412,7 @@
                                                         {% for job in gig.job_set.all %}
                                                         <li
                                                             style="line-height: 1.2; font-size: 14px; mso-line-height-alt: 17px;">
-                                                            <span style="font-size: 14px;">{{job.employee.first_name}} {{job.employee.last_name}}</span></li>
+                                                            <span style="font-size: 14px;">{% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}}</span></li>
                                                         {% endfor %}
                                                     </ul>
                                                 </div>

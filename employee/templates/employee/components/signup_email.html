@@ -305,7 +305,7 @@
                                                     style="line-height: 1.2; font-size: 12px; color: #555555; font-family: 'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif; mso-line-height-alt: 14px;">
                                                     <p
                                                         style="margin: 0; font-size: 14px; line-height: 1.2; word-break: break-word; mso-line-height-alt: 17px; margin-top: 0; margin-bottom: 0;">
-                                                        Hey there {{user.first_name}}, <br>
+                                                        Hey there {% if user.preferred_name %}{{user.preferred_name}} {% else %} {{user.first_name}} {% endif %}, <br>
                                                         Thanks for signing up for SLUGS. This email is a confirmation that we got your registration. <strong>Please note you will not be able to log into your account yet.</strong> BSSL's management team goes through and manually verifies every account to make sure that we set everything up correctly and that only BSSL employees have access to our information. You will receive an email when your account is activated.
                                                         <br>
                                                         If you have any questions, feel free to contact the managers at <a

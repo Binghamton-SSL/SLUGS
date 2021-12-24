@@ -15,7 +15,7 @@
         </b>
     </p>
     {% for e in empsnopass %}
-        <p>{{e.first_name}} {{e.last_name}}</p>
+        <p>{% if e.preferred_name %}{{e.preferred_name}} {% else %} {{e.first_name}} {% endif %} {{e.last_name}}</p>
     {% endfor %}
 </div>
 <style>

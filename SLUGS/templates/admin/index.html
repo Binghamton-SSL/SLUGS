@@ -113,5 +113,9 @@
             </ul>
             {% endif %}
     </div>
+    <div class="module">
+        <a href="{% url 'utils:restartServer' %}">Restart the server</a><br>
+        <sub>Use this when something is acting wonky. SLUGS will go down for 15-30 seconds.</sub>
+    </div>
 </div>
 {% endblock %}

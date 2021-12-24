@@ -50,13 +50,18 @@ class EmployeeManager(BaseUserManager):
 class Employee(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    preferred_name = models.CharField(max_length=100, blank=True, null=True, help_text="The first name you prefer to go by. This could be a 'Chosen Name' or a nickname.")
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     bnum = models.CharField(null=True, max_length=12, verbose_name="B Number")
     phone_number = PhoneNumberField(null=True)
     is_grad_student = models.BooleanField(default=False)
     graduation_year = models.IntegerField(blank=True, null=True)
-    signature = JSignatureField(null=True, blank=True, help_text="If on a mobile device, please turn it sideways to sign on a larger surface")
+    signature = JSignatureField(
+        null=True,
+        blank=True,
+        help_text="If on a mobile device, please turn it sideways to sign on a larger surface",
+    )
     employee_notes = HTMLField(
         blank=True,
         null=True,
@@ -72,8 +77,11 @@ class Employee(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    date_joined = models.DateTimeField(default=timezone.now, verbose_name="Date Hired", help_text="Defaults to datetime the employee signed up for SLUGS")
-
+    date_joined = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Date Hired",
+        help_text="Defaults to datetime the employee signed up for SLUGS",
+    )
 
     class Meta:
         verbose_name = "Employee"
@@ -82,7 +90,7 @@ class Employee(AbstractUser):
     objects = EmployeeManager()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.email})"
+        return f"{(self.preferred_name if self.preferred_name else self.first_name)} {self.last_name} ({self.email})"
 
     def paperwork_outstanding(self):
         papers = []

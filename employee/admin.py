@@ -35,6 +35,7 @@ class EmployeeResource(resources.ModelResource):
         fields = (
             "id",
             "email",
+            "preferred_name",
             "first_name",
             "last_name",
             "bnum",
@@ -71,7 +72,7 @@ class EmployeeAdmin(DjangoQLSearchMixin, ImportExportMixin, UserAdmin):
                 request=request,
                 title="Your SLUGS account has been activated",
                 included_text=f"""
-Hey there {form.instance.first_name},
+Hey there {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)},
 <br><br>
 Got some good news for ya, Your SLUGS account has been activated. Feel free to <a href="https://slugs.bssl.binghamtonsa.org/">head over to SLUGS</a> and take a peek around.
 """,  # noqa
@@ -83,7 +84,7 @@ Got some good news for ya, Your SLUGS account has been activated. Feel free to <
                 request=request,
                 title="Your SLUGS account has been deactivated",
                 included_text=f"""
-Hey there {form.instance.first_name},
+Hey there {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)},
 <br><br>
 We're sorry to see ya go. One of our managers has deactivated your account. If you believe this was done in error please <a href="mailto:bssl@binghamtonsa.org">reach out</a>.
 """,  # noqa
@@ -107,7 +108,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         subject=f"[ACTION REQUIRED] Fill out '{form.instance.form.form_name}' on SLUGS",
                         title=f"Paperwork needed: {form.instance.form.form_name}",
                         included_html=email_template,
-                        included_text=f"How's it going {form.instance.employee.first_name}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
+                        included_text=f"How's it going {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
                         to=[form.instance.employee.email],
                         attachments=attachments,
                     )
@@ -167,6 +168,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                 "Personal info",
                 {
                     "fields": (
+                        "preferred_name",
                         "first_name",
                         "last_name",
                         "phone_number",
@@ -192,6 +194,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "email",
                     "password1",
                     "password2",
+                    "preferred_name",
                     "first_name",
                     "last_name",
                     "bnum",
@@ -202,6 +205,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     )
     search_fields = (
         "email",
+        "preferred_name",
         "first_name",
         "last_name",
         "bnum",
