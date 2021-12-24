@@ -9,4 +9,6 @@ for emp in Employee.objects.filter(is_active=True):
             paperwork_missing.append(paperwork.form.form_name)
     if not is_good:
         # print(f'{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name} - {", ".join(paperwork_missing)}')
-        print(f"{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name}")
+        print(
+            f"{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name}"
+        )

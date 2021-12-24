@@ -1,9 +1,12 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import BaseModelFormSet
 from finance.models import PayPeriod, Shift
+from gig.models import Job
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
+from django.db.models import Q
 
 
 class BaseShiftForm(forms.ModelForm):
@@ -21,7 +24,33 @@ class BaseShiftForm(forms.ModelForm):
 
 
 class BaseShiftFormset(BaseModelFormSet):
-    pass
+    def clean(self):
+        employee = Job.objects.get(pk=self.prefix.split("_")[2]).employee
+        for shift in self.cleaned_data:
+            if shift:
+                for s in Shift.objects.filter(
+                    (
+                        Q(time_in__lt=shift["time_in"])
+                        & Q(time_out__gt=shift["time_in"])
+                    )  # Ends during this shift
+                    | (
+                        Q(time_in__gt=shift["time_in"])
+                        & Q(time_out__lt=shift["time_out"])
+                    )  # entirely during this shift
+                    | (
+                        Q(time_in__lt=shift["time_in"])
+                        & Q(time_out__gt=shift["time_out"])
+                    )
+                    | (
+                        Q(time_in__lt=shift["time_out"])
+                        & Q(time_out__gt=shift["time_out"])
+                    )  # Starts during this shift
+                ):
+                    if s.content_object.employee == employee:
+                        # pass
+                        raise ValidationError(
+                            "Overlapping shifts. Please correct and try again"
+                        )
 
 
 ShiftFormSet = modelformset_factory(

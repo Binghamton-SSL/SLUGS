@@ -50,7 +50,12 @@ class EmployeeManager(BaseUserManager):
 class Employee(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    preferred_name = models.CharField(max_length=100, blank=True, null=True, help_text="The first name you prefer to go by. This could be a 'Chosen Name' or a nickname.")
+    preferred_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="The first name you prefer to go by. This could be a 'Chosen Name' or a nickname.",
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     bnum = models.CharField(null=True, max_length=12, verbose_name="B Number")

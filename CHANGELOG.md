@@ -5,6 +5,9 @@
 * Email sent when broken equipment report is filed
 * Add action to restart the server via admin
 * Add chosen/preferred name
+* Added validation
+    * Each system in gig must have a load in
+    * Shifts cannot overlap for a given employee
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box

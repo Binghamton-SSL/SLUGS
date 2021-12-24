@@ -13,7 +13,6 @@ from django.views.generic.base import TemplateView
 from SLUGS.views import SLUGSMixin
 from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
-from gig.models import Job
 
 from finance.forms import ShiftFormSet
 from gig.forms import shiftFormHelper, engineerNotesForm, StaffShowForm
@@ -26,7 +25,7 @@ class gigIndex(SLUGSMixin, MultipleFormView):
     template_name = "gig/gig.html"
     form_classes = {}
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, ctext=False, **kwargs):
         context = super().get_context_data(**kwargs)
         for form in context["forms"]:
             if form != "show_notes":
@@ -70,6 +69,9 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         self.form_classes["show_notes"]["instance"] = self.added_context["gig"]
         self.added_context["job_forms"] = jobs
         return super().dispatch(request, *args, **kwargs)
+
+    def post_valid_reject(self, context):
+        return self.get_context_data(context)
 
     def process_forms(self, form_instances):
         for form in form_instances["forms"]:

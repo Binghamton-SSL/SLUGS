@@ -3,6 +3,7 @@ from django.urls import path
 from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
+from gig.forms import GigSystemsChangeForm
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
@@ -32,6 +33,7 @@ class AddonInline(NestedTabularInline):
 
 
 class SystemInline(NestedStackedInline):
+    form = GigSystemsChangeForm
     autocomplete_fields = ["system"]
     model = SystemInstance
     inlines = (JobSubInline, AddonInline)

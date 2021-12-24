@@ -1,8 +1,7 @@
 from crispy_forms.helper import FormHelper
+from django.core.exceptions import ValidationError
 from gig.models import Gig, Job, JobInterest
-from employee.models import Employee
 import django.forms as forms
-from django.contrib.humanize.templatetags import humanize
 from django.utils import timezone
 import functools
 
@@ -85,3 +84,16 @@ class StaffShowForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.disable_csrf = True
+
+
+class GigSystemsChangeForm(forms.ModelForm):
+    def clean(self):
+        if self.initial == {} and "system" in self.changed_data:
+            system = self.cleaned_data["system"]
+            gig = self.cleaned_data["gig"]
+            if gig.loadin_set.filter(department=system.department).count() == 0:
+                raise ValidationError(
+                    {
+                        "system": f"A loadin is required for each department that is working the show. There is currently no loadin for {system.get_department_display()}. Please add one at the bottom of the page."
+                    }
+                )
