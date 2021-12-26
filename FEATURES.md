@@ -1,3 +1,12 @@
+## Main
+### Views
+* Homepage
+    * See notifications
+    * See upcoming/current show
+    * See past shows worked
+    * Access work signup
+* Timeline
+
 ## Client
 ### Models
 * Organization contact
@@ -51,12 +60,14 @@
 * Estimate
 * Canned Notes
 * Shift
+* Timesheet
 * PayPeriod
 * Payment
 ### Views
 * View Estimates
 * View Invoices
 * View Timesheets
+* Sign Timesheet
 * View Payroll Summaries
 * Export Payroll Summary as CSV
 * View SA Billing Summary
@@ -131,3 +142,20 @@
 ### Data
 * Employees who have not signed in in over a week
 * Employees who never signed in
+
+## Utils 
+### Models
+* Notification
+* SignupStatus
+* OnboardingStatus
+* ShowFeeds
+    * Show feed 
+    * Dept feeds
+### Views
+* Restart server
+### Actions
+* Get outstanding paperwork employees
+### Admin
+* Notification
+* SignupStatus
+* OnboardingStatus

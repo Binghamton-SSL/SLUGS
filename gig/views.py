@@ -125,7 +125,8 @@ class gigList(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gigs"] = Gig.objects.filter(published=True).order_by(
             "-start"
-        )[:50]
+        )[:150]
+        self.added_context["signup_open"] = signupStatus.objects.first().is_open
         return super().dispatch(request, *args, **kwargs)
 
 

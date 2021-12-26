@@ -49,10 +49,6 @@ class index(SLUGSMixin, TemplateView):
                 Gig.objects.filter(job__employee=request.user)
                 .distinct()
                 .order_by("-start")
-                # Job.objects.all()
-                # .filter(employee=request.user)
-                # .select_related("gig")
-                # .order_by("-gig__start")
             )
             if request.user.is_authenticated
             else None

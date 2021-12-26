@@ -1,7 +1,9 @@
+from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from finance.models import (
     Payment,
+    TimeSheet,
     Wage,
     Shift,
     Estimate,
@@ -12,11 +14,44 @@ from finance.models import (
 )
 from nested_admin import NestedGenericTabularInline
 from djangoql.admin import DjangoQLSearchMixin
+from django.db.models import Q
 
 
 # Register your models here.
+
+class WageActiveFilter(admin.SimpleListFilter):
+    title = "Is Wage active?"
+
+    parameter_name = "active"
+
+    def lookups(self, request, model_admin):
+        return (
+            ('t', 'True'),
+            ('f', 'False')
+        )
+    
+    def queryset(self, request, queryset):
+        if self.value() == 't':
+            return queryset.filter(
+                Q(date_active__lte=datetime.now())
+                &
+                (
+                    Q(date_inactive__gte=datetime.now())
+                    |
+                    Q(date_inactive=None)
+                )
+            )
+        elif self.value() == 'f':
+            return queryset.filter(
+                Q(date_active__gte=datetime.now())
+                |
+                Q(date_inactive__lte=datetime.now())
+            )
+            
+
 @admin.register(Wage)
 class WageAdmin(admin.ModelAdmin):
+    list_filter = (WageActiveFilter,)
     pass
 
 
@@ -161,11 +196,25 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     djangoql_completion_enabled_by_default = False
 
 
+@admin.register(TimeSheet)
+class TimeSheetAdmin(admin.ModelAdmin):
+    pass
+
+
+class TimeSheetInline(admin.StackedInline):
+    model = TimeSheet
+    readonly_fields = ["printout_link"]
+    fk_name = "pay_period"
+    extra = 0
+    ordering = ("processed",)
+
+
 @admin.register(PayPeriod)
 class PayPeriodAdmin(admin.ModelAdmin):
     readonly_fields = ["get_summary", "associated_employees", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
+    inlines = [TimeSheetInline]
 
 
 @admin.register(CannedNote)

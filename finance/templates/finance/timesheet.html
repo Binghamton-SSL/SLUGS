@@ -2,6 +2,8 @@
 {% load slugs_components %}
 {% load static %}
 {% load tz %}
+{% load grouping %}
+{% load jsignature_filters %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BSSL Timesheet - {{employee.first_name}} {{employee.last_name}} - {{pay_period}}</title>
+    <title>BSSL Timesheet - {{employee.first_name}} {% if employee.preferred_name %}({{employee.preferred_name}}){% endif %} {{employee.last_name}} - {{pay_period}}</title>
 
     {% tailwind_css %}
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -60,6 +62,9 @@
         </div>
         <div style="width: 4.25in" class="flex flex-col">
             <h1 class="text-3xl font-medium text-right text-gray-400 font-brand">Biweekly Time Sheet</h1>
+            <div class="text-right text-gray-600">
+                <p>BSSL Time Sheet ID: {{timesheet.pk}}</p>
+            </div>
             <div class="flex mt-24">
                 <div class="ml-auto mr-10">
                     <div>
@@ -167,7 +172,7 @@
                 <tr style="border: none!important">
                     <td style="border: none!important"></td>
                     <td colspan="4" class="pl-4 bg-[#C7D6A1] border-b-2 border-black">
-                        {{rate}}
+                        {{rate.name}} - ${{rate.hourly_rate}}
                     </td>
                     <td class="text-center bg-[#C7D6A1] border-b-2 border-black">
                         {{shifts|floatformat:2}}
@@ -196,31 +201,51 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-auto mb-2 dont_break">
-        <div class="mt-4 text-sm">
-            I Certify to the best of my knowledge the hours and wages listed above are correct.
-        </div>
-        <div class="flex mt-10" style="width: 8.5in;">
-            <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
-                <div class="flex w-full border-t-2 border-black">
-                    <div class="w-full">
-                        Employee Signature
+    {% if request.user|has_group:"Manager" %}
+        <div class="mt-auto mb-2 dont_break">
+            <div class="mt-4 text-sm">
+                I Certify to the best of my knowledge the hours and wages listed above are correct.
+            </div>
+            <div class="flex mt-10" style="width: 8.5in;">
+                <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
+                    {% if timesheet.signed and timesheet.available_to_auto_sign %}
+                    <div class="absolute" style="width: 4in; bottom: 0.32in; left: 0.55in">
+                        <div class="flex space-x-4">
+                            <img src="{{employee.signature|signature_base64}}" style="width: 2.25in;">
+                            <p class="mt-auto text-right">{{timesheet.signed}}</p>
+                        </div>
                     </div>
-                    <div class="w-max">
-                        Date
+                    {% endif %}
+                    <div class="flex w-full border-t-2 border-black">
+                        <div class="w-full">
+                            Employee Signature
+                        </div>
+                        <div class="w-max">
+                            Date
+                        </div>
                     </div>
-                </div>
-                <div class="flex w-full border-t-2 border-black">
-                    <div class="w-full">
-                        Manager Signature
-                    </div>
-                    <div class="w-max">
-                        Date
+                    <div class="flex w-full border-t-2 border-black">
+                        <div class="w-full">
+                            Manager Signature
+                        </div>
+                        <div class="w-max">
+                            Date
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
+    {% if timesheet.signed %}
+        <div class="absolute text-center stamp">
+            <p style="font-size: 0.1in;">Our records indicate<br>this document has been:</p>
+            <b>SIGNED</b>
+            <p class="text-sm">By {{employee.first_name}} {{employee.last_name}}
+                <br>
+                Date: {{timesheet.signed}}
+            </p>
+        </div>
+    {% endif %}
 </body>
 <style type="text/css">
     @media print {
@@ -229,13 +254,24 @@
         }
     }
 
+    .stamp {
+        font-size: .25in;
+        top: 0.25in;
+        opacity: 1;
+        border: black 4px solid;
+        left: 3.75in;
+        padding: 0.05in;
+        -webkit-mask-image: url('{% static "img/ticket/stamp-texture.png" %}');
+        -webkit-mask-size: 500px;
+    }
+
     @page {
         size: 8.5in 11in;
     }
 
     body {
         width: 8.5in;
-        height: 11in;
+        /* height: 11in; */
         background-color: white;
     }
 
@@ -260,8 +296,6 @@
         /* border: none!important; */
     }
 </style>
-<script>
-    print()
-</script>
+{% block printed %}{% endblock %}
 
 </html>

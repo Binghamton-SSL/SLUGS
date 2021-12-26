@@ -3,8 +3,9 @@ from copy import deepcopy
 from django.utils import timezone
 from training.models import Trainee
 from gig.models import Job
-from finance.models import PayPeriod, Shift, Wage
+from finance.models import PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee, OfficeHours
+from django.db.models import Q
 
 
 def getShiftsForEmployee(emp):
@@ -27,7 +28,15 @@ def prepareSummaryData(pp_id):
     total_sum = 0
     pay_period = PayPeriod.objects.get(pk=pp_id)
     rates = {}
-    for rate in Wage.objects.all().order_by("hourly_rate"):
+    for rate in Wage.objects.filter(
+            Q(date_active__lte=pay_period.end)
+            &
+            (
+                Q(date_inactive__gte=pay_period.end)
+                |
+                Q(date_inactive=None)
+            )
+    ).order_by("hourly_rate"):
         rates[rate] = [rate, 0]
     employees = {}
 
@@ -46,25 +55,27 @@ def prepareSummaryData(pp_id):
                 "total_amount": 0.00,
                 "total_hours": 0.00,
             }
-        for shift in pay_period.shifts.all():
-            if shift.processed:
-                employees[shift.content_object.employee.bnum]["shifts"].append(shift)
-                employees[shift.content_object.employee.bnum]["rates"][
-                    shift.content_object.position.hourly_rate
-                ][1] += (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                employees[shift.content_object.employee.bnum]["total_amount"] += float(
-                    shift.content_object.position.hourly_rate.hourly_rate
-                ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                employees[shift.content_object.employee.bnum]["total_hours"] += (
-                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
-                )
+        if TimeSheet.objects.filter(paid_during=pay_period, employee=employee).exists():
+            if TimeSheet.objects.get(paid_during=pay_period, employee=employee).signed is not None:
+                for shift in pay_period.shifts.all():
+                    if shift.processed:
+                        employees[shift.content_object.employee.bnum]["shifts"].append(shift)
+                        employees[shift.content_object.employee.bnum]["rates"][
+                            shift.content_object.position.hourly_rate
+                        ][1] += (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+                        employees[shift.content_object.employee.bnum]["total_amount"] += float(
+                            shift.content_object.position.hourly_rate.hourly_rate
+                        ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+                        employees[shift.content_object.employee.bnum]["total_hours"] += (
+                            round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                        )
 
-                total_hours += (
-                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
-                )
-                total_sum += float(
-                    shift.content_object.position.hourly_rate.hourly_rate
-                ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+                        total_hours += (
+                            round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                        )
+                        total_sum += float(
+                            shift.content_object.position.hourly_rate.hourly_rate
+                        ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
         return {
             "rates": rates,
             "employees": employees,

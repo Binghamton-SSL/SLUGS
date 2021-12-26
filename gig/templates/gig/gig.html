@@ -10,7 +10,7 @@
     {% ticket gig %}
 </div>
 <div class="flex">
-    <span class="p-4 bg-red-300 text-mono mx-auto my-1 text-black font-bold">
+    <span class="p-4 mx-auto my-1 font-bold text-black bg-red-300 text-mono">
         Setup by: {{gig.setup_by|date:"H:i"}} 
     </span>
 </div>
@@ -104,7 +104,7 @@
     </div>
 </div>
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
-    {% unicorn 'employeeList' show=gig.id %}
+    {% unicorn 'employeeList' show=gig.id my_job=my_job %}
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>

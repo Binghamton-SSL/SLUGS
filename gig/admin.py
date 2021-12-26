@@ -3,7 +3,7 @@ from django.urls import path
 from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
-from gig.forms import GigSystemsChangeForm
+from gig.forms import GigSystemsChangeForm, GigLoadinChangeForm
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
@@ -33,7 +33,7 @@ class AddonInline(NestedTabularInline):
 
 
 class SystemInline(NestedStackedInline):
-    form = GigSystemsChangeForm
+    formset = GigSystemsChangeForm
     autocomplete_fields = ["system"]
     model = SystemInstance
     inlines = (JobSubInline, AddonInline)
@@ -41,6 +41,7 @@ class SystemInline(NestedStackedInline):
 
 
 class LoadInInline(NestedTabularInline):
+    formset = GigLoadinChangeForm
     model = LoadIn
     extra = 0
 
@@ -49,7 +50,7 @@ class LoadInInline(NestedTabularInline):
 class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
     djangoql_completion_enabled_by_default = False
     search_fields = ["name", "org__name", "contact__name", "location__name"]
-    inlines = (SystemInline, LoadInInline)
+    inlines = (LoadInInline, SystemInline)
     autocomplete_fields = ["org", "contact", "location"]
     list_display = (
         "__str__",
@@ -77,8 +78,8 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
                 )
             },
         ),
-        SystemInline,
         LoadInInline,
+        SystemInline,
         ("Day of Show Info", {"fields": ("day_of_show_notes",)}),
         (
             None,

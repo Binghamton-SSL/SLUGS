@@ -1,9 +1,12 @@
 {% extends "theme/base.html" %}
 {% load grouping %} {% load crispy_forms_tags %} {% load static %}
-{% block title %} - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}} - Auto-sign form{% endblock %}
+{% block title %} - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}} - Sign Timesheet{% endblock %}
 {% block content %}
 <div class="flex flex-col max-w-5xl mx-auto mt-10">
-    <h1 class="text-3xl">Automatically Sign {{paperwork.form}}</h1>
+    <h1 class="text-3xl">Sign Timesheet {{timesheet.pay_period}}</h1>
+    <div class="bg-white w-full sm:w-[9in] mx-auto">
+        <iframe src="{% url 'finance:timesheetnoprint' timesheet.pay_period.pk request.user.pk %}" class="h-[11in] w-full sm:w-[8.5in] mx-auto"></iframe>
+    </div>
     <div class="p-5 m-4 text-black bg-red-300 rounded-sm"> 
         <h2>
             By signing this form electronically using your signature, you agree to the following:
@@ -13,13 +16,13 @@
                 Your signature will be binding and held to the same standard as a physical signature
             </li>
             <li class="text-black">
-                Clicking "Sign using Signature on File" shows your clear intent to sign <a class="underline" href="/media/{{paperwork.form.form_pdf}}">{{paperwork.form}}</a>
+                Clicking "Sign using Signature on File" shows your clear intent to sign <b>Timesheet {{timesheet.pay_period}}</b>
             </li>
             <li class="text-black">
-                You've been given the option to sign and submit this form manually (just use the upload functionality instead if you wish)
+                You've been given the option to sign and submit this form manually and are opting out
             </li>
             <li class="text-black">
-                You're awesome
+                You would like us to swing💰you🤑that💸bag
             </li>
         </ul>
     </div>

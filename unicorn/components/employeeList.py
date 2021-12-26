@@ -4,6 +4,7 @@ from gig.models import Job, Gig
 
 class EmployeelistView(UnicornView):
     show_id = None
+    my_job = None
     selectedDept = None
     depts = None
     jobs = None
@@ -15,6 +16,7 @@ class EmployeelistView(UnicornView):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.show_id = kwargs.get("show")
+        self.my_job = kwargs.get("my_job")
         gig = Gig.objects.get(pk=kwargs.get("show"))
         self.depts = list(
             set(

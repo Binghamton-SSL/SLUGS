@@ -1,6 +1,5 @@
 from utils.generic_email import send_generic_email
 from django.template.loader import get_template
-import employee
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.admin import widgets
@@ -221,7 +220,7 @@ class signPaperworkForm(Form):
         self.helper.layout = Layout(
             Submit(
                 "submit",
-                "Sign Form using Signature on File",
+                "Sign using Signature on File",
                 css_class="bg-white text-black rounded-sm py-2 mt-2 px-4",
             ),
         )
@@ -248,7 +247,7 @@ class massAssignPaperworkForm(Form):
             email_template = template.render({"request": request})
             send_generic_email(
                 request=request,
-                subject=f"[ACTION REQUIRED] New forms to fill out on SLUGS",
+                subject="[ACTION REQUIRED] New forms to fill out on SLUGS",
                 title=f"Paperwork needed: {', '.join([f.form.form_name for f in forms])}",
                 included_html=email_template,
                 included_text=f"How's it going {(emp.preferred_name if emp.preferred_name else emp.first_name)}, <br><br> Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>",  # noqa

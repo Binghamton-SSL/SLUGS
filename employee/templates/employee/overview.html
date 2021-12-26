@@ -19,6 +19,7 @@
     <div class="p-4 my-4 text-black bg-white">
         {% crispy forms.userChangeForm %}
     </div>
+    {% if request.user.paperworkform_set.all.count > 0 %}
     <h2 id="paperwork" class="text-2xl">Paperwork</h2>
     <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
         {% for form in request.user.paperworkform_set.all %}
@@ -63,6 +64,46 @@
             </div>
         {% endfor %}
     </div>
+    {% endif %}
+    {% if timesheets.count > 0 %}
+    <h2 id="timesheets" class="text-2xl">Time Sheets</h2>
+    <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
+        {% for timesheet in timesheets %}
+            <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
+                <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>
+                {% if timesheet.processed %}<p class="text-xs font-bold text-center">This timesheet has been submitted to payroll</p>{% endif %}
+                <div class="flex flex-col">
+                    {% if timesheet.signed %}
+                        <div class="flex p-2 space-x-2 bg-gray-300 rounded-sm">
+                            <div class="my-auto mr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <p>{{timesheet.signed}}</p>
+                        </div>
+                        <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
+                    {% else %}
+                        {% if timesheet.available_to_auto_sign %}
+                            {% if user.signature %}
+                                <a class="mx-auto" href="{% url 'finance:sign_timesheet' timesheet.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Sign Time Sheet</button></a>
+                            {% else %}
+                                <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically sign this timesheet by putting your signature on file. Check out your user information above.</p>
+                            {% endif %}
+                        {% else %}
+                        <div class="flex p-2 bg-yellow-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                            <p class="pl-2 text-sm">This timesheet needs to be signed. Please visit the office to do so</p>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <h2 class="text-2xl">Shifts worked</h2>
     <div class="p-4 my-4 text-black bg-white">
         <h3 class="text-xl">You've worked {{shifts|length}} {% if shifts|length == 1 %} shift {% else %} shifts

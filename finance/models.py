@@ -2,24 +2,25 @@ from finance.estimate_data_utils import calculateGigCost
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import format_html
-from django.core.exceptions import NON_FIELD_ERRORS, BadRequest
 from django.urls import reverse
 from django.db.models import Q
 import django.utils.timezone as timezone
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 from django.db import models
 from django.contrib.auth.models import Group
-from gig.models import SystemInstance
 from tinymce.models import HTMLField
 import decimal
 from django.core.validators import ValidationError
 
+
 class Wage(models.Model):
     name = models.CharField(max_length=64)
     hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
+    date_active = models.DateField(default=date.today)
+    date_inactive = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name} - ${self.hourly_rate}/hr"
+        return f"{self.name} - ${self.hourly_rate}/hr - {self.date_active}"
 
 
 class Fee(models.Model):
@@ -218,6 +219,10 @@ class Shift(models.Model):
             self.cost = (
                 round(self.total_time / timezone.timedelta(minutes=15)) / 4
             ) * float(self.paid_at)
+
+        # Validation: Shift cannot be negative time
+        if self.cost < 0:
+            raise ValidationError("Shift cannot be negative payout.")
         super().save(*args, **kwargs)
 
     def get_admin_url(self):
@@ -287,6 +292,15 @@ class PayPeriod(models.Model):
             ).order_by("-time_out")
         )
         super().save()
+        emps = []
+        for shift in self.shifts.all():
+            if shift.content_object.employee not in emps:
+                emps.append(shift.content_object.employee)
+        for emp in emps:
+            timesheet, created = TimeSheet.objects.get_or_create(
+                employee=emp,
+                pay_period_id=self.pk,
+            )
 
     def __str__(self):
         return f"{self.start} - {self.end} (Paid {self.payday})"
@@ -307,3 +321,33 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.payment_date} - ${self.amount}"
+
+
+class TimeSheet(models.Model):
+    def user_dir_path(instance, filename):
+        fileName, fileExtension = os.path.splitext(filename)
+        return f"uploads/{instance.employee.bnum}/{instance.employee.bnum}_{instance.employee.first_name[0].upper()}{instance.employee.last_name}_TimeSheet_{instance.pay_period.start}_{instance.pay_period.end}{fileExtension}"  # noqa
+
+    employee = models.ForeignKey("employee.Employee", on_delete=models.PROTECT)
+    pay_period = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, related_name="pay_period")
+    paid_during = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, null=True, blank=True, help_text="Use this to override the Pay Period during which the timesheet was paid. Defaults to the Pay Period during which shifts took place.", related_name="paid_during")
+    signed = models.DateField(blank=True, null=True)
+    processed = models.DateField(blank=True, null=True)
+    available_to_auto_sign = models.BooleanField(default=False)
+    pdf = models.FileField(upload_to=user_dir_path, blank=True, null=True)
+
+    def printout_link(self):
+        return format_html((
+                        f"<div style='margin: .25rem 0 .25rem 0'>"
+                        f"<a href='{reverse('finance:timesheet', args=[self.pay_period.pk, self.employee.pk])}'>Get Timesheet: {self.employee}</a>"
+                        # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
+                        f"</div><br>"
+        ))
+
+    def save(self, *args, **kwargs):
+        if self.paid_during is None:
+            self.paid_during = self.pay_period
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.employee} - {self.pay_period}"

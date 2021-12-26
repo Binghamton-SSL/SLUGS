@@ -5,9 +5,17 @@
 * Email sent when broken equipment report is filed
 * Add action to restart the server via admin
 * Add chosen/preferred name
+* Contact info is now restricted to employees you are working a show with (not available to everyone on every showview)
 * Added validation
     * Each system in gig must have a load in
     * Shifts cannot overlap for a given employee
+    * Shifts cannot be a negative payout
+* Wages now have dateframes that they are in effect
+* Time Sheets are now available to employees electronically
+* Time Sheets can now be signed electronically
+* Make signup button more noticeable / add redirect on Shows page
+* Add print tag
+* 
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box

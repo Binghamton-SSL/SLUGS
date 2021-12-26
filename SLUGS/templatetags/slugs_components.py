@@ -10,6 +10,11 @@ def nav(request):
     return locals()
 
 
+@register.inclusion_tag("SLUGS/components/print.html")
+def print_this():
+    return locals()
+
+
 class FullStaticNode(static.StaticNode):
     def url(self, context):
         request = context["request"]

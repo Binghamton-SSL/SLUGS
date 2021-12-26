@@ -11,7 +11,6 @@ from django.utils import timezone
 from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
 from jsignature.fields import JSignatureField
-from jsignature.utils import draw_signature
 
 
 class EmployeeManager(BaseUserManager):

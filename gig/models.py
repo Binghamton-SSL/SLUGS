@@ -72,6 +72,10 @@ class Gig(models.Model):
             self.available_for_signup = self.start - timezone.timedelta(days=7)
         super().save(*args, **kwargs)
 
+    def __init__(self, *args, **kwargs):
+        super(Gig, self).__init__(*args, **kwargs)
+        self.__loadin_depts__ = []
+
 
 class LoadIn(models.Model):
     gig = models.ForeignKey(Gig, on_delete=models.CASCADE)

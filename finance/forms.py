@@ -25,32 +25,33 @@ class BaseShiftForm(forms.ModelForm):
 
 class BaseShiftFormset(BaseModelFormSet):
     def clean(self):
-        employee = Job.objects.get(pk=self.prefix.split("_")[2]).employee
         for shift in self.cleaned_data:
-            if shift:
-                for s in Shift.objects.filter(
-                    (
-                        Q(time_in__lt=shift["time_in"])
-                        & Q(time_out__gt=shift["time_in"])
-                    )  # Ends during this shift
-                    | (
-                        Q(time_in__gt=shift["time_in"])
-                        & Q(time_out__lt=shift["time_out"])
-                    )  # entirely during this shift
-                    | (
-                        Q(time_in__lt=shift["time_in"])
-                        & Q(time_out__gt=shift["time_out"])
-                    )
-                    | (
-                        Q(time_in__lt=shift["time_out"])
-                        & Q(time_out__gt=shift["time_out"])
-                    )  # Starts during this shift
-                ):
-                    if s.content_object.employee == employee:
-                        # pass
-                        raise ValidationError(
-                            "Overlapping shifts. Please correct and try again"
+            if 'id' in shift and shift['id'] is not None:
+                employee = shift['id'].content_object.employee
+                if shift:
+                    for s in Shift.objects.filter(
+                        (
+                            Q(time_in__lt=shift["time_in"])
+                            & Q(time_out__gt=shift["time_in"])
+                        )  # Ends during this shift
+                        | (
+                            Q(time_in__gt=shift["time_in"])
+                            & Q(time_out__lt=shift["time_out"])
+                        )  # entirely during this shift
+                        | (
+                            Q(time_in__lt=shift["time_in"])
+                            & Q(time_out__gt=shift["time_out"])
                         )
+                        | (
+                            Q(time_in__lt=shift["time_out"])
+                            & Q(time_out__gt=shift["time_out"])
+                        )  # Starts during this shift
+                    ):
+                        if s.content_object.employee == employee:
+                            # pass
+                            raise ValidationError(
+                                "Overlapping shifts. Please correct and try again"
+                            )
 
 
 ShiftFormSet = modelformset_factory(

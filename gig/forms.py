@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from django.core.exceptions import ValidationError
+from django.forms.models import BaseInlineFormSet
 from gig.models import Gig, Job, JobInterest
 import django.forms as forms
 from django.utils import timezone
@@ -86,14 +87,20 @@ class StaffShowForm(forms.ModelForm):
         self.helper.disable_csrf = True
 
 
-class GigSystemsChangeForm(forms.ModelForm):
+class GigLoadinChangeForm(BaseInlineFormSet):
     def clean(self):
-        if self.initial == {} and "system" in self.changed_data:
-            system = self.cleaned_data["system"]
-            gig = self.cleaned_data["gig"]
-            if gig.loadin_set.filter(department=system.department).count() == 0:
-                raise ValidationError(
-                    {
-                        "system": f"A loadin is required for each department that is working the show. There is currently no loadin for {system.get_department_display()}. Please add one at the bottom of the page."
-                    }
-                )
+        super(GigLoadinChangeForm, self).clean()
+        for form in self.cleaned_data:
+            if not form['DELETE']:
+                self.instance.__loadin_depts__.append(form['department'])
+
+
+class GigSystemsChangeForm(BaseInlineFormSet):
+    def clean(self):
+        super(GigSystemsChangeForm, self).clean()
+        for form in self.cleaned_data:
+            system = form["system"]
+            valid_depts = self.instance.__loadin_depts__
+            if system.department not in valid_depts and not form["DELETE"]:
+                print("Ya boi fucked")
+                raise ValidationError(f"A loadin is required for each department that is working the show. Saving would create a situation where {system.get_department_display()} does not have a loadin.")

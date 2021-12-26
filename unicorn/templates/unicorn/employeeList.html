@@ -19,6 +19,7 @@
                 <div class="flex flex-col p-2 space-y-2 bg-gray-600 rounded-sm sm:space-y-0 sm:space-x-2 sm:flex-row">
                     {% if job.employee != None %}
                     <span>{% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}}</span>
+                    {% if my_job %}
                     <div class="flex mx-auto space-x-2">
                         <a href="tel:{{job.employee.phone_number}}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
@@ -35,6 +36,7 @@
                             </svg>
                         </a>
                     </div>
+                    {% endif %}
                     {% else %}
                     TBD
                     {% endif %}

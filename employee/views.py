@@ -29,7 +29,7 @@ from employee.utils import processAutoSignForm
 from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
 from finance.forms import OfficeHoursShiftFormSet
-from finance.models import Shift
+from finance.models import Shift, TimeSheet
 from employee.models import OfficeHours, PaperworkForm
 
 
@@ -81,6 +81,7 @@ class userOverview(SLUGSMixin, MultipleFormView):
         if not request.user.is_authenticated:
             return redirect("%s?next=%s" % (reverse("login"), request.path))
         self.form_classes["userChangeForm"]["instance"] = request.user
+        self.added_context["timesheets"] = TimeSheet.objects.filter(employee=request.user)
         self.added_context["shifts"] = getShiftsForEmployee(request.user)
         self.added_context["timeworked"] = self.added_context["shifts"].aggregate(
             Sum("total_time")
@@ -253,7 +254,7 @@ class massAssignPaperwork(SLUGSMixin, FormView):
     def form_valid(self, form):
         form.add_forms(self.request)
         messages.add_message(
-            self.request, messages.SUCCESS, f"Forms assigned and emails sent"
+            self.request, messages.SUCCESS, "Forms assigned and emails sent"
         )
         return super().form_valid(form)
 
@@ -270,5 +271,5 @@ class addGroups(SLUGSMixin, isAdminMixin, FormView):
 
     def form_valid(self, form):
         form.add_groups(self.request)
-        messages.add_message(self.request, messages.SUCCESS, f"Groups added")
+        messages.add_message(self.request, messages.SUCCESS, "Groups added")
         return super().form_valid(form)

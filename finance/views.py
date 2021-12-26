@@ -1,13 +1,20 @@
+from django.contrib import messages
+from django.urls.base import reverse_lazy
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from employee.forms import signPaperworkForm
 from finance.estimate_data_utils import calculateGigCost
 from django.http.response import HttpResponse
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 import django.utils.timezone as timezone
 import pytz
 import csv
 from datetime import datetime
+from django.utils.timezone import localtime, now
 from django.db.models import Q
 from django.views import View
 from django.conf import settings
@@ -16,10 +23,9 @@ from django.db.models import Sum
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
-from finance.models import Estimate, SystemInstance, PayPeriod, Shift, Wage
+from finance.models import Estimate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee
 import decimal
-from collections import defaultdict
 import calendar
 
 
@@ -43,14 +49,26 @@ class viewInvoice(SLUGSMixin, TemplateView):
 
 
 class viewTimesheet(SLUGSMixin, TemplateView):
-    template_name = "finance/timesheet.html"
+    template_name = "finance/printed_timesheet.html"
 
     def dispatch(self, request, *args, **kwargs):
         pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
         employee = Employee.objects.get(pk=kwargs["emp_id"])
+        timesheet = TimeSheet.objects.get(employee=employee, pay_period=pay_period)
+        if request.user.pk is not None:
+            if employee.pk != request.user.pk and (not has_group(request.user, "Manager")):
+                raise PermissionDenied()
         shifts = pay_period.shifts.none()
         rates = {}
-        for rate in Wage.objects.all().order_by("hourly_rate"):
+        for rate in Wage.objects.filter(
+            Q(date_active__lte=pay_period.end)
+            &
+            (
+                Q(date_inactive__gte=pay_period.end)
+                |
+                Q(date_inactive=None)
+            )
+        ).order_by("hourly_rate"):
             rates[rate] = [rate, 0]
         for shift in pay_period.shifts.all():
             if shift.content_object.employee == employee and shift.processed:
@@ -151,12 +169,51 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["shifts"] = shifts
         self.added_context["employee"] = employee
         self.added_context["pay_period"] = pay_period
+        self.added_context["timesheet"] = timesheet
         self.added_context["table_rows"] = table_rows
         self.added_context["rates"] = rates
         self.added_context["t_total"] = t_total
         self.added_context["t_amt"] = shifts.aggregate(Sum("cost"))
         return super().dispatch(request, *args, **kwargs)
 
+
+class ViewTimesheetNoPrint(viewTimesheet):
+    template_name = "finance/timesheet.html"
+
+    @xframe_options_sameorigin
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+class SignTimesheet(SLUGSMixin, FormView):
+    form_class = signPaperworkForm
+    template_name = "finance/sign_timesheet.html"
+    success_url = reverse_lazy("employee:overview")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.pk is not None:
+            self.timesheet = TimeSheet.objects.get(pk=kwargs["timesheet_id"])
+            if self.timesheet.employee.pk != request.user.pk:
+                raise PermissionDenied()
+            self.added_context["timesheet"] = self.timesheet
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        LogEntry.objects.log_action(
+            user_id=self.added_context['timesheet'].employee.pk,
+            content_type_id=ContentType.objects.get_for_model(self.added_context['timesheet'], for_concrete_model=False).pk,
+            object_id=self.added_context['timesheet'].pk,
+            object_repr=str(self.added_context['timesheet']),
+            action_flag=CHANGE,
+            change_message=f"{self.added_context['timesheet'].employee} signed timesheet electronically.",
+        )
+        self.added_context['timesheet'].signed = localtime(now()).date()
+        self.added_context['timesheet'].save()
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            f"Timesheet: {self.added_context['timesheet'].pay_period} has been signed electronically.",
+        )
+        return super().form_valid(form)
 
 class viewSummary(SLUGSMixin, TemplateView):
     template_name = "finance/summary.html"
