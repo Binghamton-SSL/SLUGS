@@ -1,0 +1,18 @@
+<div>
+    <h2 class="mt-5 text-2xl">Mark Time Sheet as Signed</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <p>Type in a Time Sheet ID in order to quickly mark it as signed. Just press enter.</p>
+        <p class="p-1 m-2 text-sm bg-yellow-100 rounded-sm">There is a bug where the date will go away if you type it in. Don't worry, it got the date. It's just not showing it...</p>
+        <div class="flex space-x-2">
+            <input unicorn:model="date" type="date" id="timesheet_signed_date" />
+            <input type="number" class="w-24" min="1" id="TimeSheedMarkedID" placeholder="TS ID" onkeydown="test(event)">
+            <p class="{% if message %}p-2 m-2 my-auto bg-black rounded-sm {% if status == 'g' %}bg-green-500 {% elif status == 'b' %} bg-red-500 {% endif %} {% endif %}">{{message}}</p>
+        </div>
+        <script>
+            const test = (e) => {
+                console.log(e)
+                Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, e.target.value.trim());
+            }
+        </script>
+    </div>
+</div>

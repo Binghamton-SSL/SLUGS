@@ -15,7 +15,7 @@
 * Time Sheets can now be signed electronically
 * Make signup button more noticeable / add redirect on Shows page
 * Add print tag
-* 
+* Quickly mark time sheets as signed using Financial Overview
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
