@@ -6,29 +6,36 @@
 {% block content %}
 <div class="max-w-5xl m-4 md:mx-auto">
     <h1 class="text-4xl">Financial Overview</h1>
-    <h2 class="mt-5 text-2xl">Generate SA Group Billing Summary</h2>
-    <div class="p-4 text-black bg-white rounded">
-        <p>Generate a monthly Billing Summary for all published estimates (invoices) which have a billing contact belonging to an organization containing an SA Account #.</p>
-        <div>
-            <input type="number" class="w-24" max="12" min="1" id="saBillingSummaryMonth" placeholder="Month"/>
-            <input type="number" class="w-24" id="saBillingSummaryYear" placeholder="Year"/>
-            <button onclick="javascript:generateSaBillingSummary()" class="px-2 py-2 m-2 text-white bg-black cursor-pointer">Generate</button>
-        </div>
-        <script>
-            const month = document.getElementById('saBillingSummaryMonth');
-            const year = document.getElementById('saBillingSummaryYear');
-            month.value = (new Date()).getMonth();
-            year.value = (new Date()).getFullYear();
 
-            const generateSaBillingSummary = () => {
-                let url = "{%url 'finance:sa_billing_summary' month="-1" year="-2" %}";
-                url = url.replace('-1', month.value);
-                url = url.replace('-2', year.value);
-                window.location.href = url;
-            }
-        </script>
+    <div class="flex space-x-8">
+        <div class="flex-1">
+            <h2 class="mt-5 text-2xl">Generate SA Group Billing Summary</h2>
+            <div class="p-4 text-black bg-white rounded">
+                <p>Generate a monthly Billing Summary for all published estimates (invoices) which have a billing contact belonging to an organization containing an SA Account #.</p>
+                <div>
+                    <input type="number" class="w-24" max="12" min="1" id="saBillingSummaryMonth" placeholder="Month"/>
+                    <input type="number" class="w-24" id="saBillingSummaryYear" placeholder="Year"/>
+                    <button onclick="javascript:generateSaBillingSummary()" class="px-2 py-2 m-2 text-white bg-black cursor-pointer">Generate</button>
+                </div>
+                <script>
+                    const month = document.getElementById('saBillingSummaryMonth');
+                    const year = document.getElementById('saBillingSummaryYear');
+                    month.value = (new Date()).getMonth();
+                    year.value = (new Date()).getFullYear();
+    
+                    const generateSaBillingSummary = () => {
+                        let url = "{%url 'finance:sa_billing_summary' month="-1" year="-2" %}";
+                        url = url.replace('-1', month.value);
+                        url = url.replace('-2', year.value);
+                        window.location.href = url;
+                    }
+                </script>
+            </div>
+        </div>
+        <div class="flex-1">
+            {% unicorn 'markTimesheetSigned' %}
+        </div>
     </div>
-    {% unicorn 'markTimesheetSigned' %}
     <h2 class="mt-5 text-2xl">Most Recent Pay Period</h2>
     <div class="p-4 text-black bg-white rounded">
         <div class="sm:flex">

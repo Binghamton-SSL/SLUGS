@@ -62,7 +62,12 @@
         </div>
         <div style="width: 4.25in" class="flex flex-col">
             <h1 class="text-3xl font-medium text-right text-gray-400 font-brand">Biweekly Time Sheet</h1>
-            <div class="text-right text-gray-600">
+            <div class="flex-col ml-auto mr-0 text-right text-gray-600">
+                <div class="flex">
+                    <div class="mx-auto">
+                        {{barcode|safe}}
+                    </div>
+                </div>
                 <p>BSSL Time Sheet ID: {{timesheet.pk}}</p>
             </div>
             <div class="flex mt-24">
@@ -208,10 +213,10 @@
             </div>
             <div class="flex mt-10" style="width: 8.5in;">
                 <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
-                    {% if timesheet.signed and timesheet.available_to_auto_sign %}
-                    <div class="absolute" style="width: 4in; bottom: 0.32in; left: 0.55in">
+                    {% if timesheet.signed and timesheet.available_to_auto_sign and employee.signature %}
+                    <div class="absolute" style="width: 4in; bottom: 0.3in; left: 0.55in">
                         <div class="flex space-x-4">
-                            <img src="{{employee.signature|signature_base64}}" style="width: 2.25in;">
+                            <img src="{{employee.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
                             <p class="mt-auto text-right">{{timesheet.signed}}</p>
                         </div>
                     </div>

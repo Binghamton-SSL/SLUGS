@@ -96,8 +96,8 @@ class userCreationForm(UserCreationForm):
                     css_class="flex w-full",
                 ),
                 Div(
-                    "preferred_name",
                     "first_name",
+                    "preferred_name",
                     "last_name",
                 ),
                 "phone_number",
@@ -143,8 +143,8 @@ class userChangeForm(ModelForm):
             ),
             "graduation_year",
             Div(
-                Div("preferred_name", css_class="flex-1"),
                 Div("first_name", css_class="flex-1"),
+                Div("preferred_name", css_class="flex-1"),
                 Div("last_name", css_class="flex-1"),
                 css_class="md:flex md:space-x-2",
             ),

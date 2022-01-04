@@ -238,3 +238,5 @@ SESSION_COOKIE_AGE = 518400
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 JSIGNATURE_JQUERY = "admin"
+
+ADMINS = [('Joe', 'slugs@joebabbitt.com'), ('SLUGS', 'bssl.slugs@binghamtonsa.org')]

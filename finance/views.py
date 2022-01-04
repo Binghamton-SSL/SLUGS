@@ -27,6 +27,7 @@ from finance.models import Estimate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee
 import decimal
 import calendar
+import barcode
 
 
 class viewEstimate(SLUGSMixin, TemplateView):
@@ -55,6 +56,15 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
         employee = Employee.objects.get(pk=kwargs["emp_id"])
         timesheet = TimeSheet.objects.get(employee=employee, pay_period=pay_period)
+        barc = barcode.get('code128', str(timesheet.pk))
+        barc.default_writer_options.update(
+            {   
+                "module_height": 8.0,
+                "font_size": 0,
+                "text_distance": 0,
+            }
+        )
+        self.added_context['barcode'] = str(barc.render()).replace("\\n", "").replace("b'", '').replace("'", "")
         if request.user.pk is not None:
             if employee.pk != request.user.pk and (not has_group(request.user, "Manager")):
                 raise PermissionDenied()

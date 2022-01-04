@@ -53,7 +53,7 @@ class Employee(AbstractUser):
         max_length=100,
         blank=True,
         null=True,
-        help_text="The first name you prefer to go by. This could be a 'Chosen Name' or a nickname.",
+        help_text="The first name you prefer to go by. This could be a chosen name or a nickname. This is not required.",
     )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)

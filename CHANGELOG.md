@@ -1,4 +1,4 @@
-### V2.2.1 - In Progress
+### V2.3.0 - In Progress
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
 * Add ability to automatically sign forms using user signature
@@ -16,9 +16,13 @@
 * Make signup button more noticeable / add redirect on Shows page
 * Add print tag
 * Quickly mark time sheets as signed using Financial Overview
+* Add barcode to timesheets
+* Add timesheet quick process
+
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
+    * Move 404 page to correct place
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

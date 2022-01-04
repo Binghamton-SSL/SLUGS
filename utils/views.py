@@ -11,11 +11,11 @@ class restartServer(View, isAdminMixin):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            "Server will restart momentarily. Expect a 15-30 second interruption to service.",
+            "Server will restart momentarily. Expect a 1-2 minute interruption to service.",
         )
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         return HttpResponse(
-            "Server will restart momentarily. Expect a 15-30 second interruption to service."
+            "Server will restart momentarily. Expect a 1-2 minute interruption to service."
         )
