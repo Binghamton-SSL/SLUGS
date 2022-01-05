@@ -7,6 +7,8 @@ from equipment.models import System, SystemAddon
 from finance.models import Fee
 
 
+# THIS HAS TO BE REDONE
+
 class Command(BaseCommand):
     help = "Sets up environment for development (create Manager group, ...)"
 

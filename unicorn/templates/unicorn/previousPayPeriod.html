@@ -27,7 +27,7 @@
                             <span>End: {{shift.time_out}}</span>
                         </div>
                         <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
-                            <span>Rate: ${{shift.content_object.position.hourly_rate.hourly_rate}}/hr</span>
+                            <span>Rate: ${{shift.paid_at}}/hr</span>
                             <span>Total: ${{shift.cost|floatformat:2}}</span>
                             {% if shift.processed %}
                             <div class="bg-[#009961] text-white px-4 py-2 my-2 rounded-sm text-center">Accepted</div>

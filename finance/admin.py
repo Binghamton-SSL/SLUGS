@@ -2,6 +2,7 @@ from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from finance.models import (
+    HourlyRate,
     Payment,
     TimeSheet,
     Wage,
@@ -14,45 +15,16 @@ from finance.models import (
 )
 from nested_admin import NestedGenericTabularInline
 from djangoql.admin import DjangoQLSearchMixin
-from django.db.models import Q
 
 
-# Register your models here.
+class HourlyRateInline(admin.StackedInline):
+    model = HourlyRate
+    extra = 0
 
-class WageActiveFilter(admin.SimpleListFilter):
-    title = "Is Wage active?"
-
-    parameter_name = "active"
-
-    def lookups(self, request, model_admin):
-        return (
-            ('t', 'True'),
-            ('f', 'False')
-        )
-    
-    def queryset(self, request, queryset):
-        if self.value() == 't':
-            return queryset.filter(
-                Q(date_active__lte=datetime.now())
-                &
-                (
-                    Q(date_inactive__gte=datetime.now())
-                    |
-                    Q(date_inactive=None)
-                )
-            )
-        elif self.value() == 'f':
-            return queryset.filter(
-                Q(date_active__gte=datetime.now())
-                |
-                Q(date_inactive__lte=datetime.now())
-            )
-            
 
 @admin.register(Wage)
 class WageAdmin(admin.ModelAdmin):
-    list_filter = (WageActiveFilter,)
-    pass
+    inlines = [HourlyRateInline]
 
 
 @admin.register(Shift)

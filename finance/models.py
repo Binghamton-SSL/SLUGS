@@ -15,12 +15,46 @@ from django.core.validators import ValidationError
 
 class Wage(models.Model):
     name = models.CharField(max_length=64)
-    hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
-    date_active = models.DateField(default=date.today)
-    date_inactive = models.DateField(blank=True, null=True)
+
+    def get_current_rate(self):
+        return self.hourlyrate_set.filter(
+            Q(date_active__lte=datetime.now())
+            &
+            (
+                Q(date_inactive__gt=datetime.now())
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
+
+    def get_is_active(self):
+        return True if self.get_current_rate() is not None else False
+
+    def get_active_rate(self):
+        current = self.get_current_rate()
+        return current if current else self.hourlyrate_set.order_by("date_inactive").last()
+
+    def get_rate_at_date(self, date):
+        return self.hourlyrate_set.filter(
+            Q(date_active__lte=date)
+            &
+            (
+                Q(date_inactive__gte=date)
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
 
     def __str__(self):
-        return f"{self.name} - ${self.hourly_rate}/hr - {self.date_active}"
+        return self.name
+        # return f"{self.name} - ${self.get_active_rate().hourly_rate}/hr"
+
+
+class HourlyRate(models.Model):
+    wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
+    date_active = models.DateField(default=date.today)
+    date_inactive = models.DateField(blank=True, null=True)
+    hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
 
 
 class Fee(models.Model):
@@ -211,7 +245,7 @@ class Shift(models.Model):
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
         if self.paid_at is None or self.paid_at == 0.00:
-            self.paid_at = self.content_object.position.hourly_rate.hourly_rate
+            self.paid_at = self.content_object.position.hourly_rate.get_rate_at_date(self.time_in).hourly_rate
         if self.description is None:
             self.description = self.__str__()
         if self.time_in and self.time_out:

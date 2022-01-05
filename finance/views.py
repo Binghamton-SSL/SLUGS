@@ -23,7 +23,7 @@ from django.db.models import Sum
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
-from finance.models import Estimate, PayPeriod, Shift, TimeSheet, Wage
+from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee
 import decimal
 import calendar
@@ -70,20 +70,23 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                 raise PermissionDenied()
         shifts = pay_period.shifts.none()
         rates = {}
-        for rate in Wage.objects.filter(
-            Q(date_active__lte=pay_period.end)
-            &
-            (
-                Q(date_inactive__gte=pay_period.end)
-                |
-                Q(date_inactive=None)
-            )
-        ).order_by("hourly_rate"):
-            rates[rate] = [rate, 0]
         for shift in pay_period.shifts.all():
             if shift.content_object.employee == employee and shift.processed:
                 shifts |= Shift.objects.filter(pk=shift.pk)
-                rates[shift.content_object.position.hourly_rate][1] += (
+                rate_of_pay = HourlyRate.objects.get(
+                    Q(wage=shift.content_object.position.hourly_rate)
+                    &
+                    Q(date_active__lte=shift.time_in)
+                    &
+                    (
+                        Q(date_inactive__gt=shift.time_in)
+                        |
+                        Q(date_inactive=None)
+                    )
+                )
+                if rate_of_pay not in rates:
+                    rates[rate_of_pay] = [rate_of_pay, 0]
+                rates[rate_of_pay][1] += (
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                 )
         table_rows = []
@@ -181,7 +184,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["pay_period"] = pay_period
         self.added_context["timesheet"] = timesheet
         self.added_context["table_rows"] = table_rows
-        self.added_context["rates"] = rates
+        self.added_context["rates"] = dict(sorted(rates.items(), key=lambda item: item[0].hourly_rate))
         self.added_context["t_total"] = t_total
         self.added_context["t_amt"] = shifts.aggregate(Sum("cost"))
         return super().dispatch(request, *args, **kwargs)
@@ -253,7 +256,7 @@ class exportSummaryCSV(SLUGSMixin, View):
         writer = csv.writer(response)
         writer.writerow(
             ["B-num", "Name"]
-            + [f"{rate.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
+            + [f"{rate.wage.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
             + ["Total Hours", "Gross Pay"]
             + ["Pay Period Start", "Pay Period End", "Payday"]
         )

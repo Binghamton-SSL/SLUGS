@@ -3,7 +3,7 @@ from copy import deepcopy
 from django.utils import timezone
 from training.models import Trainee
 from gig.models import Job
-from finance.models import PayPeriod, Shift, TimeSheet, Wage
+from finance.models import HourlyRate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee, OfficeHours
 from django.db.models import Q
 
@@ -28,16 +28,6 @@ def prepareSummaryData(pp_id):
     total_sum = 0
     pay_period = PayPeriod.objects.get(pk=pp_id)
     rates = {}
-    for rate in Wage.objects.filter(
-            Q(date_active__lte=pay_period.end)
-            &
-            (
-                Q(date_inactive__gte=pay_period.end)
-                |
-                Q(date_inactive=None)
-            )
-    ).order_by("hourly_rate"):
-        rates[rate] = [rate, 0]
     employees = {}
 
     try:
@@ -51,7 +41,7 @@ def prepareSummaryData(pp_id):
                 "bnum": employee.bnum,
                 "name": f"{employee.first_name} {employee.last_name}",
                 "shifts": [],
-                "rates": deepcopy(rates),
+                "rates": {},
                 "total_amount": 0.00,
                 "total_hours": 0.00,
             }
@@ -59,12 +49,27 @@ def prepareSummaryData(pp_id):
             if TimeSheet.objects.get(paid_during=pay_period, employee=employee).signed is not None:
                 for shift in pay_period.shifts.all():
                     if shift.processed:
+                        rate_of_pay = HourlyRate.objects.get(
+                            Q(wage=shift.content_object.position.hourly_rate)
+                            &
+                            Q(date_active__lte=shift.time_in)
+                            &
+                            (
+                                Q(date_inactive__gt=shift.time_in)
+                                |
+                                Q(date_inactive=None)
+                            )
+                        )
+                        if rate_of_pay not in rates:
+                            rates[rate_of_pay] = [rate_of_pay, 0]
+                        if rate_of_pay not in employees[shift.content_object.employee.bnum]["rates"]:
+                            employees[shift.content_object.employee.bnum]["rates"][rate_of_pay] = [rate_of_pay, 0]
+                        employees[shift.content_object.employee.bnum]["rates"][rate_of_pay][1] += (
+                            round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                        )
                         employees[shift.content_object.employee.bnum]["shifts"].append(shift)
-                        employees[shift.content_object.employee.bnum]["rates"][
-                            shift.content_object.position.hourly_rate
-                        ][1] += (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
                         employees[shift.content_object.employee.bnum]["total_amount"] += float(
-                            shift.content_object.position.hourly_rate.hourly_rate
+                            rate_of_pay.hourly_rate
                         ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
                         employees[shift.content_object.employee.bnum]["total_hours"] += (
                             round(shift.total_time / timezone.timedelta(minutes=15)) / 4
@@ -74,7 +79,7 @@ def prepareSummaryData(pp_id):
                             round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                         )
                         total_sum += float(
-                            shift.content_object.position.hourly_rate.hourly_rate
+                            rate_of_pay.hourly_rate
                         ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
         return {
             "rates": rates,
@@ -96,18 +101,30 @@ def prepareSummaryData(pp_id):
                 "bnum": employee.bnum,
                 "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
                 "shifts": [],
-                "rates": deepcopy(rates),
+                "rates": rates,
                 "total_amount": 0.00,
                 "total_hours": 0.00,
             }
         for shift in pay_period.shifts.all():
             if shift.processed:
+                rate_of_pay = HourlyRate.objects.get(
+                    Q(wage=shift.content_object.position.hourly_rate)
+                    &
+                    Q(date_active__lte=shift.time_in)
+                    &
+                    (
+                        Q(date_inactive__gt=shift.time_in)
+                        |
+                        Q(date_inactive=None)
+                    )
+                )
+                if rate_of_pay not in rates:
+                    rates[rate_of_pay] = [rate_of_pay, 0]
+                if rate_of_pay not in employees[shift.content_object.employee.bnum]["rates"]:
+                    employees[shift.content_object.employee.bnum]["rates"][rate_of_pay] = [rate_of_pay, 0]
                 employees[shift.content_object.employee.bnum]["shifts"].append(shift)
-                employees[shift.content_object.employee.bnum]["rates"][
-                    shift.content_object.position.hourly_rate
-                ][1] += (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
                 employees[shift.content_object.employee.bnum]["total_amount"] += float(
-                    shift.content_object.position.hourly_rate.hourly_rate
+                    rate_of_pay.hourly_rate
                 ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
                 employees[shift.content_object.employee.bnum]["total_hours"] += (
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
@@ -117,7 +134,7 @@ def prepareSummaryData(pp_id):
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                 )
                 total_sum += float(
-                    shift.content_object.position.hourly_rate.hourly_rate
+                    rate_of_pay.hourly_rate
                 ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
         return {
             "rates": rates,

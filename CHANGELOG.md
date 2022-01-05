@@ -23,6 +23,7 @@
 BUG FIXES:
     * Fix formatting error in estimate signature box
     * Move 404 page to correct place
+    * Wages would still have been overwritten due to Job-Wage relationship. Changed Wage date/pay structure
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin
