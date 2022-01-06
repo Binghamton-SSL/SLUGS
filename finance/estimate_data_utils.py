@@ -25,6 +25,8 @@ def calculateGigCost(estimate):
         dept = system.department
         dept_loadins = ret["loadins"].filter(department=dept)
 
+        current_price = system.get_price_at_date(ret["gig"].start)
+
         system_subtotal = decimal.Decimal(0.00)
 
         rented_start = dept_loadins.order_by("shop_time").first().shop_time
@@ -58,13 +60,13 @@ def calculateGigCost(estimate):
             )
 
         system_subtotal += round(
-            system.base_price + system.price_per_hour * total_time_rented,
+            current_price.base_price + current_price.price_per_hour * total_time_rented,
             2,
         )
 
         ret["systems"][system] = [
             system,
-            total_time_rented if system.price_per_hour else 1,
+            total_time_rented if current_price.price_per_hour else 1,
             system_subtotal,
             False,
         ]
@@ -75,15 +77,17 @@ def calculateGigCost(estimate):
             addon = addon_set_item.addon
             addon.addl_description = addon_set_item.description
 
+            current_price = addon.get_price_at_date(ret["gig"].start)
+
             addon_subtotal = round(
-                addon.base_price * addon_set_item.qty
+                current_price.base_price * addon_set_item.qty
                 + (
-                    addon.price_per_hour_for_duration_of_gig
+                    current_price.price_per_hour
                     * addon_set_item.qty
                     * total_time_rented
                 )
                 + (
-                    addon.price_per_hour_for_load_in_out_ONLY
+                    current_price.price_per_hour_for_load_in_out_ONLY
                     * addon_set_item.qty
                     * total_loadin_time
                 ),
@@ -94,9 +98,9 @@ def calculateGigCost(estimate):
             ret["systems"][addon_set_item.pk] = [
                 addon,
                 addon_set_item.qty * total_time_rented
-                if addon.price_per_hour_for_duration_of_gig != 0.00
+                if current_price.price_per_hour != 0.00
                 else addon_set_item.qty * total_loadin_time
-                if addon.price_per_hour_for_load_in_out_ONLY
+                if current_price.price_per_hour_for_load_in_out_ONLY
                 else addon_set_item.qty,
                 addon_subtotal,
                 True,

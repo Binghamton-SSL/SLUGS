@@ -50,11 +50,36 @@ class Wage(models.Model):
         # return f"{self.name} - ${self.get_active_rate().hourly_rate}/hr"
 
 
-class HourlyRate(models.Model):
-    wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
+class Pricing(models.Model):
     date_active = models.DateField(default=date.today)
     date_inactive = models.DateField(blank=True, null=True)
+
+
+class HourlyRate(models.Model):
+    wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
     hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
+    date_active = models.DateField(default=date.today)
+    date_inactive = models.DateField(blank=True, null=True)
+
+
+class BasePricing(Pricing):
+    base_price = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00
+    )
+    price_per_hour = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00
+    )
+
+
+class SystemPricing(BasePricing):
+    system = models.ForeignKey("equipment.System", on_delete=models.CASCADE)
+
+
+class SystemAddonPricing(BasePricing):
+    addon = models.ForeignKey("equipment.SystemAddon", on_delete=models.CASCADE)
+    price_per_hour_for_load_in_out_ONLY = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00
+    )
 
 
 class Fee(models.Model):

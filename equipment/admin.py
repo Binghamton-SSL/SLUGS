@@ -1,9 +1,11 @@
 from django.contrib import admin
 from equipment.models import System, BrokenEquipmentReport, SystemAddon
+from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
 
 @admin.register(SystemAddon)
 class SystemAddon(admin.ModelAdmin):
+    inlines = [SystemAddonPricingInline]
     search_fields = ["name"]
     pass
 
@@ -11,6 +13,7 @@ class SystemAddon(admin.ModelAdmin):
 # Register your models here.
 @admin.register(System)
 class SystemAdmin(admin.ModelAdmin):
+    inlines = [SystemPricingInline]
     search_fields = ["name"]
     pass
 

@@ -19,6 +19,7 @@
 * Add barcode to timesheets
 * Add timesheet quick process
 * Add customized shift calendar ICS for all employees
+* Systems and Addons can now adjust in price over time
 
 <br><br>
 BUG FIXES:

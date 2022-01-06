@@ -1,6 +1,8 @@
+from datetime import datetime
 from django.db import models
 from gig.models import DEPARTMENTS
 import employee.models as employee
+from django.db.models import Q
 
 
 # Create your models here.
@@ -8,12 +10,35 @@ class System(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
-    base_price = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
-    )
-    price_per_hour = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True
-    )
+
+    def get_current_price(self):
+        return self.systempricing_set.filter(
+            Q(date_active__lte=datetime.now())
+            &
+            (
+                Q(date_inactive__gt=datetime.now())
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
+
+    def get_is_active(self):
+        return True if self.get_current_price() is not None else False
+
+    def get_active_price(self):
+        current = self.get_current_price()
+        return current if current else self.systempricing_set.order_by("date_inactive").last()
+
+    def get_price_at_date(self, date):
+        return self.systempricing_set.filter(
+            Q(date_active__lte=date)
+            &
+            (
+                Q(date_inactive__gte=date)
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
 
     def __str__(self):
         return self.department + " - " + self.name
@@ -23,13 +48,35 @@ class SystemAddon(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
-    base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    price_per_hour_for_duration_of_gig = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0.00
-    )
-    price_per_hour_for_load_in_out_ONLY = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0.00
-    )
+
+    def get_current_price(self):
+        return self.systemaddonpricing_set.filter(
+            Q(date_active__lte=datetime.now())
+            &
+            (
+                Q(date_inactive__gt=datetime.now())
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
+
+    def get_is_active(self):
+        return True if self.get_current_price() is not None else False
+
+    def get_active_price(self):
+        current = self.get_current_price()
+        return current if current else self.systemaddonpricing_set.order_by("date_inactive").last()
+
+    def get_price_at_date(self, date):
+        return self.systemaddonpricing_set.filter(
+            Q(date_active__lte=date)
+            &
+            (
+                Q(date_inactive__gte=date)
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
 
     def __str__(self):
         return self.name

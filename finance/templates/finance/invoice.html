@@ -1,6 +1,7 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
 {% load static %}
+{% load finance_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -237,31 +238,35 @@
                                             {% if system.description %}
                                             <span class="text-xs">{{system.description}}</span><br>
                                             {% endif %}
-                                            {% if system.base_price %}
-                                            Flat Rate
-                                            {% endif %}
-                                            {% if system.price_per_hour %}
-                                            Hourly Rate
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start %}
+                                                {% if pricing.base_price %}
+                                                Flat Rate
+                                                {% endif %}
+                                                {% if pricing.price_per_hour %}
+                                                Hourly Rate
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
                                             {{qty}}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {% if system.base_price %}
-                                            {{system.base_price}}
-                                            {% elif system.price_per_hour %}
-                                            {{system.price_per_hour}}
-                                            {% elif system.price_per_hour_for_duration_of_gig %}
-                                            {{system.price_per_hour_for_duration_of_gig}}
-                                            {% elif system.price_per_hour_for_load_in_out_ONLY %}
-                                            {{system.price_per_hour_for_load_in_out_ONLY}}
-                                            {% else %}
-                                            0.00
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                {% if pricing.base_price %}
+                                                {{pricing.base_price}}
+                                                {% elif pricing.price_per_hour %}
+                                                {{pricing.price_per_hour}}
+                                                {% elif pricing.price_per_hour_for_duration_of_gig %}
+                                                {{pricing.price_per_hour_for_duration_of_gig}}
+                                                {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
+                                                {{pricing.price_per_hour_for_load_in_out_ONLY}}
+                                                {% else %}
+                                                0.00
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{total_price}}
+                                            ${{total_price}}
                                         </td>
                                     </tr>
                                     {% endfor %}

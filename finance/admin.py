@@ -4,6 +4,8 @@ from django.utils.html import format_html
 from finance.models import (
     HourlyRate,
     Payment,
+    SystemAddonPricing,
+    SystemPricing,
     TimeSheet,
     Wage,
     Shift,
@@ -19,6 +21,16 @@ from djangoql.admin import DjangoQLSearchMixin
 
 class HourlyRateInline(admin.StackedInline):
     model = HourlyRate
+    extra = 0
+
+
+class SystemPricingInline(admin.StackedInline):
+    model = SystemPricing
+    extra = 0
+
+
+class SystemAddonPricingInline(admin.StackedInline):
+    model = SystemAddonPricing
     extra = 0
 
 
