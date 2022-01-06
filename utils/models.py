@@ -1,10 +1,12 @@
+import re
 from django.db import models
 from django.urls import reverse
 import django.utils.timezone as timezone
 from tinymce.models import HTMLField
 from django_ical.views import ICalFeed
 from icalendar import vCalAddress, vText
-from gig.models import Gig
+from gig.models import Gig, Job
+from employee.models import Employee
 from django.contrib.auth.models import Group
 
 
@@ -199,3 +201,93 @@ class SoundFeed(DeptFeed):
 
 class StageFeed(DeptFeed):
     department = ("T", "Stage")
+
+
+# Item Schema: 
+# {
+#     start: datetime,
+#     end: datetime,
+#     title: str,
+#     description: str,
+#     location: str,
+#     link: str,
+# }
+class EmployeeFeed(ICalFeed):
+    employee = None
+
+    def get_object(self, request, *args, **kwargs):
+        return int(kwargs['emp_id'])
+
+    def __init__(self):
+        self.product_id = "-//slugs.bssl.binghamtonsa.org//SHIFT_CAL//EN"
+        self.title = "BSSL Work Calendar"
+        self.description = "Shifts you work for BSSL"
+        self.file_name = "BSSL_shifts.ics"
+
+    def items(self, emp_id):
+        # TODO - Add trainings
+        self.employee = Employee.objects.get(pk=emp_id)
+        items = []
+        jobs = (
+            Job.objects.filter(employee=self.employee)
+        )
+        for job in jobs.all():
+            gig = Gig.objects.get(pk=job.gig.pk)
+            your_load_ins = gig.loadin_set.filter(
+                department=job.department
+            ).order_by("load_in")
+            for load_in in your_load_ins.all():
+                items.append({
+                    "start": load_in.load_in,
+                    "end": load_in.load_out,
+                    "title": f"{gig.org} - {gig.name}",
+                    "description": "",
+                    "location": gig.location,
+                    "link": reverse("gig:showView", args=[gig.pk]),
+                })
+            items.append({
+                "start": gig.setup_by,
+                "end": gig.setup_by,
+                "title": f"SETUP BY TIME: {gig.org} - {gig.name}",
+                "description": "",
+                "location": gig.location,
+                "link": reverse("gig:showView", args=[gig.pk]),
+            })
+            items.append({
+                "start": gig.start,
+                "end": gig.end,
+                "title": f"SHOW: {gig.org} - {gig.name}",
+                "description": re.sub('<[^<]+?>', '', gig.notes),
+                "location": gig.location,
+                "link": reverse("gig:showView", args=[gig.pk]),
+            })
+        return items
+
+    def item_title(self, item):
+        return item["title"]
+
+    def item_description(self, item):
+        return item["description"]
+
+    def item_guid(self, item):
+        return f'{self.product_id}-{item["title"]}-{item["start"]}-{item["link"]}'
+
+    def item_link(self, item):
+        return item["link"]
+
+    def item_location(self, item):
+        return item["location"]
+
+    def item_organizer(self, item):
+        organizer = vCalAddress("MAILTO:bssl@binghamtonsa.org")
+        organizer.params["cn"] = vText("Binghamton Sound Stage & Lighting")
+        return organizer
+
+    def item_start_datetime(self, item):
+        return item["start"]
+
+    def item_end_datetime(self, item):
+        return item["end"]
+
+    def item_status(self, item):
+        return "CONFIRMED"

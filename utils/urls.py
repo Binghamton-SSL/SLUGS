@@ -13,5 +13,6 @@ urlpatterns = [
     path("latest/lighting_work.ics", models.LightingFeed(), name="lightingFeed"),
     path("latest/sound_work.ics", models.SoundFeed(), name="soundFeed"),
     path("latest/stage_work.ics", models.StageFeed(), name="stageFeed"),
+    path("<emp_id>/shifts.ics", models.EmployeeFeed(), name="employeeFeed"),
     path("server/restart", views.restartServer.as_view(), name="restartServer"),
 ]

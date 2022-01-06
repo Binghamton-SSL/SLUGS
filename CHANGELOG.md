@@ -18,6 +18,7 @@
 * Quickly mark time sheets as signed using Financial Overview
 * Add barcode to timesheets
 * Add timesheet quick process
+* Add customized shift calendar ICS for all employees
 
 <br><br>
 BUG FIXES:
