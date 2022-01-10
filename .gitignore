@@ -14,4 +14,3 @@ exports/
 .coverage
 migrations/
 htmlcov/
-venv/
