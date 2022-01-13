@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "hijack.contrib.admin",
     "djangoql",
     "jsignature",
+    "adminsortable2",
 ]
 
 MIDDLEWARE = [
@@ -239,4 +240,4 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 JSIGNATURE_JQUERY = "admin"
 
-ADMINS = [('Joe', 'slugs@joebabbitt.com'), ('SLUGS', 'bssl.slugs@binghamtonsa.org')]
+ADMINS = [('SLUGS', 'bssl.slugs@binghamtonsa.org')]

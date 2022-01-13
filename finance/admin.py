@@ -2,6 +2,7 @@ from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from finance.models import (
+    FeePricing,
     HourlyRate,
     Payment,
     SystemAddonPricing,
@@ -17,6 +18,8 @@ from finance.models import (
 )
 from nested_admin import NestedGenericTabularInline
 from djangoql.admin import DjangoQLSearchMixin
+from adminsortable2.admin import SortableInlineAdminMixin
+
 
 
 class HourlyRateInline(admin.StackedInline):
@@ -26,6 +29,11 @@ class HourlyRateInline(admin.StackedInline):
 
 class SystemPricingInline(admin.StackedInline):
     model = SystemPricing
+    extra = 0
+
+
+class FeePricingInline(admin.StackedInline):
+    model = FeePricing
     extra = 0
 
 
@@ -55,7 +63,7 @@ class ShiftInlineAdmin(NestedGenericTabularInline):
     extra = 0
 
 
-class OneTimeFeeInline(admin.StackedInline):
+class OneTimeFeeInline(SortableInlineAdminMixin, admin.StackedInline):
     model = OneTimeFee
     extra = 0
 
@@ -63,6 +71,7 @@ class OneTimeFeeInline(admin.StackedInline):
 @admin.register(Fee)
 class FeeAdmin(admin.ModelAdmin):
     ordering = ["ordering"]
+    inlines = [FeePricingInline]
     pass
 
 

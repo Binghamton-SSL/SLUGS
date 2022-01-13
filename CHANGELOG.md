@@ -21,6 +21,10 @@
 * Add customized shift calendar ICS for all employees
 * Systems and Addons can now adjust in price over time
 * "Awaiting Paperwork" and "Cannot Work" groups are automatically added and removed based on paperwork status
+* Move all fees to an inline and subclass prepared fees
+* Allow fees to be sorted naturally
+* Allow pricing of fees to change over time
+* Improve code reuse/duplication
 
 <br><br>
 BUG FIXES:
