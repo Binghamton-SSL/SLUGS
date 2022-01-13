@@ -54,7 +54,7 @@ orjson==3.5.2
 packaging==20.9
 pathspec==0.8.1
 phonenumberslite==8.12.22
-Pillow==8.3.2
+Pillow==9.0.0
 pkg_resources==0.0.0
 poyo==0.5.0
 protobuf==3.16.0
