@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -68,5 +69,14 @@ class index(SLUGSMixin, TemplateView):
                 Gig.objects.get(pk=next_gig_id[0]["gig__id"])
                 if (len(next_gig_id) > 0)
                 else None
+            )
+            self.added_context["outstanding_paperwork"] = request.user.paperworkform_set.filter(
+                Q(processed=False)
+                &
+                (
+                    Q(form__required_for_employment=True)
+                    |
+                    Q(form__required_for_payroll=True)
+                )
             )
         return super().dispatch(request, *args, **kwargs)

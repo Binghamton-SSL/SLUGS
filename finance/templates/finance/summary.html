@@ -2,6 +2,7 @@
 {% load slugs_components %}
 {% load humanize %}
 {% load static %}
+{% load finance_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -118,8 +119,8 @@
                 <tr>
                     <td>{{emp.bnum}}</td>
                     <td>{{emp.name}}</td>
-                    {% for rate in emp.rates.values %}
-                        <td>{% if rate.1 is not 0 %}{{rate.1}}{% else %}-{% endif %}</td>
+                    {% for rate in rates %}
+                        <td>{% if emp.rates|get_hour_value:rate %}{{emp.rates|get_hour_value:rate}}{% else %}-{% endif %}</td>
                     {% endfor %}
                     <td>{{emp.total_hours}}</td>
                     <td>${{emp.total_amount|floatformat:2|intcomma}}</td>
