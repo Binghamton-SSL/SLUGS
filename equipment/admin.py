@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models.lookups import EndsWith
 from equipment.models import System, BrokenEquipmentReport, SystemAddon, Equipment, Category, ServiceRecord, Item, SystemQuantity, SystemQuantityAddon
 from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
@@ -21,17 +20,15 @@ class EquipmentAddonInline(admin.StackedInline):
 
 
 @admin.register(SystemAddon)
-class SystemAddon(admin.ModelAdmin):
+class SystemAddonAdmin(admin.ModelAdmin):
     inlines = [SystemAddonPricingInline, EquipmentAddonInline]
     search_fields = ["name"]
-    pass
 
 
 @admin.register(System)
 class SystemAdmin(admin.ModelAdmin):
     inlines = [SystemPricingInline, EquipmentInline]
     search_fields = ["name"]
-    pass
 
 
 @admin.register(BrokenEquipmentReport)
@@ -52,30 +49,20 @@ class BrokenEquipmentReportAdmin(admin.ModelAdmin):
 @admin.register(Equipment)
 class Equipment(admin.ModelAdmin):
     inlines = [ItemInline]
-    search_fields = ["name"]
-    pass
+    search_fields = ["name", "brand", "model_number", "reorder_link"]
 
 
 @admin.register(Category)
 class Category(admin.ModelAdmin):
     search_fields = ["name"]
-    pass
 
 
 @admin.register(ServiceRecord)
 class ServiceRecord(admin.ModelAdmin):
     inlines = [ItemInline]
-    search_fields = ["name"]
-    pass
+    search_fields = ["name", "date_created"]
 
 
 @admin.register(Item)
 class Item(admin.ModelAdmin):
     search_fields = ["id"]
-    pass
-
-
-@admin.register(SystemQuantity)
-class SystemQuantity(admin.ModelAdmin):
-    search_fields = ["system"]
-    pass

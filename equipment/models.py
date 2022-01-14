@@ -13,20 +13,30 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+         verbose_name = "Category"
+         verbose_name_plural = "Categories"
+
 class Equipment(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
-    brand = models.CharField(max_length=200)
-    model_number = models.CharField(max_length=200)
+    brand = models.CharField(max_length=200, blank=True, null=True)
+    model_number = models.CharField(max_length=200, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
-    value = models.PositiveIntegerField(default=0)
-    wattage = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    value = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    wattage = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     purchase_date = models.DateField(default=date.today)
     reorder_link = models.URLField(blank=True)
 
     def __str__(self):
+        if self.brand:
+            return f"{self.name}"
+
         return f"{self.name} ({self.brand})"
+
+    class Meta:
+         verbose_name_plural = "Equipment"
 
 
 class System(models.Model):
@@ -126,22 +136,23 @@ class BrokenEquipmentReport(models.Model):
 
 
 # new models
-class ServiceRecord(models.Model):
-    name = models.CharField(max_length=200)
-    date_created = models.DateField(default=date.today)
-    note = models.TextField()
-
-    def __str__(self):
-        return f"{self.name} on {self.date_created}"
-
-
 class Item(models.Model):
-    id = models.IntegerField(primary_key=True)
-    serial_no = models.ForeignKey(Equipment, on_delete=models.CASCADE)
-    service_record = models.ForeignKey(ServiceRecord, on_delete=models.CASCADE)
+    serial_no = models.CharField(max_length=200)
+    item_type = models.ForeignKey(Equipment, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.serial_no}"
+
+
+class ServiceRecord(models.Model):
+    name = models.CharField(max_length=200)
+    date_created = models.DateField(auto_now_add=True)
+    date_last_modified = models.DateField(auto_now=True)
+    note = models.TextField()
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} on {self.date_created}"
 
 
 class BaseQuantity(models.Model):
@@ -161,7 +172,7 @@ class SystemQuantity(BaseQuantity):
 
 
 class SystemQuantityAddon(BaseQuantity):
-    system = models.ForeignKey(SystemAddon, on_delete=models.CASCADE)
+    system_addon = models.ForeignKey(SystemAddon, on_delete=models.CASCADE)
 
     def __str__(self):
         return super().__str__() + f"System: {self.system}"
