@@ -12,42 +12,18 @@ from tinymce.models import HTMLField
 import decimal
 from django.core.validators import ValidationError
 
+from utils.models import PricingMixin
 
-class Wage(models.Model):
+
+class Wage(PricingMixin, models.Model):
     name = models.CharField(max_length=64)
 
-    def get_current_rate(self):
-        return self.hourlyrate_set.filter(
-            Q(date_active__lte=datetime.now())
-            &
-            (
-                Q(date_inactive__gt=datetime.now())
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
-
-    def get_is_active(self):
-        return True if self.get_current_rate() is not None else False
-
-    def get_active_rate(self):
-        current = self.get_current_rate()
-        return current if current else self.hourlyrate_set.order_by("date_inactive").last()
-
-    def get_rate_at_date(self, date):
-        return self.hourlyrate_set.filter(
-            Q(date_active__lte=date)
-            &
-            (
-                Q(date_inactive__gte=date)
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
+    def __init__(self, *args, **kwargs):
+        self.pricing_set = self.hourlyrate_set
+        super().__init__(*args, **kwargs)
 
     def __str__(self):
         return self.name
-        # return f"{self.name} - ${self.get_active_rate().hourly_rate}/hr"
 
 
 class Pricing(models.Model):
@@ -82,10 +58,13 @@ class SystemAddonPricing(BasePricing):
     )
 
 
-class Fee(models.Model):
+class Fee(PricingMixin, models.Model):
+
+    def __init__(self, *args, **kwargs):
+        self.pricing_set = self.feepricing_set
+        super().__init__(*args, **kwargs)
+
     name = models.CharField(max_length=64)
-    amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
-    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     description = models.CharField(max_length=512, blank=True, null=True)
     ordering = models.DecimalField(
         max_digits=5,
@@ -94,16 +73,40 @@ class Fee(models.Model):
         help_text="Relative order of fee, 0 is top importance. Does not have to be unique. I suggest\n 0=before booking, 1=during booking, 2=during show, 3=during invoice, 4=after invoice.",
     )
 
+    class Meta:
+        verbose_name = "Predefined Fee"
+
     def __str__(self):
-        return f"{self.name} - {f'${self.amount}' if self.amount else f'{self.percentage}%' if self.percentage else ''}"  # noqa
+        return f"{self.name} - {f'${self.get_current_price().amount}' if self.get_current_price() and self.get_current_price().amount else f'{self.get_current_price().percentage}%' if self.get_current_price() and self.get_current_price().percentage else ''}"  # noqa
+
+
+class FeePricing(Pricing):
+    fee = models.ForeignKey(Fee, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
 
 class OneTimeFee(models.Model):
+    prepared_fee = models.ForeignKey(Fee, on_delete=models.PROTECT, blank=True, null=True, help_text="Auto-fill the fee with a prepared fee")
     estimate = models.ForeignKey("finance.Estimate", on_delete=models.CASCADE)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, blank=True, null=True)
     amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     description = models.CharField(max_length=512, blank=True, null=True)
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta:
+        verbose_name = "Fee"
+        ordering = ["order"]
+
+    def save(self, *args, **kwargs):
+        if self.prepared_fee:
+            pricing = self.prepared_fee.get_price_at_date(self.estimate.gig.start)
+            self.name = self.prepared_fee.name
+            self.amount = pricing.amount
+            self.percentage = pricing.percentage
+            self.description = self.prepared_fee.description
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - {f'${self.amount}' if self.amount else f'{self.percentage}%' if self.percentage else ''}"  # noqa
@@ -270,7 +273,7 @@ class Shift(models.Model):
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
         if self.paid_at is None or self.paid_at == 0.00:
-            self.paid_at = self.content_object.position.hourly_rate.get_rate_at_date(self.time_in).hourly_rate
+            self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(self.time_in).hourly_rate
         if self.description is None:
             self.description = self.__str__()
         if self.time_in and self.time_out:

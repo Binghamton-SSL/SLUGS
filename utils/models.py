@@ -8,6 +8,8 @@ from icalendar import vCalAddress, vText
 from gig.models import Gig, Job
 from employee.models import Employee
 from django.contrib.auth.models import Group
+from django.db.models import Q
+from datetime import datetime
 
 
 # Create your models here.
@@ -291,3 +293,32 @@ class EmployeeFeed(ICalFeed):
 
     def item_status(self, item):
         return "CONFIRMED"
+
+
+class PricingMixin:
+    pricing_set = None
+
+    def get_current_price(self):
+        return self.pricing_set.filter(
+            Q(date_active__lte=datetime.now())
+            &
+            (
+                Q(date_inactive__gt=datetime.now())
+                |
+                Q(date_inactive=None)
+            )
+        ).first()
+
+    def get_is_active(self):
+        return True if self.get_current_price() is not None else False
+
+    def get_price_at_date(self, date):
+        return self.pricing_set.filter(
+            Q(date_active__lte=date)
+            &
+            (
+                Q(date_inactive__gte=date)
+                |
+                Q(date_inactive=None)
+            )
+        ).first()

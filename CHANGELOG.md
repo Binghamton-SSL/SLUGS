@@ -20,12 +20,18 @@
 * Add timesheet quick process
 * Add customized shift calendar ICS for all employees
 * Systems and Addons can now adjust in price over time
+* "Awaiting Paperwork" and "Cannot Work" groups are automatically added and removed based on paperwork status
+* Move all fees to an inline and subclass prepared fees
+* Allow fees to be sorted naturally
+* Allow pricing of fees to change over time
+* Improve code reuse/duplication
 
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
     * Move 404 page to correct place
     * Wages would still have been overwritten due to Job-Wage relationship. Changed Wage date/pay structure
+    * Updated outstandingpaperwork script to 
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

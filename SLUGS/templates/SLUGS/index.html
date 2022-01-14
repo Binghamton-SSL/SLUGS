@@ -27,6 +27,19 @@
                 </div>
                 {% endif %}
                 {% endfor %}
+                {% if outstanding_paperwork %}
+                <div class="max-w-5xl px-4 py-2 mx-auto bg-red-500 rounded-sm notification">
+                    <h1>Unfortunately you have paperwork we're still waiting for. Please hand it in!</h1>
+                    <p class="text-sm">If you've handed in one of these forms but still see it on this list. It may still be in processing</p>
+                    <ul class="ml-4">
+                        {% for paperwork in outstanding_paperwork %}
+                        <li class="list-disc">
+                            {{paperwork.form.form_name}} {% if paperwork.uploaded %}<sub>(We see that this has been uploaded. Just waiting on processing)</sub>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
                 {% if signup_open %}
                 <a class="" href="{% url 'gig:signup' %}">
                     <div
@@ -36,7 +49,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
-                        <div style="margin: auto;"> Click here to sign up for this week's work! {% if request.user|has_group:"New Hire" %}<br> <span style="font-weight: bold; font-size: .75rem;">(well not for you bc you still haven't handed in all your paperwork)</span>  {% endif %}</div>
+                        <div style="margin: auto;"> Click here to sign up for this week's work! {% if request.user|has_group:"Cannot Work" %}<br> <span style="font-weight: bold; font-size: .75rem;">(well not for you bc you still haven't handed in all your paperwork)</span>  {% endif %}</div>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -81,7 +94,7 @@
                                 Go to <a class="underline" href="https://calendar.google.com/calendar/r/settings/addbyurl">https://calendar.google.com/calendar/r/settings/addbyurl</a>
                             </li>
                             <li>
-                                Enter <b>{{request.get_host}}{% url 'utils:employeeFeed' emp_id=request.user.pk %}</b> as the URL
+                                Enter <b>https://{{request.get_host}}{% url 'utils:employeeFeed' emp_id=request.user.pk %}</b> as the URL
                             </li>
                             <li>
                                 Hit Add Calendar

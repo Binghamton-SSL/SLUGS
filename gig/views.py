@@ -103,7 +103,7 @@ class workSignup(SLUGSMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not signupStatus.objects.all().first().is_open or has_group(
-            request.user, "New Hire"
+            request.user, "Cannot Work"
         ):
             raise PermissionDenied()
         self.added_context["gigs"] = list(
