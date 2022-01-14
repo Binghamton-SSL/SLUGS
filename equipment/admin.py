@@ -4,10 +4,13 @@ from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
 
 # Register your models here.
+class ServiceRecordInline(admin.StackedInline):
+    model = ServiceRecord
+    extra = 0
+
 class ItemInline(admin.StackedInline):
     model = Item
     extra = 0
-
 
 class EquipmentInline(admin.StackedInline):
     model = SystemQuantity
@@ -59,10 +62,10 @@ class Category(admin.ModelAdmin):
 
 @admin.register(ServiceRecord)
 class ServiceRecord(admin.ModelAdmin):
-    inlines = [ItemInline]
     search_fields = ["name", "date_created"]
 
 
 @admin.register(Item)
 class Item(admin.ModelAdmin):
+    inlines = [ServiceRecordInline]
     search_fields = ["id"]
