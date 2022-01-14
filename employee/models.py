@@ -12,6 +12,8 @@ from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
 from jsignature.fields import JSignatureField
 
+from employee.utils import auto_place_group_user
+
 
 class EmployeeManager(BaseUserManager):
     """
@@ -134,15 +136,26 @@ class PaperworkForm(models.Model):
     def __str__(self):
         return f"{self.employee} - {self.form}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        auto_place_group_user(self.employee)
+
 
 class Paperwork(models.Model):
     form_name = models.CharField(max_length=256)
     form_pdf = models.FileField(upload_to="forms/")
     uploaded = models.DateTimeField(auto_now_add=True)
     handed_in = models.CharField(max_length=512, null=True, blank=True)
+    required_for_employment = models.BooleanField(default=False)
+    required_for_payroll = models.BooleanField(default=False)
     can_auto_sign = models.BooleanField(default=False)
     auto_sign_layout = models.TextField(blank=True, default="[]")
     edited = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        for employee in self.employee_set.all():
+            auto_place_group_user(employee)
 
     def __str__(self):
         return f"{self.form_name} {self.edited.year}"

@@ -1,4 +1,5 @@
 import ast
+from django.contrib.auth.models import Group
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
@@ -56,3 +57,20 @@ def processAutoSignForm(paperworkForm, user):
 
     os.remove(f"signed_copy-{user.pk}.pdf")
     os.remove(f"{paperworkForm.form}-{user.last_name}_{user.first_name}-signed.pdf")
+
+
+def auto_place_group_user(user):
+    if user.paperworkform_set.filter(processed=False, form__required_for_payroll=True):
+        if user.groups.filter(name="Awaiting Paperwork").count() == 0:
+            Group.objects.get(name="Awaiting Paperwork").user_set.add(user)
+    elif user.paperworkform_set.filter(processed=False, form__required_for_payroll=True, form__required_for_employment=True).count() == 0:
+        if user.groups.filter(name="Awaiting Paperwork").count():
+            Group.objects.get(name="Awaiting Paperwork").user_set.remove(user)
+
+    if user.paperworkform_set.filter(processed=False, form__required_for_employment=True):
+        if user.groups.filter(name="Cannot Work").count() == 0:
+            Group.objects.get(name="Cannot Work").user_set.add(user)
+            Group.objects.get(name="Awaiting Paperwork").user_set.add(user)
+    else:
+        if user.groups.filter(name="Cannot Work").count():
+            Group.objects.get(name="Cannot Work").user_set.remove(user)

@@ -5,6 +5,8 @@ import employee.models as employee
 from django.db.models import Q
 from datetime import date
 
+from utils.models import PricingMixin
+
 
 # Create your models here.
 class Category(models.Model):
@@ -39,78 +41,28 @@ class Equipment(models.Model):
          verbose_name_plural = "Equipment"
 
 
-class System(models.Model):
+class System(PricingMixin, models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
     equipment = models.ManyToManyField(Equipment, through="SystemQuantity")
 
-    def get_current_price(self):
-        return self.systempricing_set.filter(
-            Q(date_active__lte=datetime.now())
-            &
-            (
-                Q(date_inactive__gt=datetime.now())
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
-
-    def get_is_active(self):
-        return True if self.get_current_price() is not None else False
-
-    def get_active_price(self):
-        current = self.get_current_price()
-        return current if current else self.systempricing_set.order_by("date_inactive").last()
-
-    def get_price_at_date(self, date):
-        return self.systempricing_set.filter(
-            Q(date_active__lte=date)
-            &
-            (
-                Q(date_inactive__gte=date)
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
+    def __init__(self, *args, **kwargs):
+        self.pricing_set = self.systempricing_set
+        super().__init__(*args, **kwargs)
 
     def __str__(self):
         return self.department + " - " + self.name
 
 
-class SystemAddon(models.Model):
+class SystemAddon(PricingMixin, models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
 
-    def get_current_price(self):
-        return self.systemaddonpricing_set.filter(
-            Q(date_active__lte=datetime.now())
-            &
-            (
-                Q(date_inactive__gt=datetime.now())
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
-
-    def get_is_active(self):
-        return True if self.get_current_price() is not None else False
-
-    def get_active_price(self):
-        current = self.get_current_price()
-        return current if current else self.systemaddonpricing_set.order_by("date_inactive").last()
-
-    def get_price_at_date(self, date):
-        return self.systemaddonpricing_set.filter(
-            Q(date_active__lte=date)
-            &
-            (
-                Q(date_inactive__gte=date)
-                |
-                Q(date_inactive=None)
-            )
-        ).first()
+    def __init__(self, *args, **kwargs):
+        self.pricing_set = self.systemaddonpricing_set
+        super().__init__(*args, **kwargs)
 
     def __str__(self):
         return self.name

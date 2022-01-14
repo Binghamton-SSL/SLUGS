@@ -47,7 +47,8 @@
                             {% if form.processed %}
                                 <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
                             {% else %}
-                                <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">Change</button></a>
+                                <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-yellow-300 text-black mt-2 px-4 py-2 rounded">Change</button></a>
+                                <a class="mx-auto" href="/media/{{form.pdf}}?time={% now "h-i-A" %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
                             {% endif %}
                         {% else %}
                         <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
@@ -163,7 +164,7 @@
                     {{shift.total_time}} Hours
                 </div>
                 <div class="my-1 text-lg text-center">
-                    Paid at: {{shift.content_object.position.hourly_rate}}
+                    Paid at: {{shift.content_object.position.hourly_rate }} - ${{shift.paid_at}}/hr
                 </div>
                 <div class="my-1 text-lg text-center">
                     Total: ${{shift.cost}}
@@ -197,7 +198,7 @@
                     {{shift.total_time}} Hours
                 </div>
                 <div class="my-1 text-lg text-center">
-                    Paid at: {{shift.content_object.position.hourly_rate }}
+                    Paid at: {{shift.content_object.position.hourly_rate }} - ${{shift.paid_at}}/hr
                 </div>
                 <div class="my-1 text-lg text-center">
                     Total: ${{shift.cost}}
@@ -231,7 +232,7 @@
                     {{shift.total_time}} Hours
                 </div>
                 <div class="my-1 text-lg text-center">
-                    Paid at: {{shift.content_object.position.hourly_rate }}
+                    Paid at: {{shift.content_object.position.hourly_rate }} - ${{shift.paid_at}}/hr
                 </div>
                 <div class="my-1 text-lg text-center">
                     Total: ${{shift.cost}}
