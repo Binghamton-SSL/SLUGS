@@ -6,11 +6,14 @@ from finance.admin import SystemAddonPricingInline, SystemPricingInline
 # Register your models here.
 class ServiceRecordInline(admin.StackedInline):
     model = ServiceRecord
+    readonly_fields = ['date_created', 'date_last_modified']
     extra = 0
+
 
 class ItemInline(admin.StackedInline):
     model = Item
     extra = 0
+
 
 class EquipmentInline(admin.StackedInline):
     model = SystemQuantity

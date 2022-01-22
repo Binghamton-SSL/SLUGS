@@ -16,7 +16,6 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-         verbose_name = "Category"
          verbose_name_plural = "Categories"
 
 class Equipment(models.Model):
@@ -28,11 +27,11 @@ class Equipment(models.Model):
     value = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     wattage = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    purchase_date = models.DateField(default=date.today)
+    purchase_date = models.DateField(default=date.today, help_text="Date of purchase or creation if made")
     reorder_link = models.URLField(blank=True)
 
     def __str__(self):
-        if self.brand:
+        if not self.brand:
             return f"{self.name}"
 
         return f"{self.name} ({self.brand})"
@@ -93,7 +92,7 @@ class Item(models.Model):
     item_type = models.ForeignKey(Equipment, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.serial_no}"
+        return f"{self.item_type} #{self.serial_no}"
 
 
 class ServiceRecord(models.Model):
@@ -119,12 +118,20 @@ class BaseQuantity(models.Model):
 class SystemQuantity(BaseQuantity):
     system = models.ForeignKey(System, on_delete=models.CASCADE)
 
+    class Meta:
+        verbose_name = "Equipment Quantity"
+        verbose_name_plural = "Equipment Quantities"
+
     def __str__(self):
         return super().__str__() + f"System: {self.system}"
 
 
 class SystemQuantityAddon(BaseQuantity):
     system_addon = models.ForeignKey(SystemAddon, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Addon Equipment Quantity"
+        verbose_name_plural = "Addon Equipment Quantities"
 
     def __str__(self):
         return super().__str__() + f"System: {self.system}"
