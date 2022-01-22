@@ -79,8 +79,11 @@ class MultipleFormView(TemplateView):
         if valid:
             return self.process_forms(forms_initialized)
         else:
-            context = merge_dicts(self.get_context_data(), forms_initialized)
-            context = self.post_valid_reject(context)
+            context = super(MultipleFormView, self).get_context_data(**kwargs)
+            try:
+                context = self.post_valid_reject(context)
+            except NotImplementedError:
+                context = merge_dicts(self.get_context_data(), forms_initialized)
             messages.add_message(
                 self.request,
                 messages.ERROR,
@@ -91,5 +94,5 @@ class MultipleFormView(TemplateView):
     def process_forms(self, form_instances):
         raise NotImplementedError
 
-    def post_valid_reject(context):
+    def post_valid_reject(self, context):
         raise NotImplementedError

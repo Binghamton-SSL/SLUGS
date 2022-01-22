@@ -17,16 +17,17 @@ def processAutoSignForm(paperworkForm, user):
             if element["type"] == "Text":
                 c.setFont("Times-Roman", element["font_size"])
                 c.drawString(
-                    element["x"] * inch, element["y"] * inch, eval(element["text"])
+                    (element["x"]) * inch, (11 - element["y"]) * inch, eval(element["text"])
                 )
             elif element["type"] == "Signature":
                 sig_image = ImageReader(draw_signature(user.signature))
                 (sig_width, sig_height) = sig_image.getSize()
+                # Go back through this and make better
                 img_height = (element["width"] / (sig_width / sig_height)) * inch
                 c.drawImage(
                     sig_image,
-                    element["x"] * inch,
-                    ((element["y"] * inch) - img_height),
+                    (element["x"]) * inch,
+                    (((11 - element["y"]) * inch) - img_height),
                     width=element["width"] * inch,
                     height=img_height,
                     mask="auto",

@@ -99,6 +99,9 @@ class OneTimeFee(models.Model):
         verbose_name = "Fee"
         ordering = ["order"]
 
+    def or_create_your_own(self):
+        return ""
+
     def save(self, *args, **kwargs):
         if self.prepared_fee:
             pricing = self.prepared_fee.get_price_at_date(self.estimate.gig.start)
@@ -143,7 +146,6 @@ class Estimate(models.Model):
     )
     payment_due = models.DateField(blank=True, null=True)
     paid = models.DateField(blank=True, null=True)
-    fees = models.ManyToManyField(Fee, blank=True)
     subtotal = models.DecimalField(
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
     )
