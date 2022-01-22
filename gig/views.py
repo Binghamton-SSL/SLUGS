@@ -25,6 +25,9 @@ class gigIndex(SLUGSMixin, MultipleFormView):
     template_name = "gig/gig.html"
     form_classes = {}
 
+    def post_valid_reject(self, context):
+        return self.get_context_data(context)
+
     def get_context_data(self, ctext=False, **kwargs):
         context = super().get_context_data(**kwargs)
         for form in context["forms"]:
@@ -69,9 +72,6 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         self.form_classes["show_notes"]["instance"] = self.added_context["gig"]
         self.added_context["job_forms"] = jobs
         return super().dispatch(request, *args, **kwargs)
-
-    def post_valid_reject(self, context):
-        return self.get_context_data(context)
 
     def process_forms(self, form_instances):
         for form in form_instances["forms"]:

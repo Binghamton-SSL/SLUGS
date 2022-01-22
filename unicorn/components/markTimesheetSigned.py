@@ -17,5 +17,9 @@ class MarktimesheetsignedView(UnicornView):
                 self.message = f"Timesheet {id} Signed with date {self.date}"
                 self.status = 'g'
             except TimeSheet.DoesNotExist:
-                self.message = f"Timesheet {id} does not exist"
-                self.status = 'b'
+                if type(id) == int:
+                    self.message = f"Timesheet {id} does not exist"
+                    self.status = 'b'
+                else:
+                    self.message = "This timesheet ID doesn't seem right...."
+                    self.status = 'b'

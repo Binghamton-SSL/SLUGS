@@ -11,7 +11,9 @@
         <script>
             const test = (e) => {
                 console.log(e)
-                Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, e.target.value.trim());
+                if(e.target.value.trim().length > 0) {
+                    Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, e.target.value.trim());
+                }
             }
         </script>
     </div>

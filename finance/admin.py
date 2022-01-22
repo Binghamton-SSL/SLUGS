@@ -64,13 +64,17 @@ class ShiftInlineAdmin(NestedGenericTabularInline):
 
 
 class OneTimeFeeInline(SortableInlineAdminMixin, admin.StackedInline):
+    autocomplete_fields = ["prepared_fee"]
     model = OneTimeFee
+    readonly_fields = ["or_create_your_own"]
+    fields = ["prepared_fee", "or_create_your_own", "name", "amount", "percentage", "description"]
     extra = 0
 
 
 @admin.register(Fee)
 class FeeAdmin(admin.ModelAdmin):
     ordering = ["ordering"]
+    search_fields = ["name", "description"]
     inlines = [FeePricingInline]
     pass
 
@@ -136,7 +140,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         "gig__org",
     )
     ordering = ["-gig__start"]
-    filter_horizontal = ["fees", "canned_notes"]
+    filter_horizontal = ["canned_notes"]
     autocomplete_fields = ["gig", "billing_contact"]
     search_fields = (
         "gig__name",
@@ -176,7 +180,6 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
                     "gig__day_of_show_notes",
                     "payment_due",
                     "paid",
-                    "fees",
                     "adjustments",
                 ]
             },
