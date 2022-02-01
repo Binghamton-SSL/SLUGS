@@ -129,7 +129,7 @@
             </tbody>
             <tfoot>
                 <tr class="text-lg font-bold ">
-                    <td class="pl-4 " colspan="8">Total:</td>
+                    <td class="pl-4 " colspan="{{ rates|length|add:2 }}">Total:</td>
                     <td class="text-center">{{total_hours}}</td>
                     <td class="text-center">${{total_sum|floatformat:2|intcomma}}</td>
                 </tr>

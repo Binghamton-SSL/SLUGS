@@ -25,6 +25,7 @@ from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
 from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee
+from utils.generic_email import send_generic_email
 import decimal
 import calendar
 import barcode
@@ -221,6 +222,20 @@ class SignTimesheet(SLUGSMixin, FormView):
         )
         self.added_context['timesheet'].signed = localtime(now()).date()
         self.added_context['timesheet'].save()
+        send_generic_email(
+            request=None,
+            title=f"TIMESHEET SIGNED - {self.added_context['timesheet']}",
+            included_text=(f"""
+                Ayo FD,
+                <br><br>
+                {(self.added_context['timesheet'].employee.preferred_name if self.added_context['timesheet'].employee.preferred_name else self.added_context['timesheet'].employee.first_name)} {self.added_context['timesheet'].employee.last_name} signed their timesheet for the pay period {self.added_context['timesheet'].pay_period.start} through {self.added_context['timesheet'].pay_period.end}.
+                <br><br>
+                <b>Go to SLUGS to print it</b>
+                <br><br>
+                """),  # noqa
+            subject=f"[SLUGS] TIMESHEET SIGNED - {self.added_context['timesheet']}",
+            to=["bssl.finance@binghamtonsa.org"],
+        )
         messages.add_message(
             self.request,
             messages.SUCCESS,

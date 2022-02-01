@@ -9,16 +9,22 @@
 <div class="m-5 mt-10">
     {% ticket gig %}
 </div>
-<div class="flex">
-    <span class="p-4 mx-auto my-1 font-bold text-black bg-red-300 text-mono">
-        Setup by: {{gig.setup_by|date:"H:i"}} 
-    </span>
+<div class="flex max-w-prose mx-auto flex-col space-y-2 sm:space-y-0 sm:flex-row">
+    <div class="my-auto m-2 flex-1">
+        <div class="my-auto p-2 text-center mx-auto font-bold text-black bg-red-300 text-mono">Setup by: {{gig.setup_by|date:"H:i"}}</div>
+    </div>
+    <div class="p-1 flex-1 mx-auto">
+        <p>Event Contact:</p>
+        <p>{{gig.contact.name}}</p>
+        <p class="underline"><a href="mailto:{{gig.contact.email}}">{{gig.contact.email}}</a></p>
+        <p class="underline"><a href="tel:{{gig.contact.phone_number}}">{{gig.contact.phone_number}}</a></p>
+    </div>
+    {% if gig.estimate_set.first.signed_estimate %}
+    <div class="flex my-4 p-1 flex-1">
+        <a class="mx-auto" href="{% url 'download_estimate' gig.estimate_set.first.signed_estimate %}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>
+    </div>
+    {% endif %}
 </div>
-{% if gig.estimate_set.first.signed_estimate %}
-<div class="flex my-4">
-     <a class="mx-auto" href="{% url 'download_estimate' gig.estimate_set.first.signed_estimate %}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>
-</div>
-{% endif %}
 <div class="mx-4 my-10 sm:mx-auto max-w-prose">
     <h2 class="p-1 text-black bg-white w-max">
         Notes:

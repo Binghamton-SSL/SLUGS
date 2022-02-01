@@ -14,19 +14,26 @@ from djangoql.admin import DjangoQLSearchMixin
 from .models import Employee, OfficeHours
 
 
-@admin.register(Paperwork)
-class PaperworkAdmin(admin.ModelAdmin):
-    search_fields = ["form_name"]
-    readonly_fields = ["associated_forms"]
-    pass
-
-
 class PaperworkInline(admin.StackedInline):
     model = PaperworkForm
     autocomplete_fields = ["form"]
     exclude = []
     extra = 0
     readonly_fields = ["uploaded", "requested"]
+
+
+@admin.register(PaperworkForm)
+class PaperworkAdmin(admin.ModelAdmin):
+    search_fields = ["form__form_name", "employee"]
+    pass
+
+
+@admin.register(Paperwork)
+class PaperworkAdmin(admin.ModelAdmin):
+    search_fields = ["form_name"]
+    readonly_fields = ["associated_forms"]
+    inlines = [PaperworkInline]
+    pass
 
 
 class EmployeeResource(resources.ModelResource):

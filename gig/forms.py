@@ -102,5 +102,4 @@ class GigSystemsChangeForm(BaseInlineFormSet):
             system = form["system"]
             valid_depts = self.instance.__loadin_depts__
             if system.department not in valid_depts and not form["DELETE"]:
-                print("Ya boi fucked")
                 raise ValidationError(f"A loadin is required for each department that is working the show. Saving would create a situation where {system.get_department_display()} does not have a loadin.")

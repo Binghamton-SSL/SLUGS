@@ -14,6 +14,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.models import Group
 from django.db.models import Sum
 from django.core.exceptions import PermissionDenied
+from django.contrib.admin.models import LogEntry, CHANGE
 from employee.forms import (
     massAssignPaperworkForm,
     addGroupsForm,
@@ -213,6 +214,14 @@ class automaticallySignForm(SLUGSMixin, FormView):
 
     def form_valid(self, form):
         processAutoSignForm(self.added_context["paperwork"], self.request.user)
+        LogEntry.objects.log_action(
+            user_id=self.request.user.pk,
+            content_type_id=ContentType.objects.get_for_model(self.added_context['paperwork'], for_concrete_model=False).pk,
+            object_id=self.added_context['paperwork'].pk,
+            object_repr=str(self.added_context['paperwork']),
+            action_flag=CHANGE,
+            change_message=f"{self.request.user} signed {self.added_context['paperwork'].form} electronically.",
+        )
         messages.add_message(
             self.request,
             messages.SUCCESS,

@@ -24,11 +24,15 @@ def processAutoSignForm(paperworkForm, user):
                 (sig_width, sig_height) = sig_image.getSize()
                 # Go back through this and make better
                 img_height = (element["width"] / (sig_width / sig_height)) * inch
+                img_width = element["width"] * inch
+                if img_height > (element['max_height'] * inch):
+                    img_height = element['max_height'] * inch
+                    img_width = (element["max_height"] / (sig_height / sig_width)) * inch
                 c.drawImage(
                     sig_image,
                     (element["x"]) * inch,
-                    (((11 - element["y"]) * inch) - img_height),
-                    width=element["width"] * inch,
+                    ((11 - element["y"]) * inch),
+                    width=img_width,
                     height=img_height,
                     mask="auto",
                 )

@@ -30,6 +30,64 @@ class Pricing(models.Model):
     date_active = models.DateField(default=date.today)
     date_inactive = models.DateField(blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.date_active.strftime('%m.%d.%y')}{'-'+str(self.date_inactive.strftime('%m.%d.%y')) if self.date_inactive else '-Present'}"
+
+    def clean(self, *args, **kwargs):
+        if 'item_set' not in kwargs:
+            raise ValidationError('Pricing validation not implemented on this model. Please contact the developer.')
+        # if self.date_inactive:
+        #     if kwargs['item_set'].filter(
+        #         ~Q(pk=self.pk)
+        #         &
+        #         (
+        #             # Before Into
+        #             Q(
+        #                 date_active__lte=self.date_active,
+        #                 date_inactive__gte=self.date_active
+        #             )
+        #             |
+        #             # Entirely during the period
+        #             Q(
+        #                 date_active__gte=self.date_active,
+        #                 date_inactive__lte=self.date_inactive
+        #             )
+        #             |
+        #             # Starts during period, ends after
+        #             Q(
+        #                 date_active__lte=self.date_inactive,
+        #                 date_inactive__gte=self.date_inactive
+        #             )
+        #         )
+        #     ).count() > 0:
+        #         raise ValidationError("Pricing overlaps with another period")
+        # else:
+        #     if kwargs['item_set'].filter(
+        #         ~Q(pk=self.pk)
+        #         &
+        #         (
+        #             # Before Into no end date
+        #             Q(
+        #                 date_active__lte=self.date_active,
+        #                 date_inactive=None,
+        #             )
+        #             |
+        #             # Before Into end date
+        #             Q(
+        #                 date_active__lte=self.date_active,
+        #                 date_inactive__gte=self.date_active
+        #             )
+        #             |
+        #             # Start after this
+        #             Q(
+        #                 date_active__gte=self.date_active
+        #             )
+        #         )
+        #     ).count() > 0:
+        #         raise ValidationError("Pricing overlaps with another period")
+        del kwargs['item_set']
+        super().clean(*args, **kwargs)
+
 
 class HourlyRate(models.Model):
     wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
@@ -46,9 +104,16 @@ class BasePricing(Pricing):
         max_digits=8, decimal_places=2, default=0.00
     )
 
+    def __str__(self):
+        return f"{('$'+str(self.base_price)+' ') if self.base_price else ''} {('$'+str(self.price_per_hour)+'/hr ') if self.price_per_hour else ''}{super().__str__()}"
+
 
 class SystemPricing(BasePricing):
     system = models.ForeignKey("equipment.System", on_delete=models.CASCADE)
+
+    def clean(self, *args, **kwargs):
+        kwargs['item_set'] = self.__class__.objects.filter(system=self.system)
+        super().clean(*args, **kwargs)
 
 
 class SystemAddonPricing(BasePricing):
@@ -56,6 +121,10 @@ class SystemAddonPricing(BasePricing):
     price_per_hour_for_load_in_out_ONLY = models.DecimalField(
         max_digits=8, decimal_places=2, default=0.00
     )
+
+    def clean(self, *args, **kwargs):
+        kwargs['item_set'] = self.__class__.objects.filter(addon=self.addon)
+        super().clean(*args, **kwargs)
 
 
 class Fee(PricingMixin, models.Model):
@@ -84,6 +153,10 @@ class FeePricing(Pricing):
     fee = models.ForeignKey(Fee, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    def clean(self, *args, **kwargs):
+        kwargs['item_set'] = self.__class__.objects.filter(fee=self.fee)
+        super().clean(*args, **kwargs)
 
 
 class OneTimeFee(models.Model):
@@ -310,7 +383,7 @@ class PayPeriod(models.Model):
     start = models.DateField()
     end = models.DateField()
     payday = models.DateField()
-    submitted = models.BooleanField(default=False)
+    submitted = models.DateField(blank=True, null=True, help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.")
     shifts = models.ManyToManyField("finance.Shift")
 
     def get_summary(self):
@@ -365,6 +438,8 @@ class PayPeriod(models.Model):
                 employee=emp,
                 pay_period_id=self.pk,
             )
+        if self.submitted:
+            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(signed=None).update(processed=self.submitted)
 
     def __str__(self):
         return f"{self.start} - {self.end} (Paid {self.payday})"

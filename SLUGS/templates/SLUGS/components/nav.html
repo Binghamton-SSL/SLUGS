@@ -15,11 +15,12 @@
         {% endif %}
         {% if request.user|has_group:"Manager" %}
         <a class="hidden md:inline hover:text-gray-600" href="{% url 'employee:office_hours' %}">Office Hours</a>
+        <a class="hidden md:inline hover:text-gray-600" href="{% url 'gig:booking_overview' %}">Booking</a>
         {% if request.user|has_group:"Financial Director/GM" %}<a class="hidden md:inline hover:text-gray-600" href="{% url 'finance:overview' %}">Finance</a>{% endif %}
         {% endif %}
     </div>
     <div class="my-auto ml-auto mr-0">
-        <div class="relative hidden md:block">
+        <div class="relative hidden md:block" tabindex="0">
             <a href="#"><span>Hey there,</span>
                 {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %}</a>
             <div
@@ -72,6 +73,7 @@
             {% if request.user|has_group:"Manager" %}
             <a class="text-lg font-bold underline" href="{% url 'admin:index' %}">Admin</a>
             <a class="text-lg font-bold underline" href="{% url 'employee:office_hours' %}">Office Hours</a>
+            <a class="text-lg font-bold underline" href="{% url 'gig:booking_overview' %}">Booking</a>
             {% endif %}
             {% if request.user|has_group:"Financial Director/GM" %}<a class="text-lg font-bold underline" href="{% url 'finance:overview' %}">Finance</a>{% endif %}
             <hr/>

@@ -242,12 +242,23 @@
         </div>
     {% endif %}
     {% if timesheet.signed %}
-        <div class="absolute text-center stamp">
+        <div style="left: 3.75in;" class="absolute text-center stamp">
             <p style="font-size: 0.1in;">Our records indicate<br>this document has been:</p>
             <b>SIGNED</b>
             <p class="text-sm">By {{employee.first_name}} {{employee.last_name}}
                 <br>
                 Date: {{timesheet.signed}}
+            </p>
+        </div>
+    {% endif %}
+    {% if timesheet.processed %}
+        <div style="left: 5.35in; color: #005A43; border-color: #005A43;" class="absolute text-center stamp">
+            <p style="font-size: 0.1in;">Our records indicate<br>this document has been:</p>
+            <b>APPROVED</b>
+            <p class="text-sm">
+            SENT TO PAYROLL
+            <br>
+            Date: {{timesheet.processed}}
             </p>
         </div>
     {% endif %}

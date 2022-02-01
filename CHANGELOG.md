@@ -25,6 +25,15 @@
 * Allow fees to be sorted naturally
 * Allow pricing of fees to change over time
 * Improve code reuse/duplication
+* Add equipment management (Kene)
+* Add barcode field to Item
+* Allow for multiple of same system to be booked (road to new booking equipment validation)
+* Add pricing set validation
+* Process timesheets on pay period submission if not previously processed
+* Send email to FD when timesheet is auto-signed
+* Add sent to payroll stamp
+* Adding booking overview page
+* Add event contact to showView
 
 <br><br>
 BUG FIXES:
@@ -32,6 +41,14 @@ BUG FIXES:
     * Move 404 page to correct place
     * Wages would still have been overwritten due to Job-Wage relationship. Changed Wage date/pay structure
     * Updated outstandingpaperwork script to 
+    * Adjust issue with upside down form filling
+    * Log when employee signs paperwork
+    * Move purchase date to unit not Equipment
+    * Fix shift validation where person is not clocked out
+    * WIP new summary processing w timesheets
+    * Make finance widgets responsive
+    * Fix summary table to expand with as many rates as paid
+    * Fix formatting of setup time / view estimate to be more space efficient
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

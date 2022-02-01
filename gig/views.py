@@ -10,13 +10,14 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from dev_utils.views import MultipleFormView
 from django.views.generic.base import TemplateView
-from SLUGS.views import SLUGSMixin
+from SLUGS.views import SLUGSMixin, isAdminMixin
 from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
+from datetime import datetime
 
 from finance.forms import ShiftFormSet
 from gig.forms import shiftFormHelper, engineerNotesForm, StaffShowForm
-from finance.models import Shift
+from finance.models import Shift, Estimate
 from utils.models import signupStatus
 
 
@@ -215,4 +216,11 @@ class generateEmailTemplate(SLUGSMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
+    template_name = "gig/booking.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context["outstanding_bookings"] = Estimate.objects.filter(gig__start__gte=datetime.now(), status="E").order_by("gig__start")
         return super().dispatch(request, *args, **kwargs)

@@ -75,7 +75,7 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.all()])}
+{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
 Staff:
@@ -154,7 +154,7 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.filter(department=self.department[0])])}
+{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
 Staff:
@@ -299,21 +299,21 @@ class PricingMixin:
     pricing_set = None
 
     def get_current_price(self):
-        return self.pricing_set.filter(
+        return self.pricing_set.get(
             Q(date_active__lte=datetime.now())
             &
             (
-                Q(date_inactive__gt=datetime.now())
+                Q(date_inactive__gte=datetime.now())
                 |
                 Q(date_inactive=None)
             )
-        ).first()
+        )
 
     def get_is_active(self):
         return True if self.get_current_price() is not None else False
 
     def get_price_at_date(self, date):
-        return self.pricing_set.filter(
+        return self.pricing_set.get(
             Q(date_active__lte=date)
             &
             (
@@ -321,4 +321,4 @@ class PricingMixin:
                 |
                 Q(date_inactive=None)
             )
-        ).first()
+        )

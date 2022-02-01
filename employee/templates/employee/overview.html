@@ -69,7 +69,7 @@
     {% if timesheets.count > 0 %}
     <h2 id="timesheets" class="text-2xl">Time Sheets</h2>
     <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
-        {% for timesheet in timesheets %}
+        {% for timesheet in timesheets|dictsortreversed:"pay_period.end" %}
             <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
                 <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>
                 {% if timesheet.processed %}<p class="text-xs font-bold text-center">This timesheet has been submitted to payroll</p>{% endif %}

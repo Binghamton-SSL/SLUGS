@@ -27,7 +27,6 @@ class Equipment(models.Model):
     value = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     wattage = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    purchase_date = models.DateField(default=date.today, help_text="Date of purchase or creation if made")
     reorder_link = models.URLField(blank=True)
 
     def __str__(self):
@@ -89,7 +88,15 @@ class BrokenEquipmentReport(models.Model):
 # new models
 class Item(models.Model):
     serial_no = models.CharField(max_length=200)
+    purchase_date = models.DateField(default=date.today, help_text="Date of purchase or creation if made")
     item_type = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    barcode = models.CharField(max_length=200, blank=True, null=True, unique=True, help_text="If no serial number barcode is present on device upon arrival leave blank + print and affix barcode generated on save. Otherwise enter barcode text on device if unique.")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.barcode is None and self.pk is not None:
+            self.barcode = f"BSSL-{self.pk}-{self.serial_no}"
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.item_type} #{self.serial_no}"

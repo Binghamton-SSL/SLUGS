@@ -158,7 +158,7 @@ class Paperwork(models.Model):
             auto_place_group_user(employee)
 
     def __str__(self):
-        return f"{self.form_name} {self.edited.year}"
+        return f"{self.form_name} (Last Edited: {self.edited.strftime('%m.%d.%y')})"
 
     def associated_forms(self):
         ret = ""
