@@ -26,14 +26,13 @@ class BaseShiftForm(forms.ModelForm):
 class BaseShiftFormset(BaseModelFormSet):
     def clean(self):
         for shift in self.cleaned_data:
-            if 'id' in shift and shift['id'] is not None:
-                employee = shift['id'].content_object.employee
+            if "id" in shift and shift["id"] is not None:
+                employee = shift["id"].content_object.employee
                 if shift:
-                    if 'time_out' not in shift:
+                    if "time_out" not in shift:
                         for s in Shift.objects.filter(
-                            ~Q(pk=shift['id'].pk)
-                            &
-                            (
+                            ~Q(pk=shift["id"].pk)
+                            & (
                                 Q(time_in__lt=shift["time_in"])
                                 & Q(time_out__gt=shift["time_in"])
                             )  # Ends during this shift
@@ -44,11 +43,15 @@ class BaseShiftFormset(BaseModelFormSet):
                                     "Overlapping shifts. Please correct and try again"
                                 )
                     else:
-                        if shift['time_in'] is not None and shift['time_out'] is not None and 'id' in shift and shift['id'] is not None:
+                        if (
+                            shift["time_in"] is not None
+                            and shift["time_out"] is not None
+                            and "id" in shift
+                            and shift["id"] is not None
+                        ):
                             for s in Shift.objects.filter(
-                                ~Q(pk=shift['id'].pk)
-                                &
-                                (
+                                ~Q(pk=shift["id"].pk)
+                                & (
                                     (
                                         Q(time_in__lt=shift["time_in"])
                                         & Q(time_out__gt=shift["time_in"])

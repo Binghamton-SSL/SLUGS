@@ -82,7 +82,9 @@ class userOverview(SLUGSMixin, MultipleFormView):
         if not request.user.is_authenticated:
             return redirect("%s?next=%s" % (reverse("login"), request.path))
         self.form_classes["userChangeForm"]["instance"] = request.user
-        self.added_context["timesheets"] = TimeSheet.objects.filter(employee=request.user)
+        self.added_context["timesheets"] = TimeSheet.objects.filter(
+            employee=request.user
+        )
         self.added_context["shifts"] = getShiftsForEmployee(request.user)
         self.added_context["timeworked"] = self.added_context["shifts"].aggregate(
             Sum("total_time")
@@ -216,9 +218,11 @@ class automaticallySignForm(SLUGSMixin, FormView):
         processAutoSignForm(self.added_context["paperwork"], self.request.user)
         LogEntry.objects.log_action(
             user_id=self.request.user.pk,
-            content_type_id=ContentType.objects.get_for_model(self.added_context['paperwork'], for_concrete_model=False).pk,
-            object_id=self.added_context['paperwork'].pk,
-            object_repr=str(self.added_context['paperwork']),
+            content_type_id=ContentType.objects.get_for_model(
+                self.added_context["paperwork"], for_concrete_model=False
+            ).pk,
+            object_id=self.added_context["paperwork"].pk,
+            object_repr=str(self.added_context["paperwork"]),
             action_flag=CHANGE,
             change_message=f"{self.request.user} signed {self.added_context['paperwork'].form} electronically.",
         )

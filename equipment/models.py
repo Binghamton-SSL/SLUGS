@@ -16,7 +16,8 @@ class Category(models.Model):
         return self.name
 
     class Meta:
-         verbose_name_plural = "Categories"
+        verbose_name_plural = "Categories"
+
 
 class Equipment(models.Model):
     name = models.CharField(max_length=200)
@@ -36,7 +37,7 @@ class Equipment(models.Model):
         return f"{self.name} ({self.brand})"
 
     class Meta:
-         verbose_name_plural = "Equipment"
+        verbose_name_plural = "Equipment"
 
 
 class System(PricingMixin, models.Model):
@@ -100,9 +101,17 @@ class Item(models.Model):
     status = models.CharField(max_length=1, choices=ITEM_STATUS, default="O")
     label = models.CharField(max_length=200, blank=True, null=True)
     serial_no = models.CharField(max_length=200)
-    purchase_date = models.DateField(default=date.today, help_text="Date of purchase or creation if made")
+    purchase_date = models.DateField(
+        default=date.today, help_text="Date of purchase or creation if made"
+    )
     item_type = models.ForeignKey(Equipment, on_delete=models.CASCADE)
-    barcode = models.CharField(max_length=200, blank=True, null=True, unique=True, help_text="If no serial number barcode is present on device upon arrival leave blank + print and affix barcode generated on save. Otherwise enter barcode text on device if unique.")
+    barcode = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="If no serial number barcode is present on device upon arrival leave blank + print and affix barcode generated on save. Otherwise enter barcode text on device if unique.",
+    )
     children = models.ManyToManyField("Item", through="ItemRelationship", blank=True)
     last_updated = models.DateTimeField(auto_now=True)
 
@@ -117,7 +126,9 @@ class Item(models.Model):
 
 
 class ItemRelationship(models.Model):
-    parent = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="parent_item")
+    parent = models.ForeignKey(
+        Item, on_delete=models.CASCADE, related_name="parent_item"
+    )
     child = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="child_item")
 
     def __str__(self):
@@ -137,6 +148,7 @@ class ServiceRecord(models.Model):
 
 class BaseQuantity(models.Model):
     """Through model linking System and Equipment quantity"""
+
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=0)
 

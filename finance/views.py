@@ -58,17 +58,21 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
         employee = Employee.objects.get(pk=kwargs["emp_id"])
         timesheet = TimeSheet.objects.get(employee=employee, pay_period=pay_period)
-        barc = barcode.get('code128', str(timesheet.pk))
+        barc = barcode.get("code128", str(timesheet.pk))
         barc.default_writer_options.update(
-            {   
+            {
                 "module_height": 8.0,
                 "font_size": 0,
                 "text_distance": 0,
             }
         )
-        self.added_context['barcode'] = str(barc.render()).replace("\\n", "").replace("b'", '').replace("'", "")
+        self.added_context["barcode"] = (
+            str(barc.render()).replace("\\n", "").replace("b'", "").replace("'", "")
+        )
         if request.user.pk is not None:
-            if employee.pk != request.user.pk and (not has_group(request.user, "Manager")):
+            if employee.pk != request.user.pk and (
+                not has_group(request.user, "Manager")
+            ):
                 raise PermissionDenied()
         shifts = pay_period.shifts.none()
         rates = {}
@@ -77,14 +81,8 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                 shifts |= Shift.objects.filter(pk=shift.pk)
                 rate_of_pay = HourlyRate.objects.get(
                     Q(wage=shift.content_object.position.hourly_rate)
-                    &
-                    Q(date_active__lte=shift.time_in)
-                    &
-                    (
-                        Q(date_inactive__gt=shift.time_in)
-                        |
-                        Q(date_inactive=None)
-                    )
+                    & Q(date_active__lte=shift.time_in)
+                    & (Q(date_inactive__gt=shift.time_in) | Q(date_inactive=None))
                 )
                 if rate_of_pay not in rates:
                     rates[rate_of_pay] = [rate_of_pay, 0]
@@ -186,9 +184,33 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["pay_period"] = pay_period
         self.added_context["timesheet"] = timesheet
         self.added_context["table_rows"] = table_rows
-        self.added_context["rates"] = dict(sorted(rates.items(), key=lambda item: item[0].hourly_rate))
+        self.added_context["rates"] = dict(
+            sorted(rates.items(), key=lambda item: item[0].hourly_rate)
+        )
         self.added_context["t_total"] = t_total
-        self.added_context["t_amt"] = round(float(reduce(lambda sum, shift: (sum + float(HourlyRate.objects.get(Q(wage=shift.content_object.position.hourly_rate)&Q(date_active__lte=shift.time_in)&(Q(date_inactive__gt=shift.time_in)|Q(date_inactive=None))).hourly_rate) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)), shifts, 0)),2)
+        self.added_context["t_amt"] = round(
+            float(
+                reduce(
+                    lambda sum, shift: (
+                        sum
+                        + float(
+                            HourlyRate.objects.get(
+                                Q(wage=shift.content_object.position.hourly_rate)
+                                & Q(date_active__lte=shift.time_in)
+                                & (
+                                    Q(date_inactive__gt=shift.time_in)
+                                    | Q(date_inactive=None)
+                                )
+                            ).hourly_rate
+                        )
+                        * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+                    ),
+                    shifts,
+                    0,
+                )
+            ),
+            2,
+        )
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -198,6 +220,7 @@ class ViewTimesheetNoPrint(viewTimesheet):
     @xframe_options_sameorigin
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
 
 class SignTimesheet(SLUGSMixin, FormView):
     form_class = signPaperworkForm
@@ -214,26 +237,30 @@ class SignTimesheet(SLUGSMixin, FormView):
 
     def form_valid(self, form):
         LogEntry.objects.log_action(
-            user_id=self.added_context['timesheet'].employee.pk,
-            content_type_id=ContentType.objects.get_for_model(self.added_context['timesheet'], for_concrete_model=False).pk,
-            object_id=self.added_context['timesheet'].pk,
-            object_repr=str(self.added_context['timesheet']),
+            user_id=self.added_context["timesheet"].employee.pk,
+            content_type_id=ContentType.objects.get_for_model(
+                self.added_context["timesheet"], for_concrete_model=False
+            ).pk,
+            object_id=self.added_context["timesheet"].pk,
+            object_repr=str(self.added_context["timesheet"]),
             action_flag=CHANGE,
             change_message=f"{self.added_context['timesheet'].employee} signed timesheet electronically.",
         )
-        self.added_context['timesheet'].signed = localtime(now()).date()
-        self.added_context['timesheet'].save()
+        self.added_context["timesheet"].signed = localtime(now()).date()
+        self.added_context["timesheet"].save()
         send_generic_email(
             request=None,
             title=f"TIMESHEET SIGNED - {self.added_context['timesheet']}",
-            included_text=(f"""
+            included_text=(
+                f"""
                 Ayo FD,
                 <br><br>
                 {(self.added_context['timesheet'].employee.preferred_name if self.added_context['timesheet'].employee.preferred_name else self.added_context['timesheet'].employee.first_name)} {self.added_context['timesheet'].employee.last_name} signed their timesheet for the pay period {self.added_context['timesheet'].pay_period.start} through {self.added_context['timesheet'].pay_period.end}.
                 <br><br>
                 <b>Go to SLUGS to print it</b>
                 <br><br>
-                """),  # noqa
+                """
+            ),  # noqa
             subject=f"[SLUGS] TIMESHEET SIGNED - {self.added_context['timesheet']}",
             to=["bssl.finance@binghamtonsa.org"],
         )
@@ -243,6 +270,7 @@ class SignTimesheet(SLUGSMixin, FormView):
             f"Timesheet: {self.added_context['timesheet'].pay_period} has been signed electronically.",
         )
         return super().form_valid(form)
+
 
 class viewSummary(SLUGSMixin, TemplateView):
     template_name = "finance/summary.html"
@@ -272,7 +300,10 @@ class exportSummaryCSV(SLUGSMixin, View):
         writer = csv.writer(response)
         writer.writerow(
             ["B-num", "Name"]
-            + [f"{rate.wage.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
+            + [
+                f"{rate.wage.name} Hours - ${rate.hourly_rate}"
+                for rate in sumData["rates"]
+            ]
             + ["Total Hours", "Gross Pay"]
             + ["Pay Period Start", "Pay Period End", "Payday"]
         )
@@ -291,7 +322,9 @@ class exportSummaryCSV(SLUGSMixin, View):
             writer.writerow(
                 [emp["bnum"], emp["name"]]
                 + [
-                    "-" if (rate not in emp["rates"] or emp["rates"][rate][1] == 0) else emp["rates"][rate][1]
+                    "-"
+                    if (rate not in emp["rates"] or emp["rates"][rate][1] == 0)
+                    else emp["rates"][rate][1]
                     for rate in sumData["rates"]
                 ]
                 + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]

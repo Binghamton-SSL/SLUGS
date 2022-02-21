@@ -21,7 +21,9 @@ def calculateGigCost(estimate):
     ret["first_load_in"] = ret["loadins"].first().load_in
     ret["last_load_out"] = ret["loadins"].first().load_out
     # Format All system / addon costs
-    for systeminstance in ret["gig"].systeminstance_set.all().order_by("system__department"):
+    for systeminstance in (
+        ret["gig"].systeminstance_set.all().order_by("system__department")
+    ):
         system = systeminstance.system
         dept = system.department
         dept_loadins = ret["loadins"].filter(department=dept)

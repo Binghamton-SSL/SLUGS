@@ -205,7 +205,7 @@ class StageFeed(DeptFeed):
     department = ("T", "Stage")
 
 
-# Item Schema: 
+# Item Schema:
 # {
 #     start: datetime,
 #     end: datetime,
@@ -218,7 +218,7 @@ class EmployeeFeed(ICalFeed):
     employee = None
 
     def get_object(self, request, *args, **kwargs):
-        return int(kwargs['emp_id'])
+        return int(kwargs["emp_id"])
 
     def __init__(self):
         self.product_id = "-//slugs.bssl.binghamtonsa.org//SHIFT_CAL//EN"
@@ -230,39 +230,43 @@ class EmployeeFeed(ICalFeed):
         # TODO - Add trainings
         self.employee = Employee.objects.get(pk=emp_id)
         items = []
-        jobs = (
-            Job.objects.filter(employee=self.employee)
-        )
+        jobs = Job.objects.filter(employee=self.employee)
         for job in jobs.all():
             gig = Gig.objects.get(pk=job.gig.pk)
-            your_load_ins = gig.loadin_set.filter(
-                department=job.department
-            ).order_by("load_in")
+            your_load_ins = gig.loadin_set.filter(department=job.department).order_by(
+                "load_in"
+            )
             for load_in in your_load_ins.all():
-                items.append({
-                    "start": load_in.load_in,
-                    "end": load_in.load_out,
-                    "title": f"{gig.org} - {gig.name}",
+                items.append(
+                    {
+                        "start": load_in.load_in,
+                        "end": load_in.load_out,
+                        "title": f"{gig.org} - {gig.name}",
+                        "description": "",
+                        "location": gig.location,
+                        "link": reverse("gig:showView", args=[gig.pk]),
+                    }
+                )
+            items.append(
+                {
+                    "start": gig.setup_by,
+                    "end": gig.setup_by,
+                    "title": f"SETUP BY TIME: {gig.org} - {gig.name}",
                     "description": "",
                     "location": gig.location,
                     "link": reverse("gig:showView", args=[gig.pk]),
-                })
-            items.append({
-                "start": gig.setup_by,
-                "end": gig.setup_by,
-                "title": f"SETUP BY TIME: {gig.org} - {gig.name}",
-                "description": "",
-                "location": gig.location,
-                "link": reverse("gig:showView", args=[gig.pk]),
-            })
-            items.append({
-                "start": gig.start,
-                "end": gig.end,
-                "title": f"SHOW: {gig.org} - {gig.name}",
-                "description": re.sub('<[^<]+?>', '', gig.notes),
-                "location": gig.location,
-                "link": reverse("gig:showView", args=[gig.pk]),
-            })
+                }
+            )
+            items.append(
+                {
+                    "start": gig.start,
+                    "end": gig.end,
+                    "title": f"SHOW: {gig.org} - {gig.name}",
+                    "description": re.sub("<[^<]+?>", "", gig.notes),
+                    "location": gig.location,
+                    "link": reverse("gig:showView", args=[gig.pk]),
+                }
+            )
         return items
 
     def item_title(self, item):
@@ -301,12 +305,7 @@ class PricingMixin:
     def get_current_price(self):
         return self.pricing_set.get(
             Q(date_active__lte=datetime.now())
-            &
-            (
-                Q(date_inactive__gte=datetime.now())
-                |
-                Q(date_inactive=None)
-            )
+            & (Q(date_inactive__gte=datetime.now()) | Q(date_inactive=None))
         )
 
     def get_is_active(self):
@@ -315,10 +314,5 @@ class PricingMixin:
     def get_price_at_date(self, date):
         return self.pricing_set.get(
             Q(date_active__lte=date)
-            &
-            (
-                Q(date_inactive__gte=date)
-                |
-                Q(date_inactive=None)
-            )
+            & (Q(date_inactive__gte=date) | Q(date_inactive=None))
         )

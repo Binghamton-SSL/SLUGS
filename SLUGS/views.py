@@ -70,13 +70,13 @@ class index(SLUGSMixin, TemplateView):
                 if (len(next_gig_id) > 0)
                 else None
             )
-            self.added_context["outstanding_paperwork"] = request.user.paperworkform_set.filter(
+            self.added_context[
+                "outstanding_paperwork"
+            ] = request.user.paperworkform_set.filter(
                 Q(processed=False)
-                &
-                (
+                & (
                     Q(form__required_for_employment=True)
-                    |
-                    Q(form__required_for_payroll=True)
+                    | Q(form__required_for_payroll=True)
                 )
             )
         return super().dispatch(request, *args, **kwargs)

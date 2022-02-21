@@ -40,6 +40,7 @@
 * Add billing contact signature to estimate
 * Choose employees to send staffing email to (defaults to all)
 * Booking page: Show gigs without estimate and highlight those less than 3 weeks out
+* Add validation to Jobs in addition to Systems on Gigs to ensure load in/out
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
@@ -59,6 +60,7 @@ BUG FIXES:
     * Fix issue with unassigned shift crashing showview
     * Fix inconsistent financial summary generation
     * Timesheet ID clears on enter when using quick action on finance page
+    * Add all active rates to new finance summary page
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

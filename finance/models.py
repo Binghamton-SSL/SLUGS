@@ -34,8 +34,10 @@ class Pricing(models.Model):
         return f"{self.date_active.strftime('%m.%d.%y')}{'-'+str(self.date_inactive.strftime('%m.%d.%y')) if self.date_inactive else '-Present'}"
 
     def clean(self, *args, **kwargs):
-        if 'item_set' not in kwargs:
-            raise ValidationError('Pricing validation not implemented on this model. Please contact the developer.')
+        if "item_set" not in kwargs:
+            raise ValidationError(
+                "Pricing validation not implemented on this model. Please contact the developer."
+            )
         # if self.date_inactive:
         #     if kwargs['item_set'].filter(
         #         ~Q(pk=self.pk)
@@ -85,7 +87,7 @@ class Pricing(models.Model):
         #         )
         #     ).count() > 0:
         #         raise ValidationError("Pricing overlaps with another period")
-        del kwargs['item_set']
+        del kwargs["item_set"]
         super().clean(*args, **kwargs)
 
 
@@ -97,12 +99,8 @@ class HourlyRate(models.Model):
 
 
 class BasePricing(Pricing):
-    base_price = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0.00
-    )
-    price_per_hour = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0.00
-    )
+    base_price = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    price_per_hour = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"{('$'+str(self.base_price)+' ') if self.base_price else ''} {('$'+str(self.price_per_hour)+'/hr ') if self.price_per_hour else ''}{super().__str__()}"
@@ -112,7 +110,7 @@ class SystemPricing(BasePricing):
     system = models.ForeignKey("equipment.System", on_delete=models.CASCADE)
 
     def clean(self, *args, **kwargs):
-        kwargs['item_set'] = self.__class__.objects.filter(system=self.system)
+        kwargs["item_set"] = self.__class__.objects.filter(system=self.system)
         super().clean(*args, **kwargs)
 
 
@@ -123,12 +121,11 @@ class SystemAddonPricing(BasePricing):
     )
 
     def clean(self, *args, **kwargs):
-        kwargs['item_set'] = self.__class__.objects.filter(addon=self.addon)
+        kwargs["item_set"] = self.__class__.objects.filter(addon=self.addon)
         super().clean(*args, **kwargs)
 
 
 class Fee(PricingMixin, models.Model):
-
     def __init__(self, *args, **kwargs):
         self.pricing_set = self.feepricing_set
         super().__init__(*args, **kwargs)
@@ -149,12 +146,18 @@ class FeePricing(Pricing):
     percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def clean(self, *args, **kwargs):
-        kwargs['item_set'] = self.__class__.objects.filter(fee=self.fee)
+        kwargs["item_set"] = self.__class__.objects.filter(fee=self.fee)
         super().clean(*args, **kwargs)
 
 
 class OneTimeFee(models.Model):
-    prepared_fee = models.ForeignKey(Fee, on_delete=models.PROTECT, blank=True, null=True, help_text="Auto-fill the fee with a prepared fee")
+    prepared_fee = models.ForeignKey(
+        Fee,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        help_text="Auto-fill the fee with a prepared fee",
+    )
     estimate = models.ForeignKey("finance.Estimate", on_delete=models.CASCADE)
     name = models.CharField(max_length=64, blank=True, null=True)
     amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
@@ -345,7 +348,9 @@ class Shift(models.Model):
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
         if self.paid_at is None or self.paid_at == 0.00:
-            self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(self.time_in).hourly_rate
+            self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(
+                self.time_in
+            ).hourly_rate
         if self.description is None:
             self.description = self.__str__()
         if self.time_in and self.time_out:
@@ -380,7 +385,11 @@ class PayPeriod(models.Model):
     start = models.DateField()
     end = models.DateField()
     payday = models.DateField()
-    submitted = models.DateField(blank=True, null=True, help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.")
+    submitted = models.DateField(
+        blank=True,
+        null=True,
+        help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.",
+    )
     shifts = models.ManyToManyField("finance.Shift")
 
     def get_summary(self):
@@ -436,7 +445,9 @@ class PayPeriod(models.Model):
                 pay_period_id=self.pk,
             )
         if self.submitted:
-            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(signed=None).update(processed=self.submitted)
+            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(
+                signed=None
+            ).update(processed=self.submitted)
 
     def __str__(self):
         return f"{self.start} - {self.end} (Paid {self.payday})"
@@ -465,20 +476,31 @@ class TimeSheet(models.Model):
         return f"uploads/{instance.employee.bnum}/{instance.employee.bnum}_{instance.employee.first_name[0].upper()}{instance.employee.last_name}_TimeSheet_{instance.pay_period.start}_{instance.pay_period.end}{fileExtension}"  # noqa
 
     employee = models.ForeignKey("employee.Employee", on_delete=models.PROTECT)
-    pay_period = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, related_name="pay_period")
-    paid_during = models.ForeignKey("PayPeriod", on_delete=models.PROTECT, null=True, blank=True, help_text="Use this to override the Pay Period during which the timesheet was paid. Defaults to the Pay Period during which shifts took place.", related_name="paid_during")
+    pay_period = models.ForeignKey(
+        "PayPeriod", on_delete=models.PROTECT, related_name="pay_period"
+    )
+    paid_during = models.ForeignKey(
+        "PayPeriod",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        help_text="Use this to override the Pay Period during which the timesheet was paid. Defaults to the Pay Period during which shifts took place.",
+        related_name="paid_during",
+    )
     signed = models.DateField(blank=True, null=True)
     processed = models.DateField(blank=True, null=True)
     available_to_auto_sign = models.BooleanField(default=False)
     pdf = models.FileField(upload_to=user_dir_path, blank=True, null=True)
 
     def printout_link(self):
-        return format_html((
-                        f"<div style='margin: .25rem 0 .25rem 0'>"
-                        f"<a href='{reverse('finance:timesheet', args=[self.pay_period.pk, self.employee.pk])}'>Get Timesheet: {self.employee}</a>"
-                        # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
-                        f"</div><br>"
-        ))
+        return format_html(
+            (
+                f"<div style='margin: .25rem 0 .25rem 0'>"
+                f"<a href='{reverse('finance:timesheet', args=[self.pay_period.pk, self.employee.pk])}'>Get Timesheet: {self.employee}</a>"
+                # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
+                f"</div><br>"
+            )
+        )
 
     def save(self, *args, **kwargs):
         if self.paid_during is None:

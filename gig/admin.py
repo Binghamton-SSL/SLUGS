@@ -3,7 +3,7 @@ from django.urls import path
 from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
-from gig.forms import GigSystemsChangeForm, GigLoadinChangeForm
+from gig.forms import GigJobChangeForm, GigSystemsChangeForm, GigLoadinChangeForm
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
@@ -11,6 +11,7 @@ from djangoql.admin import DjangoQLSearchMixin
 
 
 class JobSubInline(NestedTabularInline):
+    formset = GigJobChangeForm
     inlines = (ShiftInlineAdmin,)
     autocomplete_fields = ["employee", "position"]
     model = Job

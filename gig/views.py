@@ -20,7 +20,12 @@ from django.utils import timezone
 
 
 from finance.forms import ShiftFormSet
-from gig.forms import sendStaffingEmailForm, shiftFormHelper, engineerNotesForm, StaffShowForm
+from gig.forms import (
+    sendStaffingEmailForm,
+    shiftFormHelper,
+    engineerNotesForm,
+    StaffShowForm,
+)
 from finance.models import Shift, Estimate
 from utils.models import signupStatus
 
@@ -192,17 +197,32 @@ class SendStaffingEmail(SLUGSMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['employees'] = self.added_context['gig'].job_set.exclude(employee=None).values_list('employee__preferred_name', 'employee__first_name', 'employee__last_name', 'employee__pk').distinct()
+        kwargs["employees"] = (
+            self.added_context["gig"]
+            .job_set.exclude(employee=None)
+            .values_list(
+                "employee__preferred_name",
+                "employee__first_name",
+                "employee__last_name",
+                "employee__pk",
+            )
+            .distinct()
+        )
         return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["employees_working"] = list(self.added_context['gig'].job_set.values_list('employee__pk', flat=True).distinct())
+        initial["employees_working"] = list(
+            self.added_context["gig"]
+            .job_set.values_list("employee__pk", flat=True)
+            .distinct()
+        )
         return initial
 
     def form_valid(self, form):
         recipient_list = [
-            Employee.objects.get(pk=emp_id).email for emp_id in form.cleaned_data["employees_working"]
+            Employee.objects.get(pk=emp_id).email
+            for emp_id in form.cleaned_data["employees_working"]
         ]
         email = EmailMessage(
             f"You've been staffed for {self.added_context['gig'].name}",
@@ -228,10 +248,24 @@ class generateEmailTemplate(SLUGSMixin, TemplateView):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
         return super().dispatch(request, *args, **kwargs)
 
+
 class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
     template_name = "gig/booking.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context["outstanding_bookings"] = Estimate.objects.filter(gig__start__gte=datetime.now(), status__in=["E", "L"]).order_by("gig__start").annotate(three_weeks_prior=ExpressionWrapper(F('gig__start')-timezone.timedelta(weeks=3), output_field=DateTimeField()))
-        self.added_context["gig_wo_estimate"] = Gig.objects.filter(estimate=None, start__gte=datetime.now())
+        self.added_context["outstanding_bookings"] = (
+            Estimate.objects.filter(
+                gig__start__gte=datetime.now(), status__in=["E", "L"]
+            )
+            .order_by("gig__start")
+            .annotate(
+                three_weeks_prior=ExpressionWrapper(
+                    F("gig__start") - timezone.timedelta(weeks=3),
+                    output_field=DateTimeField(),
+                )
+            )
+        )
+        self.added_context["gig_wo_estimate"] = Gig.objects.filter(
+            estimate=None, start__gte=datetime.now()
+        )
         return super().dispatch(request, *args, **kwargs)

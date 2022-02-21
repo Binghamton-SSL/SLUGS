@@ -21,6 +21,7 @@ def getShiftsForEmployee(emp):
     shifts.order_by("time_out")[:25]
     return shifts
 
+
 # Attempts to grab everyone that is squared away with paperwork only. If someone who has outstanding paperwork is in pay period grab everyone on staff. If someone who is no longer on staff is in pay period grab everyone
 def prepareSummaryData(pp_id):
     # TODO CLEAN IT UP
@@ -36,46 +37,91 @@ def prepareSummaryData(pp_id):
         nonlocal pay_period
         nonlocal rates
 
-        pay_period_ids_in_range = TimeSheet.objects.filter(paid_during=pay_period).exclude(signed=None).values_list('pay_period', flat=True).distinct()
+        # Grab our "base" rates, all rates active during pay period
+        for rate in HourlyRate.objects.filter(
+            Q(date_active__lte=pay_period.start)
+            & (Q(date_inactive__gt=pay_period.start) | Q(date_inactive=None))
+        ):
+            rates[rate] = [rate, 0]
+
+        pay_period_ids_in_range = (
+            TimeSheet.objects.filter(paid_during=pay_period)
+            .exclude(signed=None)
+            .values_list("pay_period", flat=True)
+            .distinct()
+        )
         for pay_period_id in pay_period_ids_in_range:
             pay_p = PayPeriod.objects.get(pk=pay_period_id)
             for shift in pay_p.shifts.filter(processed=True):
-                if shift.content_object is not None and shift.content_object.employee is not None:
-                    if TimeSheet.objects.filter(pay_period=pay_p, paid_during=pay_period, employee=shift.content_object.employee).exists():
-                        if TimeSheet.objects.filter(pay_period=pay_p, paid_during=pay_period, employee=shift.content_object.employee).exclude(signed=None).count() > 0:
+                if (
+                    shift.content_object is not None
+                    and shift.content_object.employee is not None
+                ):
+                    if TimeSheet.objects.filter(
+                        pay_period=pay_p,
+                        paid_during=pay_period,
+                        employee=shift.content_object.employee,
+                    ).exists():
+                        if (
+                            TimeSheet.objects.filter(
+                                pay_period=pay_p,
+                                paid_during=pay_period,
+                                employee=shift.content_object.employee,
+                            )
+                            .exclude(signed=None)
+                            .count()
+                            > 0
+                        ):
                             rate_of_pay = HourlyRate.objects.get(
                                 Q(wage=shift.content_object.position.hourly_rate)
-                                &
-                                Q(date_active__lte=shift.time_in)
-                                &
-                                (
+                                & Q(date_active__lte=shift.time_in)
+                                & (
                                     Q(date_inactive__gt=shift.time_in)
-                                    |
-                                    Q(date_inactive=None)
+                                    | Q(date_inactive=None)
                                 )
                             )
                             if rate_of_pay not in rates:
                                 rates[rate_of_pay] = [rate_of_pay, 0]
-                            if rate_of_pay not in employees[shift.content_object.employee.bnum]["rates"]:
-                                employees[shift.content_object.employee.bnum]["rates"][rate_of_pay] = [rate_of_pay, 0]
-                            employees[shift.content_object.employee.bnum]["rates"][rate_of_pay][1] += (
-                                round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                            if (
+                                rate_of_pay
+                                not in employees[shift.content_object.employee.bnum][
+                                    "rates"
+                                ]
+                            ):
+                                employees[shift.content_object.employee.bnum]["rates"][
+                                    rate_of_pay
+                                ] = [rate_of_pay, 0]
+                            employees[shift.content_object.employee.bnum]["rates"][
+                                rate_of_pay
+                            ][1] += (
+                                round(shift.total_time / timezone.timedelta(minutes=15))
+                                / 4
                             )
-                            employees[shift.content_object.employee.bnum]["shifts"].append(shift)
-                            employees[shift.content_object.employee.bnum]["total_amount"] += float(
-                                rate_of_pay.hourly_rate
-                            ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                            employees[shift.content_object.employee.bnum]["total_hours"] += (
-                                round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                            employees[shift.content_object.employee.bnum][
+                                "shifts"
+                            ].append(shift)
+                            employees[shift.content_object.employee.bnum][
+                                "total_amount"
+                            ] += float(rate_of_pay.hourly_rate) * (
+                                round(shift.total_time / timezone.timedelta(minutes=15))
+                                / 4
+                            )
+                            employees[shift.content_object.employee.bnum][
+                                "total_hours"
+                            ] += (
+                                round(shift.total_time / timezone.timedelta(minutes=15))
+                                / 4
                             )
 
                             total_hours += (
-                                round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                                round(shift.total_time / timezone.timedelta(minutes=15))
+                                / 4
                             )
-                            total_sum += float(
-                                rate_of_pay.hourly_rate
-                            ) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                            
+                            total_sum += float(rate_of_pay.hourly_rate) * (
+                                round(shift.total_time / timezone.timedelta(minutes=15))
+                                / 4
+                            )
+
     try:
         for employee in (
             Employee.objects.all()
@@ -93,7 +139,9 @@ def prepareSummaryData(pp_id):
             }
         generate_data()
         return {
-            "rates": dict(sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)),
+            "rates": dict(
+                sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+            ),
             "employees": employees,
             "pay_period": pay_period,
             "total_sum": total_sum,
@@ -121,7 +169,9 @@ def prepareSummaryData(pp_id):
                 }
             generate_data()
             return {
-                "rates": dict(sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)),
+                "rates": dict(
+                    sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+                ),
                 "employees": employees,
                 "pay_period": pay_period,
                 "total_sum": total_sum,
@@ -147,7 +197,9 @@ def prepareSummaryData(pp_id):
                 }
             generate_data()
             return {
-                "rates": dict(sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)),
+                "rates": dict(
+                    sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+                ),
                 "employees": employees,
                 "pay_period": pay_period,
                 "total_sum": total_sum,

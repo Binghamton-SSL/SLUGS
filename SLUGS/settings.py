@@ -240,4 +240,4 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 JSIGNATURE_JQUERY = "admin"
 
-ADMINS = [('SLUGS', 'bssl.slugs@binghamtonsa.org')]
+ADMINS = [("SLUGS", "bssl.slugs@binghamtonsa.org")]

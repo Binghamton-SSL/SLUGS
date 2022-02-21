@@ -17,7 +17,9 @@ def processAutoSignForm(paperworkForm, user):
             if element["type"] == "Text":
                 c.setFont("Times-Roman", element["font_size"])
                 c.drawString(
-                    (element["x"]) * inch, (11 - element["y"]) * inch, eval(element["text"])
+                    (element["x"]) * inch,
+                    (11 - element["y"]) * inch,
+                    eval(element["text"]),
                 )
             elif element["type"] == "Signature":
                 sig_image = ImageReader(draw_signature(user.signature))
@@ -25,9 +27,11 @@ def processAutoSignForm(paperworkForm, user):
                 # Go back through this and make better
                 img_height = (element["width"] / (sig_width / sig_height)) * inch
                 img_width = element["width"] * inch
-                if img_height > (element['max_height'] * inch):
-                    img_height = element['max_height'] * inch
-                    img_width = (element["max_height"] / (sig_height / sig_width)) * inch
+                if img_height > (element["max_height"] * inch):
+                    img_height = element["max_height"] * inch
+                    img_width = (
+                        element["max_height"] / (sig_height / sig_width)
+                    ) * inch
                 c.drawImage(
                     sig_image,
                     (element["x"]) * inch,
@@ -68,11 +72,20 @@ def auto_place_group_user(user):
     if user.paperworkform_set.filter(processed=False, form__required_for_payroll=True):
         if user.groups.filter(name="Awaiting Paperwork").count() == 0:
             Group.objects.get(name="Awaiting Paperwork").user_set.add(user)
-    elif user.paperworkform_set.filter(processed=False, form__required_for_payroll=True, form__required_for_employment=True).count() == 0:
+    elif (
+        user.paperworkform_set.filter(
+            processed=False,
+            form__required_for_payroll=True,
+            form__required_for_employment=True,
+        ).count()
+        == 0
+    ):
         if user.groups.filter(name="Awaiting Paperwork").count():
             Group.objects.get(name="Awaiting Paperwork").user_set.remove(user)
 
-    if user.paperworkform_set.filter(processed=False, form__required_for_employment=True):
+    if user.paperworkform_set.filter(
+        processed=False, form__required_for_employment=True
+    ):
         if user.groups.filter(name="Cannot Work").count() == 0:
             Group.objects.get(name="Cannot Work").user_set.add(user)
             Group.objects.get(name="Awaiting Paperwork").user_set.add(user)

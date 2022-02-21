@@ -21,7 +21,6 @@ from djangoql.admin import DjangoQLSearchMixin
 from adminsortable2.admin import SortableInlineAdminMixin
 
 
-
 class HourlyRateInline(admin.StackedInline):
     model = HourlyRate
     extra = 0
@@ -67,7 +66,14 @@ class OneTimeFeeInline(SortableInlineAdminMixin, admin.StackedInline):
     autocomplete_fields = ["prepared_fee"]
     model = OneTimeFee
     readonly_fields = ["or_create_your_own"]
-    fields = ["prepared_fee", "or_create_your_own", "name", "amount", "percentage", "description"]
+    fields = [
+        "prepared_fee",
+        "or_create_your_own",
+        "name",
+        "amount",
+        "percentage",
+        "description",
+    ]
     extra = 0
 
 
@@ -139,10 +145,10 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     @staticmethod
     def gig__day_of_show_notes(obj):
         return obj.gig.day_of_show_notes
-    
+
     @staticmethod
     def estimate_id(obj):
-        return 2500+int(obj.pk)
+        return 2500 + int(obj.pk)
 
     @staticmethod
     def reservation_number(obj):

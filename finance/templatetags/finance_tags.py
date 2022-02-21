@@ -10,6 +10,7 @@ def get_hour_value(dict, key):
     else:
         return None
 
+
 @register.filter
 def get_price_at_date(object, date):
     return object.get_price_at_date(date)

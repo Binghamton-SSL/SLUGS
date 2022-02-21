@@ -25,5 +25,5 @@ class Command(BaseCommand):
                 print(
                     f"{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name}"
                     if not options["forms"]
-                    else f'{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name} - {[form.form.form_name for form in paperwork_missing.all()]}'
+                    else f"{(emp.preferred_name if emp.preferred_name else emp.first_name)} {emp.last_name} - {[form.form.form_name for form in paperwork_missing.all()]}"
                 )

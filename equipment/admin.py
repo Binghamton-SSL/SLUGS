@@ -1,13 +1,23 @@
 from django.contrib import admin
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
-from equipment.models import System, BrokenEquipmentReport, SystemAddon, Equipment, Category, ServiceRecord, Item, SystemQuantity, SystemQuantityAddon
+from equipment.models import (
+    System,
+    BrokenEquipmentReport,
+    SystemAddon,
+    Equipment,
+    Category,
+    ServiceRecord,
+    Item,
+    SystemQuantity,
+    SystemQuantityAddon,
+)
 from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
 
 # Register your models here.
 class ServiceRecordInline(NestedStackedInline):
     model = ServiceRecord
-    readonly_fields = ['date_created', 'date_last_modified']
+    readonly_fields = ["date_created", "date_last_modified"]
     extra = 0
 
 
