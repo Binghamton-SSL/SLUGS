@@ -10,13 +10,17 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from dev_utils.views import MultipleFormView
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin, isAdminMixin
 from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
 from datetime import datetime
+from django.db.models import F, DateTimeField, ExpressionWrapper
+from django.utils import timezone
+
 
 from finance.forms import ShiftFormSet
-from gig.forms import shiftFormHelper, engineerNotesForm, StaffShowForm
+from gig.forms import sendStaffingEmailForm, shiftFormHelper, engineerNotesForm, StaffShowForm
 from finance.models import Shift, Estimate
 from utils.models import signupStatus
 
@@ -175,8 +179,9 @@ class staffShow(SLUGSMixin, MultipleFormView):
         return redirect("admin:gig_gig_change", object_id=self.added_context["gig"].pk)
 
 
-class SendStaffingEmail(SLUGSMixin, TemplateView):
+class SendStaffingEmail(SLUGSMixin, FormView):
     template_name = "gig/send_email.html"
+    form_class = sendStaffingEmailForm
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["object_id"])
@@ -185,15 +190,20 @@ class SendStaffingEmail(SLUGSMixin, TemplateView):
         self.added_context["email_template"] = template.render(self.added_context)
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, **kwargs):
-        recipient_list = []
-        for emp in self.added_context["gig"].job_set.all():
-            recipient_list.append(emp.employee.email)
-        # subject = f"You've been staffed for {self.added_context['gig'].name}"
-        # html_message = self.added_context['email_template']
-        # plain_message = strip_tags(html_message)
-        # email_from = settings.EMAIL_HOST_USER
-        # send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['employees'] = self.added_context['gig'].job_set.exclude(employee=None).values_list('employee__preferred_name', 'employee__first_name', 'employee__last_name', 'employee__pk').distinct()
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["employees_working"] = list(self.added_context['gig'].job_set.values_list('employee__pk', flat=True).distinct())
+        return initial
+
+    def form_valid(self, form):
+        recipient_list = [
+            Employee.objects.get(pk=emp_id).email for emp_id in form.cleaned_data["employees_working"]
+        ]
         email = EmailMessage(
             f"You've been staffed for {self.added_context['gig'].name}",
             self.added_context["email_template"],
@@ -222,5 +232,6 @@ class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
     template_name = "gig/booking.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.added_context["outstanding_bookings"] = Estimate.objects.filter(gig__start__gte=datetime.now(), status="E").order_by("gig__start")
+        self.added_context["outstanding_bookings"] = Estimate.objects.filter(gig__start__gte=datetime.now(), status__in=["E", "L"]).order_by("gig__start").annotate(three_weeks_prior=ExpressionWrapper(F('gig__start')-timezone.timedelta(weeks=3), output_field=DateTimeField()))
+        self.added_context["gig_wo_estimate"] = Gig.objects.filter(estimate=None, start__gte=datetime.now())
         return super().dispatch(request, *args, **kwargs)

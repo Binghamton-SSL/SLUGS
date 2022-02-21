@@ -135,12 +135,6 @@ class Fee(PricingMixin, models.Model):
 
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=512, blank=True, null=True)
-    ordering = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        default=0.00,
-        help_text="Relative order of fee, 0 is top importance. Does not have to be unique. I suggest\n 0=before booking, 1=during booking, 2=during show, 3=during invoice, 4=after invoice.",
-    )
 
     class Meta:
         verbose_name = "Predefined Fee"
@@ -192,6 +186,7 @@ class Estimate(models.Model):
     INVOICE_STATUSES = [
         ("E", "Estimate"),
         ("B", "Booked"),
+        ("L", "In Limbo/Postponed"),
         ("O", "Show Concluded"),
         ("A", "Awaiting Payment"),
         ("C", "Closed"),
@@ -241,11 +236,13 @@ class Estimate(models.Model):
     payments_made = models.DecimalField(
         max_digits=7, decimal_places=2, blank=True, null=True, default=0.00
     )
+    estimate_id = models.CharField(max_length=10, default="")
 
     def save(self):
         self.subtotal = decimal.Decimal(0.00)
         self.fees_amt = decimal.Decimal(0.00)
         self.payment_amt = decimal.Decimal(0.00)
+        self.estimate_id = f"E{2500+int(self.pk)}" if self.pk else ""
 
         if self.status == "B":
             self.gig.published = True
@@ -331,7 +328,7 @@ class Shift(models.Model):
     description = models.CharField(
         max_length=150,
         blank=True,
-        help_text="Only required if abnormal shift needs explaination to finance",
+        help_text="Only required if abnormal shift needs explanation to finance",
     )
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     processed = models.BooleanField(default=False)
@@ -388,7 +385,7 @@ class PayPeriod(models.Model):
 
     def get_summary(self):
         return format_html(
-            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}'>Summary CSV File</a></div><br>"
+            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}?time={datetime.now()}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}?time={datetime.now()}'>Summary CSV File</a></div><br>"
         )  # noqa
 
     def associated_shifts(self):

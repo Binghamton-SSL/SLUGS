@@ -24,7 +24,7 @@ class PaperworkInline(admin.StackedInline):
 
 @admin.register(PaperworkForm)
 class PaperworkAdmin(admin.ModelAdmin):
-    search_fields = ["form__form_name", "employee"]
+    search_fields = ["form__form_name", "employee__first_name", "employee__preferred_name", "employee__last_name"]
     pass
 
 

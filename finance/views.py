@@ -29,6 +29,7 @@ from utils.generic_email import send_generic_email
 import decimal
 import calendar
 import barcode
+from functools import reduce
 
 
 class viewEstimate(SLUGSMixin, TemplateView):
@@ -187,7 +188,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["table_rows"] = table_rows
         self.added_context["rates"] = dict(sorted(rates.items(), key=lambda item: item[0].hourly_rate))
         self.added_context["t_total"] = t_total
-        self.added_context["t_amt"] = shifts.aggregate(Sum("cost"))
+        self.added_context["t_amt"] = round(float(reduce(lambda sum, shift: (sum + float(HourlyRate.objects.get(Q(wage=shift.content_object.position.hourly_rate)&Q(date_active__lte=shift.time_in)&(Q(date_inactive__gt=shift.time_in)|Q(date_inactive=None))).hourly_rate) * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)), shifts, 0)),2)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -290,8 +291,8 @@ class exportSummaryCSV(SLUGSMixin, View):
             writer.writerow(
                 [emp["bnum"], emp["name"]]
                 + [
-                    "-" if emp["rates"][rate][1] == 0 else emp["rates"][rate][1]
-                    for rate in emp["rates"]
+                    "-" if (rate not in emp["rates"] or emp["rates"][rate][1] == 0) else emp["rates"][rate][1]
+                    for rate in sumData["rates"]
                 ]
                 + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]
             )

@@ -21,7 +21,7 @@ class reportBroken(SLUGSMixin, FormView):
             included_text=f"""
                 Ayo Shop Techs,
                 <br><br>
-                {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)} {form.instance.reported_broken_by.last_name} said that {form.instance.broken_system} is broken.
+                {(form.instance.reported_broken_by.preferred_name if form.instance.reported_broken_by.preferred_name else form.instance.reported_broken_by.first_name)} {form.instance.reported_broken_by.last_name} said that {form.instance.broken_system} is broken.
                 <br>
                 Here are the details:
                 <br><br>

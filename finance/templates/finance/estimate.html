@@ -177,7 +177,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{estimate.gig.org.name}}
+                                                {{estimate.billing_contact.organization.name}}
                                             </td>
                                             {% if estimate.gig.org.SA_account_num %}
                                             <td>
@@ -284,7 +284,7 @@
                                             {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{qty}}
+                                            {{qty|floatformat:2}}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
                                             {% with pricing=system|get_price_at_date:estimate.gig.start%}
@@ -509,25 +509,60 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex mx-auto">
-                                        <p class="mr-4">{{estimate.gig.org}}</p>
-                                        <div class="text-center">
-                                            <p class="mx-auto">_________________________________</p>
-                                            <p class="mx-auto">{{estimate.gig.contact.name}}</p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
-                                            </p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
-                                            </p>
+                                    <div class="flex-col mx-auto">
+                                        <div class="flex ml-auto mr-0 w-max">
+                                            <p class="mr-4">{{estimate.gig.org}}</p>
+                                            <div class="text-center">
+                                                <p class="mx-auto">_________________________________</p>
+                                                <p class="mx-auto">{{estimate.gig.contact.name}}</p>
+                                                <p class="mx-auto text-xs">
+                                                    {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
+                                                </p>
+                                                <p class="mx-auto text-xs">
+                                                    {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
+                                                </p>
+                                            </div>
                                         </div>
+                                        {% if estimate.billing_contact != estimate.gig.contact %}
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                            have read the contract and BSSL Reservation Policy in
+                                            full
+                                            and agree to the terms and conditions.</p>
+                                            <p class="text-center text-md my-4 font-bold">Please complete one of the following:</p>
+                                            <div class="flex mx-auto w-max">
+                                                <div class="h-4 w-4 border-black border-2 mr-4 my-auto text-transparent">.</div>
+                                                <p class="text-xs w-52">
+                                                    I, {{estimate.gig.contact.name}} am authorized to execute on behalf of {{estimate.billing_contact.organization}}
+                                                </p>
+                                            </div>
+                                            <p class="text-center text-md font-bold">OR</p>
+                                            <div class="flex ml-auto mr-0 w-max">
+                                                <p class="mr-4">{{estimate.billing_contact.organization}}</p>
+                                                <div class="text-center">
+                                                    <p class="mx-auto">_________________________________</p>
+                                                    <p class="mx-auto">{{estimate.billing_contact.name}}</p>
+                                                    <p class="mx-auto text-xs">
+                                                        {% if estimate.billing_contact.phone_number %}{{estimate.billing_contact.phone_number}}{% endif %}
+                                                    </p>
+                                                    <p class="mx-auto text-xs">
+                                                        {% if estimate.billing_contact.email %}{{estimate.billing_contact.email}}{% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                                have read the contract and BSSL Reservation Policy in
+                                                full
+                                                and agree to the terms and conditions. I agree to pay the
+                                                total amount in full upon receipt of invoice.</p>
+                                        {% else %}
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                                have read the contract and BSSL Reservation Policy in
+                                                full
+                                                and agree to the terms and conditions. I agree to pay the
+                                                total amount in full upon receipt of invoice.</p>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
-                                    have read the contract and BSSL Reservation Policy in
-                                    full
-                                    and agree to the terms and conditions. I agree to pay the
-                                    total amount in full upon receipt of invoice.</p>
                             </div>
                         </div>
                     </div>

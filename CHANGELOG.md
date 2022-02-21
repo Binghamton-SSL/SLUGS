@@ -34,7 +34,12 @@
 * Add sent to payroll stamp
 * Adding booking overview page
 * Add event contact to showView
-
+* Add children to items in inventory
+* Add status' to items
+* Add reservation number to estimate object
+* Add billing contact signature to estimate
+* Choose employees to send staffing email to (defaults to all)
+* Booking page: Show gigs without estimate and highlight those less than 3 weeks out
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
@@ -49,6 +54,11 @@ BUG FIXES:
     * Make finance widgets responsive
     * Fix summary table to expand with as many rates as paid
     * Fix formatting of setup time / view estimate to be more space efficient
+    * Remove ordering from predefined fees (no longer needed with drag and drop)
+    * Add manager notes to estimate admin
+    * Fix issue with unassigned shift crashing showview
+    * Fix inconsistent financial summary generation
+    * Timesheet ID clears on enter when using quick action on finance page
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

@@ -73,7 +73,6 @@ class OneTimeFeeInline(SortableInlineAdminMixin, admin.StackedInline):
 
 @admin.register(Fee)
 class FeeAdmin(admin.ModelAdmin):
-    ordering = ["ordering"]
     search_fields = ["name", "description"]
     inlines = [FeePricingInline]
     pass
@@ -128,8 +127,30 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         )
 
     @staticmethod
+    def gig__manager_notes(obj):
+        return (
+            format_html(
+                f"<b>This is information is for managers view only:</b>\n{obj.gig.manager_only_notes}"
+            )
+            if obj.gig.manager_only_notes
+            else "No Manager Notes for this gig"
+        )
+
+    @staticmethod
     def gig__day_of_show_notes(obj):
         return obj.gig.day_of_show_notes
+    
+    @staticmethod
+    def estimate_id(obj):
+        return 2500+int(obj.pk)
+
+    @staticmethod
+    def reservation_number(obj):
+        return f"E{2500+int(obj.pk)}"
+
+    @staticmethod
+    def invoice_number(obj):
+        return f"SA7400-I{2500+obj.pk}"
 
     actions = [make_concluded, make_awaiting_payment, make_closed, make_abandoned]
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
@@ -143,6 +164,8 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     filter_horizontal = ["canned_notes"]
     autocomplete_fields = ["gig", "billing_contact"]
     search_fields = (
+        "pk",
+        "estimate_id",
         "gig__name",
         "gig__org__name",
         "gig__org__SA_account_num",
@@ -156,12 +179,15 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         "get_printout_link",
         "gig__notes",
         "gig__day_of_show_notes",
+        "gig__manager_notes",
     ]
+    exclude = ["estimate_id"]
     fieldsets = (
         (
             "Information",
             {
                 "fields": [
+                    "gig__manager_notes",
                     "status",
                     "gig",
                     "billing_contact",

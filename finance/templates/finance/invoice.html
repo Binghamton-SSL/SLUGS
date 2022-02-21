@@ -248,7 +248,7 @@
                                             {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{qty}}
+                                            {{qty|floatformat:2}}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
                                             {% with pricing=system|get_price_at_date:estimate.gig.start%}

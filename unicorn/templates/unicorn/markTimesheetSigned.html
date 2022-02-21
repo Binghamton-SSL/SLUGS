@@ -10,9 +10,9 @@
         </div>
         <script>
             const test = (e) => {
-                console.log(e)
-                if(e.target.value.trim().length > 0) {
+                if(e.target.value.trim().length > 0 && e.keyCode == 13) {
                     Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, e.target.value.trim());
+                    document.querySelector("#TimeSheedMarkedID").value = '';
                 }
             }
         </script>

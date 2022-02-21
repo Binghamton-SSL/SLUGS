@@ -1,17 +1,27 @@
 from django.contrib import admin
+from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from equipment.models import System, BrokenEquipmentReport, SystemAddon, Equipment, Category, ServiceRecord, Item, SystemQuantity, SystemQuantityAddon
 from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
 
 # Register your models here.
-class ServiceRecordInline(admin.StackedInline):
+class ServiceRecordInline(NestedStackedInline):
     model = ServiceRecord
     readonly_fields = ['date_created', 'date_last_modified']
     extra = 0
 
 
-class ItemInline(admin.StackedInline):
+class ItemThroughInline(NestedStackedInline):
+    verbose_name = "Child"
+    verbose_name_plural = "Children"
+    model = Item.children.through
+    fk_name = "parent"
+    extra = 0
+
+
+class ItemInline(NestedStackedInline):
     model = Item
+    inlines = [ItemThroughInline]
     extra = 0
 
 
@@ -53,22 +63,25 @@ class BrokenEquipmentReportAdmin(admin.ModelAdmin):
 
 
 @admin.register(Equipment)
-class Equipment(admin.ModelAdmin):
+class EquipmentAdmin(NestedModelAdmin):
     inlines = [ItemInline]
     search_fields = ["name", "brand", "model_number", "reorder_link"]
 
 
 @admin.register(Category)
-class Category(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     search_fields = ["name"]
 
 
 @admin.register(ServiceRecord)
-class ServiceRecord(admin.ModelAdmin):
+class ServiceRecordAdmin(admin.ModelAdmin):
+    verbose_name = "Service Record / Equipment Note"
+    verbose_name_plural = "Service Records & Equipment Notes"
     search_fields = ["name", "date_created"]
 
 
 @admin.register(Item)
-class Item(admin.ModelAdmin):
-    inlines = [ServiceRecordInline]
-    search_fields = ["id"]
+class ItemAdmin(NestedModelAdmin):
+    inlines = [ServiceRecordInline, ItemThroughInline]
+    exclude = ["children"]
+    search_fields = ["pk", "barcode", "serial_no"]

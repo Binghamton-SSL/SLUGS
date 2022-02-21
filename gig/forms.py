@@ -90,9 +90,10 @@ class StaffShowForm(forms.ModelForm):
 class GigLoadinChangeForm(BaseInlineFormSet):
     def clean(self):
         super(GigLoadinChangeForm, self).clean()
-        for form in self.cleaned_data:
-            if not form['DELETE']:
-                self.instance.__loadin_depts__.append(form['department'])
+        if 'cleaned_data' in self:
+            for form in self.cleaned_data:
+                if not form['DELETE']:
+                    self.instance.__loadin_depts__.append(form['department'])
 
 
 class GigSystemsChangeForm(BaseInlineFormSet):
@@ -103,3 +104,15 @@ class GigSystemsChangeForm(BaseInlineFormSet):
             valid_depts = self.instance.__loadin_depts__
             if system.department not in valid_depts and not form["DELETE"]:
                 raise ValidationError(f"A loadin is required for each department that is working the show. Saving would create a situation where {system.get_department_display()} does not have a loadin.")
+
+
+class sendStaffingEmailForm(forms.Form):
+    employees_working = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, label="", choices=["test", "test2"])
+
+    def __init__(self, *args, **kwargs):
+        employees = kwargs.pop("employees")
+        super().__init__(*args, **kwargs)
+        self.fields['employees_working'].choices = [(emp[3], f"{emp[0] if emp[0] else emp[1]} {emp[2]}") for emp in employees]
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.disable_csrf = True
