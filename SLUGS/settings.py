@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.admindocs",
     "dev_utils",
     "theme",
     "SLUGS",
@@ -90,6 +91,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.contrib.admindocs.middleware.XViewMiddleware",
     "hijack.middleware.HijackUserMiddleware",
 ]
 
@@ -235,7 +237,7 @@ VERSION = "v" + re.match("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 now = timezone.now()
 BUILD = f'b.{now.strftime("%m.%d.%y.%H.%M.%S")}UTC'
 
-SESSION_COOKIE_AGE = 518400
+SESSION_COOKIE_AGE = 86400
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 JSIGNATURE_JQUERY = "admin"

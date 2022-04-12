@@ -5,6 +5,8 @@ from training.models import Training, TrainingRequest
 from training.forms import requestTrainingForm
 from django.utils import timezone
 from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse
 
 
 # Create your views here.
@@ -55,6 +57,8 @@ class index(SLUGSMixin, FormView):
         return super().form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("%s?next=%s" % (reverse("login"), request.path))
         self.added_context["trainings"] = Training.objects.filter(
             date__gte=timezone.now()
         ).order_by("dept")

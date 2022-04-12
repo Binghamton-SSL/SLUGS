@@ -7,7 +7,7 @@ class Organization(models.Model):
     SA_account_num = models.BigIntegerField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}{' - NON-SA' if self.SA_account_num is None else ''}"
 
 
 class OrgContact(models.Model):
@@ -20,4 +20,4 @@ class OrgContact(models.Model):
         verbose_name = "Organization Contact"
 
     def __str__(self):
-        return f"{self.name} - {self.organization}"
+        return f"{self.name} - {self.organization.name}"

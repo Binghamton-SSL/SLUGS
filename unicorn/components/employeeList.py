@@ -17,7 +17,7 @@ class EmployeelistView(UnicornView):
         super().__init__(**kwargs)
         self.show_id = kwargs.get("show")
         self.my_job = kwargs.get("my_job")
-        gig = Gig.objects.get(pk=kwargs.get("show"))
+        gig = Gig.objects.get(pk=self.show_id)
         self.depts = list(
             set(
                 [

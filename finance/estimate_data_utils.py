@@ -19,7 +19,7 @@ def calculateGigCost(estimate):
     # Format first/last loadin times for use on printed documents
     ret["first_shop_time"] = ret["loadins"].first().shop_time
     ret["first_load_in"] = ret["loadins"].first().load_in
-    ret["last_load_out"] = ret["loadins"].first().load_out
+    ret["last_load_out"] = ret["gig"].loadin_set.order_by("-load_out").first().load_out
     # Format All system / addon costs
     for systeminstance in (
         ret["gig"].systeminstance_set.all().order_by("system__department")

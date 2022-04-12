@@ -441,7 +441,7 @@
                                         Engineers are not required to work more than 15 minutes past the End Time. If
                                         the engineers
                                         agree to work beyond contracted hours, the
-                                        promoter will be billed a $20 late fee, as well as the extra labor per hour at
+                                        promoter will be billed $20 per hour in addition to the extra labor per hour at
                                         the current
                                         hourly rate.
                                     </li>
@@ -511,7 +511,7 @@
                                     </div>
                                     <div class="flex-col mx-auto">
                                         <div class="flex ml-auto mr-0 w-max">
-                                            <p class="mr-4">{{estimate.gig.org}}</p>
+                                            <p class="mr-4">{{estimate.gig.org.name}}</p>
                                             <div class="text-center">
                                                 <p class="mx-auto">_________________________________</p>
                                                 <p class="mx-auto">{{estimate.gig.contact.name}}</p>
@@ -532,12 +532,12 @@
                                             <div class="flex mx-auto w-max">
                                                 <div class="h-4 w-4 border-black border-2 mr-4 my-auto text-transparent">.</div>
                                                 <p class="text-xs w-52">
-                                                    I, {{estimate.gig.contact.name}} am authorized to execute on behalf of {{estimate.billing_contact.organization}}
+                                                    I, {{estimate.gig.contact.name}} am authorized to execute on behalf of {{estimate.billing_contact.organization.name}}
                                                 </p>
                                             </div>
                                             <p class="text-center text-md font-bold">OR</p>
                                             <div class="flex ml-auto mr-0 w-max">
-                                                <p class="mr-4">{{estimate.billing_contact.organization}}</p>
+                                                <p class="mr-4">{{estimate.billing_contact.organization.name}}</p>
                                                 <div class="text-center">
                                                     <p class="mx-auto">_________________________________</p>
                                                     <p class="mx-auto">{{estimate.billing_contact.name}}</p>

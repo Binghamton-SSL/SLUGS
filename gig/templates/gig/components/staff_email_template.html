@@ -391,7 +391,7 @@
                                                     {% for loadin in gig.loadin_set.all %}
                                                         <p
                                                             style="margin: 0; line-height: 1.2; word-break: break-word; font-size: 12px; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;">
-                                                            <span style="font-size: 12px;">{{loadin.get_department_display}}</span></p>
+                                                            <span style="font-size: 12px;">{{loadin.get_department_display}} {% if loadin.note %} - {{loadin.note}}{% endif %}</span></p>
                                                         <p
                                                             style="margin: 0; line-height: 1.2; word-break: break-word; font-size: 12px; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;">
                                                             <span style="font-size: 12px;">Shop Time: {{loadin.shop_time}}</span></p>

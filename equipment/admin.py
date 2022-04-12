@@ -1,5 +1,7 @@
 from django.contrib import admin
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
+from import_export.admin import ImportExportMixin
+from import_export import resources
 from equipment.models import (
     System,
     BrokenEquipmentReport,
@@ -75,6 +77,7 @@ class BrokenEquipmentReportAdmin(admin.ModelAdmin):
 @admin.register(Equipment)
 class EquipmentAdmin(NestedModelAdmin):
     inlines = [ItemInline]
+    list_filter = ["category", "brand", "department"]
     search_fields = ["name", "brand", "model_number", "reorder_link"]
 
 
@@ -90,8 +93,34 @@ class ServiceRecordAdmin(admin.ModelAdmin):
     search_fields = ["name", "date_created"]
 
 
+class ItemResource(resources.ModelResource):
+    class Meta:
+        model = Item
+        fields = (
+            "id",
+            "status",
+            "label",
+            "serial_no",
+            "purchase_date",
+            "item_type__name",
+            "item_type__description",
+            "item_type__brand",
+            "item_type__model_number",
+            "item_type__name",
+            "item_type__department",
+            "item_type__value",
+            "item_type__wattage",
+            "item_type__category",
+            "barcode",
+            "children",
+            "last_updated",
+        )
+
+
 @admin.register(Item)
-class ItemAdmin(NestedModelAdmin):
+class ItemAdmin(ImportExportMixin, NestedModelAdmin):
+    resource_class = ItemResource
     inlines = [ServiceRecordInline, ItemThroughInline]
+    # list_filter = ["equipment__department"]
     exclude = ["children"]
     search_fields = ["pk", "barcode", "serial_no"]

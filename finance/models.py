@@ -381,95 +381,6 @@ Group.add_to_class(
 Group.add_to_class("description", models.TextField(blank=True, null=True))
 
 
-class PayPeriod(models.Model):
-    start = models.DateField()
-    end = models.DateField()
-    payday = models.DateField()
-    submitted = models.DateField(
-        blank=True,
-        null=True,
-        help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.",
-    )
-    shifts = models.ManyToManyField("finance.Shift")
-
-    def get_summary(self):
-        return format_html(
-            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}?time={datetime.now()}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}?time={datetime.now()}'>Summary CSV File</a></div><br>"
-        )  # noqa
-
-    def associated_shifts(self):
-        ret = ""
-        for shift in self.shifts.all():
-            ret += f"<div style='margin: .25rem 0 .25rem 0'><a href='{shift.get_admin_url()}'>{shift}</a></div><br>"
-        return format_html(ret)
-
-    def associated_employees(self):
-        emps = []
-        for shift in self.shifts.all():
-            if shift.content_object.employee not in emps:
-                emps.append(shift.content_object.employee)
-        return format_html(
-            "".join(
-                [
-                    (
-                        f"<div style='margin: .25rem 0 .25rem 0'>"
-                        f"<a href='{reverse('finance:timesheet', args=[self.pk, emp.pk])}'>Get Timesheet: {emp}</a>"
-                        # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
-                        f"</div><br>"
-                    )
-                    for emp in emps
-                ]
-            )
-        )
-
-    def save(self):
-        super().save()
-        self.shifts.set(
-            Shift.objects.filter(
-                (
-                    Q(time_in__gte=self.start)
-                    & Q(time_out__lte=self.end + timezone.timedelta(days=1))
-                    & Q(override_pay_period=None)
-                )
-                | Q(override_pay_period=self)
-            ).order_by("-time_out")
-        )
-        super().save()
-        emps = []
-        for shift in self.shifts.all():
-            if shift.content_object.employee not in emps:
-                emps.append(shift.content_object.employee)
-        for emp in emps:
-            timesheet, created = TimeSheet.objects.get_or_create(
-                employee=emp,
-                pay_period_id=self.pk,
-            )
-        if self.submitted:
-            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(
-                signed=None
-            ).update(processed=self.submitted)
-
-    def __str__(self):
-        return f"{self.start} - {self.end} (Paid {self.payday})"
-
-
-class Payment(models.Model):
-    PAYMENT_TYPES = [
-        ("C", "Cash"),
-        ("H", "Check"),
-        ("G", "Grant"),
-        ("O", "Other"),
-        ("D", "Discount"),
-    ]
-    payment_date = models.DateField(blank=True, null=True)
-    amount = models.DecimalField(max_digits=7, decimal_places=2)
-    payment_type = models.CharField(choices=PAYMENT_TYPES, max_length=1)
-    estimate = models.ForeignKey("Estimate", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.payment_date} - ${self.amount}"
-
-
 class TimeSheet(models.Model):
     def user_dir_path(instance, filename):
         fileName, fileExtension = os.path.splitext(filename)
@@ -509,3 +420,89 @@ class TimeSheet(models.Model):
 
     def __str__(self):
         return f"{self.employee} - {self.pay_period}"
+
+
+class PayPeriod(models.Model):
+    start = models.DateField()
+    end = models.DateField()
+    payday = models.DateField()
+    submitted = models.DateField(
+        blank=True,
+        null=True,
+        help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.",
+    )
+    shifts = models.ManyToManyField("finance.Shift")
+
+    def get_summary(self):
+        return format_html(
+            f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}?time={datetime.now()}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}?time={datetime.now()}'>Summary CSV File</a></div><br>"
+        )  # noqa
+
+    def associated_shifts(self):
+        ret = ""
+        for shift in self.shifts.all():
+            ret += f"<div style='margin: .25rem 0 .25rem 0'><a href='{shift.get_admin_url()}'>{shift}</a></div><br>"
+        return format_html(ret)
+
+    def timesheets_for_this_pay_period(self):
+        timesheets = TimeSheet.objects.filter(paid_during=self.pk).order_by('employee__last_name')
+        return format_html(
+            "".join(
+                [
+                    (
+                        f"<div style='margin: .25rem 0 .25rem 0'>"
+                        f"<a href='{reverse('finance:timesheet', args=[timesheet.pay_period.pk, timesheet.employee.pk])}'>Get Timesheet: {timesheet.employee} {'<b>- SIGNED</b>' if timesheet.signed else ''}{(' - ('+str(timesheet.pay_period)+')') if timesheet.pay_period.pk is not self.pk else ''}</a>"
+                        f"</div><br>"
+                    )
+                    for timesheet in timesheets
+                ]
+            )
+        )
+
+    def save(self):
+        super().save()
+        self.shifts.set(
+            Shift.objects.filter(
+                (
+                    Q(time_in__gte=self.start)
+                    & Q(time_out__lte=self.end + timezone.timedelta(days=1))
+                    & Q(override_pay_period=None)
+                )
+                | Q(override_pay_period=self)
+            ).order_by("-time_out")
+        )
+        super().save()
+        emps = []
+        for shift in self.shifts.all():
+            if shift.content_object.employee not in emps:
+                emps.append(shift.content_object.employee)
+        for emp in emps:
+            timesheet, created = TimeSheet.objects.get_or_create(
+                employee=emp,
+                pay_period_id=self.pk,
+            )
+        if self.submitted:
+            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(
+                signed=None
+            ).update(processed=self.submitted)
+
+    def __str__(self):
+        return f"{self.start} - {self.end} (Paid {self.payday})"
+
+
+class Payment(models.Model):
+    PAYMENT_TYPES = [
+        ("C", "Cash"),
+        ("H", "Check"),
+        ("I", "SA Intra-Organization Transfer"),
+        ("G", "Grant"),
+        ("O", "Other"),
+        ("D", "Discount"),
+    ]
+    payment_date = models.DateField(blank=True, null=True)
+    amount = models.DecimalField(max_digits=7, decimal_places=2)
+    payment_type = models.CharField(choices=PAYMENT_TYPES, max_length=1)
+    estimate = models.ForeignKey("Estimate", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.payment_date} - ${self.amount}"

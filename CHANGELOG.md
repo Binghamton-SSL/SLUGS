@@ -61,6 +61,8 @@ BUG FIXES:
     * Fix inconsistent financial summary generation
     * Timesheet ID clears on enter when using quick action on finance page
     * Add all active rates to new finance summary page
+    * Estimate would show first load out time, not last
+    * Validation for overlapping shifts would only apply once a shift is entered. Locking the shift in.
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

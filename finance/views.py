@@ -348,7 +348,6 @@ class saBillingSummary(SLUGSMixin, TemplateView):
         month = kwargs["month"]
         year = kwargs["year"]
         estimates = Estimate.objects.filter(
-            gig__start__year__gte=year,
             gig__start__month=month,
             gig__start__year=year,
             billing_contact__organization__SA_account_num__isnull=False,
@@ -404,7 +403,8 @@ class FinancialOverview(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not has_group(request.user, "Financial Director/GM"):
             raise PermissionDenied
-        most_recent_pay_period = PayPeriod.objects.all().order_by("-end").first()
+        # most_recent_pay_period = PayPeriod.objects.all().order_by("-end").first()
+        most_recent_pay_period = PayPeriod.objects.filter(end__lte=datetime.now()).order_by("end").last()
         shifts = Shift.objects.filter(
             Q(time_in__gte=most_recent_pay_period.start)
             & Q(time_out__lte=most_recent_pay_period.end + timezone.timedelta(days=1))

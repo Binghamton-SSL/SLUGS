@@ -80,6 +80,7 @@ class Gig(models.Model):
 class LoadIn(models.Model):
     gig = models.ForeignKey(Gig, on_delete=models.CASCADE)
     department = models.CharField(choices=DEPARTMENTS, max_length=1)
+    note = models.CharField(max_length=128, blank=True, null=True, help_text="Use this only when further explaintation is needed as to which shift this loadin is for.")
     shop_time = models.DateTimeField()
     load_in = models.DateTimeField()
     load_out = models.DateTimeField()

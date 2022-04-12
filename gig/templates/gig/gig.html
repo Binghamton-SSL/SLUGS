@@ -5,7 +5,11 @@
 
 {% block headincludes %}{% unicorn_scripts %}{% endblock %}
 {% block content %}
-
+{% if gig.archived %}
+<div class="my-2 mx-4 flex-1">
+    <div class="my-auto p-2 text-center mx-auto font-bold text-black bg-gray-300 text-mono">This show has been archived. Either it is over or was cancelled.</div>
+</div>
+{% endif %}
 <div class="m-5 mt-10">
     {% ticket gig %}
 </div>
@@ -56,7 +60,7 @@
                     <div class="w-4 text-transparent bg-transparent"><p>.</p></div>
                     {% for loadin in gig.loadin_set.all %}
                     <div class="p-4 mx-auto text-black bg-white rounded-sm">
-                        <h3 class="text-xl">{{loadin.get_department_display}}</h3>
+                        <h3 class="text-xl">{{loadin.get_department_display}} {% if loadin.note %}<sub>{{loadin.note}}</sub>{% endif %}</h3>
                         <div class="flex m-2 text-lg w-max">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -154,7 +158,9 @@
             {% else %}
                 {% if job_formset.employee is not None %}
                 <div class="p-4 my-4 bg-gray-700">
-                    <p class="text-xl">{{job_formset.employee}}</p>
+                    {% with thejob=job_forms|get_item:name%}
+                        <p class="text-xl">{{job_formset.employee}} - <sub>{{thejob.position}}</sub></p>
+                    {% endwith %}
                     <div id="{{job_formset.form.prefix}}">
                         {{ job_formset.form.management_form|crispy }}
                         {% for form in job_formset.form.forms %}
@@ -201,7 +207,17 @@
             {% endfor %}
             <button class="m-2 bg-[#009961] py-4 px-2" type="submit">Update day of show</button>
         </form>
-
+        <div>
+            <div class="flex flex-col p-4 bg-red-300 text-black">
+                <p class="font-bold text-lg">
+                    Ready to go home?
+                </p>
+                <p class="text-md">
+                    Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
+                </p>
+                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+            </div>
+        </div>
     </div>
 </div>
 <style>
@@ -233,11 +249,22 @@
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
 <h1 class="mx-4 text-3xl">My shifts:</h1>
 <div class="flex flex-col p-4 my-4 text-black bg-white">
-{% if not gig.archived %}
-    <div class="w-full">
-        {% unicorn 'gigShift' job=my_job %}
-    </div>
-{% endif %}
+    {% if not gig.archived %}
+        <div class="w-full">
+            {% unicorn 'gigShift' job=my_job %}
+        </div>
+        <div class="m-4">
+            <div class="flex flex-col p-4 bg-red-300 text-black">
+                <p class="font-bold text-lg">
+                    Ready to go home?
+                </p>
+                <p class="text-md">
+                    Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
+                </p>
+                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+            </div>
+        </div>
+    {% endif %}
     {% if not my_job|isEngineer %}
         <div class="flex p-2 my-2 mt-5 space-x-2 bg-blue-300 rounded">
             <div class="my-auto">

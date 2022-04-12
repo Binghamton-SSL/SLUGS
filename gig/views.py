@@ -123,6 +123,7 @@ class workSignup(SLUGSMixin, TemplateView):
                     available_for_signup__lte=timezone.now(),
                     job__employee=None,
                     published=True,
+                    archived=False,
                 ).order_by("-start")
             )
         )

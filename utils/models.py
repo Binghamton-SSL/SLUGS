@@ -239,7 +239,7 @@ class EmployeeFeed(ICalFeed):
             for load_in in your_load_ins.all():
                 items.append(
                     {
-                        "start": load_in.load_in,
+                        "start": load_in.shop_time,
                         "end": load_in.load_out,
                         "title": f"{gig.org} - {gig.name}",
                         "description": "",

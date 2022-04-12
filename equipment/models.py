@@ -118,7 +118,7 @@ class Item(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.barcode is None and self.pk is not None:
-            self.barcode = f"BSSL-{self.pk}-{self.serial_no}"
+            self.barcode = f"BSSL-{self.pk}"
         super().save(*args, **kwargs)
 
     def __str__(self):

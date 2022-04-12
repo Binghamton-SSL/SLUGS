@@ -18,7 +18,7 @@ def getShiftsForEmployee(emp):
     # Office Hours
     for shift in OfficeHours.objects.filter(employee=emp):
         shifts = shifts | shift.shifts.all()
-    shifts.order_by("time_out")[:25]
+    shifts.order_by("time_out")
     return shifts
 
 
@@ -122,86 +122,86 @@ def prepareSummaryData(pp_id):
                                 / 4
                             )
 
-    try:
-        for employee in (
-            Employee.objects.all()
-            .filter(is_active=True)
-            .exclude(groups__name__in=["SA Employee", "Awaiting Paperwork"])
-            .order_by("last_name")
-        ):
-            employees[employee.bnum] = {
-                "bnum": employee.bnum,
-                "name": f"{employee.first_name} {employee.last_name}",
-                "shifts": [],
-                "rates": {},
-                "total_amount": 0.00,
-                "total_hours": 0.00,
-            }
-        generate_data()
-        return {
-            "rates": dict(
-                sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
-            ),
-            "employees": employees,
-            "pay_period": pay_period,
-            "total_sum": total_sum,
-            "total_hours": total_hours,
+    # try:
+    #     for employee in (
+    #         Employee.objects.all()
+    #         .filter(is_active=True)
+    #         .exclude(groups__name__in=["SA Employee", "Awaiting Paperwork"])
+    #         .order_by("last_name")
+    #     ):
+    #         employees[employee.bnum] = {
+    #             "bnum": employee.bnum,
+    #             "name": f"{employee.first_name} {employee.last_name}",
+    #             "shifts": [],
+    #             "rates": {},
+    #             "total_amount": 0.00,
+    #             "total_hours": 0.00,
+    #         }
+    #     generate_data()
+    #     return {
+    #         "rates": dict(
+    #             sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+    #         ),
+    #         "employees": employees,
+    #         "pay_period": pay_period,
+    #         "total_sum": total_sum,
+    #         "total_hours": total_hours,
+    #     }
+    # except:
+    #     try:
+    #         total_hours = 0
+    #         total_sum = 0
+    #         rates = {}
+    #         employees = {}
+    #         for employee in (
+    #             Employee.objects.all()
+    #             .filter(is_active=True)
+    #             .exclude(groups__name__in=["SA Employee"])
+    #             .order_by("last_name")
+    #         ):
+    #             employees[employee.bnum] = {
+    #                 "bnum": employee.bnum,
+    #                 "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
+    #                 "shifts": [],
+    #                 "rates": deepcopy(rates),
+    #                 "total_amount": 0.00,
+    #                 "total_hours": 0.00,
+    #             }
+    #         generate_data()
+    #         return {
+    #             "rates": dict(
+    #                 sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+    #             ),
+    #             "employees": employees,
+    #             "pay_period": pay_period,
+    #             "total_sum": total_sum,
+    #             "total_hours": total_hours,
+    #         }
+    #     except:
+    total_hours = 0
+    total_sum = 0
+    rates = {}
+    employees = {}
+    for employee in (
+        Employee.objects.filter(timesheet__paid_during=pay_period)
+        .exclude(groups__name__in=["SA Employee"])
+        .order_by("last_name")
+    ):
+        employees[employee.bnum] = {
+            "bnum": employee.bnum,
+            "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
+            "shifts": [],
+            "rates": deepcopy(rates),
+            "total_amount": 0.00,
+            "total_hours": 0.00,
         }
-    except:
-        try:
-            total_hours = 0
-            total_sum = 0
-            rates = {}
-            employees = {}
-            for employee in (
-                Employee.objects.all()
-                .filter(is_active=True)
-                .exclude(groups__name__in=["SA Employee"])
-                .order_by("last_name")
-            ):
-                employees[employee.bnum] = {
-                    "bnum": employee.bnum,
-                    "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
-                    "shifts": [],
-                    "rates": deepcopy(rates),
-                    "total_amount": 0.00,
-                    "total_hours": 0.00,
-                }
-            generate_data()
-            return {
-                "rates": dict(
-                    sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
-                ),
-                "employees": employees,
-                "pay_period": pay_period,
-                "total_sum": total_sum,
-                "total_hours": total_hours,
-            }
-        except:
-            total_hours = 0
-            total_sum = 0
-            rates = {}
-            employees = {}
-            for employee in (
-                Employee.objects.filter(timesheet__paid_during=pay_period)
-                .exclude(groups__name__in=["SA Employee"])
-                .order_by("last_name")
-            ):
-                employees[employee.bnum] = {
-                    "bnum": employee.bnum,
-                    "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
-                    "shifts": [],
-                    "rates": deepcopy(rates),
-                    "total_amount": 0.00,
-                    "total_hours": 0.00,
-                }
-            generate_data()
-            return {
-                "rates": dict(
-                    sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
-                ),
-                "employees": employees,
-                "pay_period": pay_period,
-                "total_sum": total_sum,
-                "total_hours": total_hours,
-            }
+    generate_data()
+    return {
+        "rates": dict(
+            sorted(rates.items(), key=lambda rate: rate[1][0].hourly_rate)
+        ),
+        "employees": employees,
+        "pay_period": pay_period,
+        "total_sum": total_sum,
+        "total_hours": total_hours,
+    }

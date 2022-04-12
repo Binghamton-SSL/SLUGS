@@ -39,7 +39,7 @@
         <div class="flex flex-col mx-auto w-max md:flex-row">
             {% for loadin in gig.loadin_set.all %}
                 <div class="p-4 m-2 border-2 border-black border-solid rounded w-max">
-                    <p class="text-lg font-bold">{{loadin.get_department_display}}</p>
+                    <p class="text-lg font-bold">{{loadin.get_department_display}} {% if loadin.note %}<sub>{{loadin.note}}</sub>{% endif %}</p>
                     <div class="flex space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 my-auto mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -81,7 +81,7 @@
     {% endfor %}
     <div class="p-4 my-2 text-black bg-white">
         <h2>
-            As a reminder. You may sign  up for the following jobs.
+            As a reminder. You may sign up for the following jobs.
         </h2>
         <div >
             {% for group in request.user.groups.all %}

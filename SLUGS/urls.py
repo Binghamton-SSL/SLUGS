@@ -26,6 +26,7 @@ urlpatterns = [
     path("tinymce/", include("tinymce.urls")),
     path("__debug__/", include(debug_toolbar.urls)),
     path("hijack/", include("hijack.urls")),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path("admin/", admin.site.urls),
     path(
         "media/forms/<path:relative_path>", FormDownload.as_view(), name="download_form"

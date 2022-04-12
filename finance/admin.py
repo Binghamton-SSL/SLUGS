@@ -239,10 +239,15 @@ class TimeSheetInline(admin.StackedInline):
 
 @admin.register(PayPeriod)
 class PayPeriodAdmin(admin.ModelAdmin):
-    readonly_fields = ["get_summary", "associated_employees", "associated_shifts"]
+    readonly_fields = ["get_summary", "timesheets_for_this_pay_period", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
     inlines = [TimeSheetInline]
+
+    def get_form(self, request, obj=None, **kwargs):
+        help_texts = {'timesheets_for_this_pay_period': 'All timesheets that are being PAID during this pay period. This includes timesheets not listed below since they were created during another pay period. Timesheets from another pay period will be post-marked with the timeframe of their original pay period'}
+        kwargs.update({'help_texts': help_texts})
+        return super(PayPeriodAdmin, self).get_form(request, obj, **kwargs)
 
 
 @admin.register(CannedNote)
