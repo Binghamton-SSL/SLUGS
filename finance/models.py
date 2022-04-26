@@ -345,6 +345,10 @@ class Shift(models.Model):
         "PayPeriod", on_delete=models.PROTECT, null=True, blank=True
     )
 
+    def clean(self, *args, **kwargs):
+        # add custom validation here
+        super().clean(*args, **kwargs)
+
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
         if self.paid_at is None or self.paid_at == 0.00:

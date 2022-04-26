@@ -41,6 +41,12 @@
 * Choose employees to send staffing email to (defaults to all)
 * Booking page: Show gigs without estimate and highlight those less than 3 weeks out
 * Add validation to Jobs in addition to Systems on Gigs to ensure load in/out
+* Add Employee ID module
+* Add search to Timesheet admin
+* Update SA billing summary to include estimates where payment date is set to specific month/year
+* Add DjangoQL search to Job Admin
+* Add BSSL Bingo Board
+* Add gig notes to staffing email
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box

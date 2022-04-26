@@ -76,7 +76,11 @@
     <p class="font-mono text-xs text-gray-300"><span class="font-stencil">S.L.U.G.S</span> is created for the exclusive use of BSSL</p>
     <p class="text-xs text-gray-600">We use Google Analytics to monitor usage and make sure all is well. <br> If you're worried about your privacy contact <a href="mailto:slugs@joebabbitt.com" class="underline">Joe</a></p>
     <p class="text-xs text-gray-700">S.L.U.G.S. version: {% settings_value "VERSION" %} - {% settings_value "BUILD" %}</p>
-    <p class="text-xs text-gray-700">Debug Info: UID - {{request.user.pk}}</p>
+    <div class="text-xs text-gray-700">
+        <p>Debug Info:</p>
+        <p>UID - {{request.user.pk}}</p>
+        <p>User-UID - {{user.pk}}</p>
+    </div>
 </footer>
 {% endblock %}
 </html>

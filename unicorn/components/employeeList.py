@@ -17,14 +17,15 @@ class EmployeelistView(UnicornView):
         super().__init__(**kwargs)
         self.show_id = kwargs.get("show")
         self.my_job = kwargs.get("my_job")
-        gig = Gig.objects.get(pk=self.show_id)
-        self.depts = list(
-            set(
-                [
-                    (dept.department, dept.get_department_display())
-                    for dept in gig.job_set.all()
-                ]
+        if self.show_id is not None:
+            gig = Gig.objects.get(pk=self.show_id)
+            self.depts = list(
+                set(
+                    [
+                        (dept.department, dept.get_department_display())
+                        for dept in gig.job_set.all()
+                    ]
+                )
             )
-        )
-        self.selectedDept = self.depts[0][0] if len(self.depts) > 0 else None
-        self.jobs = Job.objects.filter(gig=self.show_id, department=self.selectedDept)
+            self.selectedDept = self.depts[0][0] if len(self.depts) > 0 else None
+            self.jobs = Job.objects.filter(gig=self.show_id, department=self.selectedDept)

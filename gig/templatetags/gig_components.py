@@ -8,6 +8,10 @@ register = template.Library()
 def ticket(gig):
     return locals()
 
+@register.inclusion_tag("gig/components/bingo.html")
+def bingo():
+    return locals()
+
 
 @register.filter
 def duration(td):

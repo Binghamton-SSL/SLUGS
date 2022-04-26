@@ -348,10 +348,20 @@ class saBillingSummary(SLUGSMixin, TemplateView):
         month = kwargs["month"]
         year = kwargs["year"]
         estimates = Estimate.objects.filter(
+            Q(
             gig__start__month=month,
             gig__start__year=year,
             billing_contact__organization__SA_account_num__isnull=False,
             gig__published=True,
+            payment_due=None
+            )
+            |
+            Q(
+            payment_due__month=month,
+            payment_due__year=year,
+            billing_contact__organization__SA_account_num__isnull=False,
+            gig__published=True,
+            )
         ).order_by("billing_contact__organization")
         groups = {}
         grand_total = decimal.Decimal(0)

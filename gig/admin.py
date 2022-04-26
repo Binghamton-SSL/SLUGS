@@ -134,6 +134,7 @@ class JobAdmin(admin.ModelAdmin):
 
 
 @admin.register(JobInterest)
-class JobInterestAdmin(admin.ModelAdmin):
+class JobInterestAdmin(DjangoQLSearchMixin ,admin.ModelAdmin):
+    djangoql_completion_enabled_by_default = False
     search_fields = ["employee__first_name", "employee__last_name"]
     pass
