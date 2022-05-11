@@ -226,6 +226,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
 @admin.register(TimeSheet)
 class TimeSheetAdmin(admin.ModelAdmin):
+    readonly_fields = ["printout_link"]
     search_fields = ["employee__first_name", "employee__last_name"]
     pass
 

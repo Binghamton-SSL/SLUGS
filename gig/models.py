@@ -20,6 +20,9 @@ DEPARTMENTS = [
 
 
 class Gig(models.Model):
+    """
+    A BSSL Show.
+    """
     name = models.CharField(max_length=200)
     notes = HTMLField(
         blank=True,
@@ -78,6 +81,9 @@ class Gig(models.Model):
 
 
 class LoadIn(models.Model):
+    """
+    A Load in for a show. Contains: the time employees should report to the shop (Shop Time), the time BSSL is to arrive at the venue (Load in time) and the time BSSL is to be done unpacking and go home (Load out time).
+    """
     gig = models.ForeignKey(Gig, on_delete=models.CASCADE)
     department = models.CharField(choices=DEPARTMENTS, max_length=1)
     note = models.CharField(max_length=128, blank=True, null=True, help_text="Use this only when further explaintation is needed as to which shift this loadin is for.")
@@ -90,6 +96,9 @@ class LoadIn(models.Model):
 
 
 class SystemInstance(models.Model):
+    """
+    An instance of a :model:`equipment.System` applied to a :model:`gig.Gig`. Contains the addons and employees for this show.
+    """
     system = models.ForeignKey("equipment.System", on_delete=models.PROTECT)
     addons = models.ManyToManyField(
         "equipment.SystemAddon", through="gig.AddonInstance", blank=True
@@ -106,6 +115,9 @@ class SystemInstance(models.Model):
 
 
 class AddonInstance(models.Model):
+    """
+    An instance of a :model:`equipment.SystemAddon` applied to a :model:`gig.Gig`. Contains the addons and employees for this show.
+    """
     addon = models.ForeignKey("equipment.SystemAddon", on_delete=models.CASCADE)
     systemInstance = models.ForeignKey("gig.SystemInstance", on_delete=models.CASCADE)
     description = models.CharField(max_length=200, blank=True, null=True)
@@ -117,6 +129,9 @@ class AddonInstance(models.Model):
 
 
 class Job(models.Model):
+    """
+    A Job that must be worked as part of a :model:`gig.Gig`.
+    """
     gig = models.ForeignKey(Gig, on_delete=models.CASCADE)
     employee = models.ForeignKey(
         employee.Employee, on_delete=models.SET_NULL, null=True, blank=True
@@ -134,6 +149,9 @@ class Job(models.Model):
 
 
 class JobInterest(models.Model):
+    """
+    Interest from an employee to work a :model:`gig.Job`.
+    """
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     employee = models.ForeignKey(employee.Employee, on_delete=models.CASCADE)
     submitted = models.DateTimeField(auto_now_add=True)

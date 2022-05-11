@@ -126,6 +126,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="{% static 'js/jquery.formset.js' %}" type="text/javascript"> </script>
+
 {% if my_job|isEngineer and not gig.archived or request.user|has_group:"Manager" %}
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
     <h1 class="mx-4 text-3xl"> Day of Show </h1>
@@ -149,14 +150,14 @@
                         </div>
                         <p>
                             Broken equipment should always be reported, but this is not the place! Hit the "Report issue" link
-                            under to the broken system.
+                            under the broken system in question.
                         </p>
                     </div>
                     {% crispy forms.show_notes %}
                 </div>
             </div>
             {% else %}
-                {% if job_formset.employee is not None %}
+                {% if job_formset.employee != None %}
                 <div class="p-4 my-4 bg-gray-700">
                     {% with thejob=job_forms|get_item:name%}
                         <p class="text-xl">{{job_formset.employee}} - <sub>{{thejob.position}}</sub></p>
@@ -247,53 +248,60 @@
 </style>
 {% elif my_job %}
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
-<h1 class="mx-4 text-3xl">My shifts:</h1>
-<div class="flex flex-col p-4 my-4 text-black bg-white">
-    {% if not gig.archived %}
-        <div class="w-full">
-            {% unicorn 'gigShift' job=my_job %}
-        </div>
-        <div class="m-4">
-            <div class="flex flex-col p-4 bg-red-300 text-black">
-                <p class="font-bold text-lg">
-                    Ready to go home?
-                </p>
-                <p class="text-md">
-                    Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
-                </p>
-                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+    <h1 class="mx-4 text-3xl">My shifts:</h1>
+    <div class="flex flex-col p-4 my-4 text-black bg-white">
+        {% for a_job in my_jobs %}
+        {% if not gig.archived %}
+            <div class="w-full">
+                {% unicorn 'gigShift' job=a_job %}
+            </div>
+        {% endif %}
+        {% endfor %}
+        {% if not gig.archived %}
+            <div class="m-4">
+                <div class="flex flex-col p-4 bg-red-300 text-black">
+                    <p class="font-bold text-lg">
+                        Ready to go home?
+                    </p>
+                    <p class="text-md">
+                        Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
+                    </p>
+                    <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+                </div>
+            </div>
+        {% endif %}
+        {% if not my_job|isEngineer %}
+            <div class="flex p-2 my-2 mt-5 space-x-2 bg-blue-300 rounded">
+                <div class="my-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="">Something not look right? Contact the engineer for this show and they'll be able to make any changes required through their version of this page.</p>
+            </div>
+        {% endif %}
+        {% for a_job in my_jobs %}
+        <h3 class="text-center pt-4 text-xl">{{a_job.position}}</h3>
+        {% for shift in a_job.shifts.all %}
+        <div class="flex m-4 border-2 border-black rounded">
+            <div class="flex flex-col ml-4 mr-auto">
+                <span>{{shift.time_in}}</span>
+                <span>{{shift.time_out}}</span>
+            </div>
+            <div class="flex flex-col ml-auto mr-4">
+                {% if shift.time_out %}
+                <span>{{shift.total_time|duration}}</span>
+                <span>${{shift.cost|floatformat:2}}</span>
+                {% else %}
+                <span>Ongoing</span>
+                <span>$TBD</span>
+                {% endif %}
             </div>
         </div>
-    {% endif %}
-    {% if not my_job|isEngineer %}
-        <div class="flex p-2 my-2 mt-5 space-x-2 bg-blue-300 rounded">
-            <div class="my-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <p class="">Something not look right? Contact the engineer for this show and they'll be able to make any changes required through their version of this page.</p>
-        </div>
-    {% endif %}
-    {% for shift in my_job.shifts.all %}
-    <div class="flex m-4 border-2 border-black rounded">
-        <div class="flex flex-col ml-4 mr-auto">
-            <span>{{shift.time_in}}</span>
-            <span>{{shift.time_out}}</span>
-        </div>
-        <div class="flex flex-col ml-auto mr-4">
-            {% if shift.time_out %}
-            <span>{{shift.total_time|duration}}</span>
-            <span>${{shift.cost|floatformat:2}}</span>
-            {% else %}
-            <span>Ongoing</span>
-            <span>$TBD</span>
-            {% endif %}
-        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>   
     </div>
-    {% endfor %}
-</div>   
-</div>
 {% endif %}
 {% if my_job %}
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">

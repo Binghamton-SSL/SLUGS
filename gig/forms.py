@@ -86,6 +86,12 @@ class GigJobChangeForm(BaseInlineFormSet):
         super(GigJobChangeForm, self).clean()
         if self.is_valid():
             for form in self.cleaned_data:
+                # Make sure position has hourly rate
+                if form['position'].hourly_rate is None:
+                    raise ValidationError(
+                        f"This position does not have an associated hourly rate. Please add one or choose another position."
+                    )
+                # Make sure dept of job has load in
                 dept = form["department"]
                 valid_depts = self.instance.gig.__loadin_depts__
                 if dept not in valid_depts and not form["DELETE"]:

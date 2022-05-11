@@ -14,6 +14,9 @@ from datetime import datetime
 
 # Create your models here.
 class Notification(models.Model):
+    """
+    A Notification that is displayed on the homepage. Type impacts the color of the message: Success->Green, Warning->Yellow, Danger/Error->Red, Normal->Gray.
+    """
     MESSAGE_TYPES = [
         ("normal bg-white text-black", "Normal"),
         ("bg-green-500", "Success"),

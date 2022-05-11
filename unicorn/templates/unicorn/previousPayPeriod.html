@@ -2,7 +2,7 @@
 
 <div class="p-4 text-black bg-white rounded">
     Select Pay Period:
-    <select class="my-4 ml-4" unicorn:model="selected_pp">
+    <select class="my-4 w-full" unicorn:model="selected_pp">
         <option value="-1"></option>
         {% for option in available_pay_period.all%}
         <option value="{{option.pk}}">{{option}}</option>

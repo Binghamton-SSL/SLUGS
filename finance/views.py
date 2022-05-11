@@ -366,14 +366,14 @@ class saBillingSummary(SLUGSMixin, TemplateView):
         groups = {}
         grand_total = decimal.Decimal(0)
         for e in estimates:
-            if e.billing_contact.organization.name not in groups:
+            if e.billing_contact.organization not in groups:
                 groups[e.billing_contact.organization] = {
                     "estimates": [e],
                     "total": decimal.Decimal(e.outstanding_balance),
                 }
             else:
-                groups[e.billing_contact.organization.name]["estimates"].append(e)
-                groups[e.billing_contact.organization.name][
+                groups[e.billing_contact.organization]["estimates"].append(e)
+                groups[e.billing_contact.organization][
                     "total"
                 ] += e.outstanding_balance
             grand_total += e.outstanding_balance
@@ -417,16 +417,21 @@ class FinancialOverview(SLUGSMixin, TemplateView):
         most_recent_pay_period = PayPeriod.objects.filter(end__lte=datetime.now()).order_by("end").last()
         shifts = Shift.objects.filter(
             Q(time_in__gte=most_recent_pay_period.start)
-            & Q(time_out__lte=most_recent_pay_period.end + timezone.timedelta(days=1))
-        ).order_by("-time_out")
+            & Q(time_in__lte=most_recent_pay_period.end + timezone.timedelta(days=1))
+        ).order_by("processed", "-time_out")
         most_recent_pay_period.shifts.set(shifts)
         most_recent_pay_period.save()
         shifts_hours = shifts.aggregate(Sum("total_time"))
         shifts_price = shifts.aggregate(Sum("cost"))
 
+        unsigned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=True)
+        unprocessed_tms = TimeSheet.objects.filter(~Q(signed=None) & Q(processed=None))
+
         self.added_context["most_recent_pay_period"] = most_recent_pay_period
         self.added_context["shifts"] = shifts
         self.added_context["shifts_hours"] = shifts_hours
         self.added_context["shifts_price"] = shifts_price
+        self.added_context["unsigned_tms"] = unsigned_tms
+        self.added_context["unprocessed_tms"] = unprocessed_tms
 
         return super().dispatch(request, *args, **kwargs)

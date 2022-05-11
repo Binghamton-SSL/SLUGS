@@ -16,6 +16,9 @@ from utils.models import PricingMixin
 
 
 class Wage(PricingMixin, models.Model):
+    """
+    A pay rate that is earned by an employee. These are tracked over time.
+    """
     name = models.CharField(max_length=64)
 
     def __init__(self, *args, **kwargs):
@@ -92,6 +95,9 @@ class Pricing(models.Model):
 
 
 class HourlyRate(models.Model):
+    """
+    A pay rate for a particular time period
+    """
     wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
     hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
     date_active = models.DateField(default=date.today)
@@ -107,6 +113,9 @@ class BasePricing(Pricing):
 
 
 class SystemPricing(BasePricing):
+    """
+    The pricing for a system. Tracked over time
+    """
     system = models.ForeignKey("equipment.System", on_delete=models.CASCADE)
 
     def clean(self, *args, **kwargs):
@@ -115,6 +124,9 @@ class SystemPricing(BasePricing):
 
 
 class SystemAddonPricing(BasePricing):
+    """
+    The pricing for a system addon. Tracked over time
+    """
     addon = models.ForeignKey("equipment.SystemAddon", on_delete=models.CASCADE)
     price_per_hour_for_load_in_out_ONLY = models.DecimalField(
         max_digits=8, decimal_places=2, default=0.00
@@ -126,6 +138,9 @@ class SystemAddonPricing(BasePricing):
 
 
 class Fee(PricingMixin, models.Model):
+    """
+    A predefined fee. Name is from a deprecated version of fees on Gigs.
+    """
     def __init__(self, *args, **kwargs):
         self.pricing_set = self.feepricing_set
         super().__init__(*args, **kwargs)
@@ -141,6 +156,9 @@ class Fee(PricingMixin, models.Model):
 
 
 class FeePricing(Pricing):
+    """
+    The pricing for a Free over time.
+    """
     fee = models.ForeignKey(Fee, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
@@ -151,6 +169,9 @@ class FeePricing(Pricing):
 
 
 class OneTimeFee(models.Model):
+    """
+    A Fee as applied to a particular Estimate.
+    """
     prepared_fee = models.ForeignKey(
         Fee,
         on_delete=models.PROTECT,
@@ -186,6 +207,9 @@ class OneTimeFee(models.Model):
 
 
 class Estimate(models.Model):
+    """
+    An Estimate generated for a Client of a BSSL Gig. Invoices are also generated from Estimates.
+    """
     INVOICE_STATUSES = [
         ("E", "Estimate"),
         ("B", "Booked"),
@@ -315,6 +339,9 @@ class Estimate(models.Model):
 
 
 class CannedNote(models.Model):
+    """
+    A predefined note commonly applied to an Estimate.
+    """
     name = models.CharField(max_length=100)
     ordering = models.PositiveIntegerField(default=0)
     note = HTMLField()
@@ -324,6 +351,9 @@ class CannedNote(models.Model):
 
 
 class Shift(models.Model):
+    """
+    A shift worked by a BSSL employee. Linked to a Job, Training, or Office Hour object
+    """
     time_in = models.DateTimeField()
     time_out = models.DateTimeField(null=True, blank=True)
     total_time = models.DurationField(default=timedelta())
@@ -351,7 +381,7 @@ class Shift(models.Model):
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
-        if self.paid_at is None or self.paid_at == 0.00:
+        if ((self.paid_at is None or self.paid_at == 0.00) and self.content_object is not None):
             self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(
                 self.time_in
             ).hourly_rate
@@ -386,6 +416,9 @@ Group.add_to_class("description", models.TextField(blank=True, null=True))
 
 
 class TimeSheet(models.Model):
+    """
+    A timesheet generated as a result of working during a given pay period. 
+    """
     def user_dir_path(instance, filename):
         fileName, fileExtension = os.path.splitext(filename)
         return f"uploads/{instance.employee.bnum}/{instance.employee.bnum}_{instance.employee.first_name[0].upper()}{instance.employee.last_name}_TimeSheet_{instance.pay_period.start}_{instance.pay_period.end}{fileExtension}"  # noqa
@@ -416,6 +449,12 @@ class TimeSheet(models.Model):
                 f"</div><br>"
             )
         )
+    
+    def get_admin_url(self):
+        return reverse(
+            "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+            args=(self.id,),
+        )
 
     def save(self, *args, **kwargs):
         if self.paid_during is None:
@@ -427,6 +466,9 @@ class TimeSheet(models.Model):
 
 
 class PayPeriod(models.Model):
+    """
+    A Pay Period during which employees are paid for their work.
+    """
     start = models.DateField()
     end = models.DateField()
     payday = models.DateField()
@@ -444,7 +486,7 @@ class PayPeriod(models.Model):
 
     def associated_shifts(self):
         ret = ""
-        for shift in self.shifts.all():
+        for shift in self.shifts.all().order_by("processed"):
             ret += f"<div style='margin: .25rem 0 .25rem 0'><a href='{shift.get_admin_url()}'>{shift}</a></div><br>"
         return format_html(ret)
 
@@ -469,7 +511,7 @@ class PayPeriod(models.Model):
             Shift.objects.filter(
                 (
                     Q(time_in__gte=self.start)
-                    & Q(time_out__lte=self.end + timezone.timedelta(days=1))
+                    & Q(time_in__lte=self.end + timezone.timedelta(days=1))
                     & Q(override_pay_period=None)
                 )
                 | Q(override_pay_period=self)
@@ -495,6 +537,9 @@ class PayPeriod(models.Model):
 
 
 class Payment(models.Model):
+    """
+    A Payment made by a group on their invoice.
+    """
     PAYMENT_TYPES = [
         ("C", "Cash"),
         ("H", "Check"),

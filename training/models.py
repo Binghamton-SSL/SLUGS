@@ -8,6 +8,9 @@ from django.utils import timezone
 
 # Create your models here.
 class Training(models.Model):
+    """
+    A training conducted by Managerial staff for employees.
+    """
     date = models.DateTimeField()
     dept = models.CharField(max_length=1, choices=DEPARTMENTS)
     location = models.ForeignKey(
@@ -29,6 +32,9 @@ class Training(models.Model):
 
 
 class Trainee(models.Model):
+    """
+    An employee who participates in a training. Position defaults to New Hire
+    """
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
     training = models.ForeignKey("training.Training", on_delete=models.CASCADE)
     position = models.ForeignKey(
@@ -41,6 +47,9 @@ class Trainee(models.Model):
 
 
 class TrainingRequest(models.Model):
+    """
+    A request from an employee for Training on a particular system
+    """
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
     systems = models.ManyToManyField("equipment.System", blank=True)
     notes = models.TextField(

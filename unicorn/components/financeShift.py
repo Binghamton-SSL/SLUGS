@@ -13,7 +13,8 @@ class FinanceshiftView(UnicornView):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.has_parent = True if self.parent is not None else False
-        self.shift = Shift.objects.get(pk=kwargs["shift"].pk)
+        if "shift" in kwargs:
+            self.shift = Shift.objects.get(pk=kwargs["shift"].pk)
 
     def accept(self):
         shift = Shift.objects.get(pk=self.shift.pk)

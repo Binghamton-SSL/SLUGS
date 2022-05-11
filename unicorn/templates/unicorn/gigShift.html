@@ -1,6 +1,7 @@
-{% if job is not None %}
+{% if job != None %}
 {% if reload %}<script>location.reload()</script>{% endif %}
 <div class="w-full">
+    <h3 class="text-center pt-4 text-xl">{{job.position}}</h3>
     {% if job.shifts.last.time_out or job.shifts.count == 0%}
     <button unicorn:click="clock_in" class="bg-[#009961] w-full px-8 py-4 rounded" >Clock in</button>
     {% elif job.shifts.last.time_in %}

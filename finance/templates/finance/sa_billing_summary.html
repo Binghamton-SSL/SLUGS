@@ -77,14 +77,14 @@
                             {% for e in details.estimates %}
                             <tr>
                                 <td>&nbsp;&nbsp;&nbsp;&nbsp;{{e.gig.name}}</td>
-                                <td style="border-bottom-width: 1px;" class="border-black">{{e.outstanding_balance}}</td>
+                                <td>{{e.outstanding_balance}}</td>
                             </tr>
                             {% endfor %}
                             <tr>
                                 <td>
                                     Total {{group.name}} (#{{group.SA_account_num}})
                                 </td>
-                                <td class="text-right">
+                                <td style="border-top-width: 1px;" class="text-right border-black">
                                     {{details.total}}
                                 </td>
                             </tr>

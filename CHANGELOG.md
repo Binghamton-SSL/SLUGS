@@ -69,6 +69,12 @@ BUG FIXES:
     * Add all active rates to new finance summary page
     * Estimate would show first load out time, not last
     * Validation for overlapping shifts would only apply once a shift is entered. Locking the shift in.
+    * Allow for an employee to work multiple Jobs in a shift and clock in/out appropriately 
+    * SA Billing summary now sorted by group entry, not account #
+    * Fix PayPeriod issue where shifts overlapping periods were unassigned.
+    * Fix phantom login bug
+    * Fix bug where FinanceShift crashed out (gracefully handled)
+    * Sign Timesheet widget now fades background color to provide greater visual clarity
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

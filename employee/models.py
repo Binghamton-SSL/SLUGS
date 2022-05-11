@@ -49,6 +49,10 @@ class EmployeeManager(BaseUserManager):
 
 
 class Employee(AbstractUser):
+    """
+    Employees that work or have worked for Binghamton Sound, Staging, and Lighting. Contains basic contact and employment info. 
+    An employee's outstanding :model:`employee.paperwork` is also available.
+    """
     username = None
     email = models.EmailField(_("email address"), unique=True)
     preferred_name = models.CharField(
@@ -108,6 +112,9 @@ class Employee(AbstractUser):
 
 
 class OfficeHours(models.Model):
+    """
+    Managerial Office Hours recorded outside of shows.
+    """
     position = models.ForeignKey(
         Group, default="Manager", to_field="name", on_delete=models.PROTECT
     )
@@ -122,6 +129,10 @@ class OfficeHours(models.Model):
 
 
 class PaperworkForm(models.Model):
+    """
+    All :model:`employee.paperwork` documents from every employee in order of upload date *(not including timesheets)*. 
+    You also have the ability to add paperwork forms to individuals via this model. 
+    """
     def user_dir_path(instance, filename):
         fileName, fileExtension = os.path.splitext(filename)
         return f"uploads/{instance.employee.bnum}/{instance.employee.bnum}_{instance.employee.first_name[0].upper()}{instance.employee.last_name}_{str(instance.form)}{fileExtension}"  # noqa
@@ -142,6 +153,10 @@ class PaperworkForm(models.Model):
 
 
 class Paperwork(models.Model):
+    """
+    Basic paperwork model used in conjunction with :model:`employee.PaperworkForm` to send out paperwork to employees. 
+    Basic info about paperwork to be distributed.
+    """
     form_name = models.CharField(max_length=256)
     form_pdf = models.FileField(upload_to="forms/")
     uploaded = models.DateTimeField(auto_now_add=True)

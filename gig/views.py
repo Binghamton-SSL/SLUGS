@@ -58,14 +58,16 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         jobs = {}
         self.added_context["helper"] = shiftFormHelper()
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
-        if not self.added_context["gig"].published:
+        if not self.added_context["gig"].published or not request.user.is_authenticated:
             raise PermissionDenied()
         try:
-            self.added_context["my_job"] = (
-                Job.objects.get(employee=request.user, gig=self.added_context["gig"])
-                if request.user.is_authenticated
-                else ""
-            )
+            self.added_context["my_jobs"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"])
+            if len(self.added_context["my_jobs"]) > 1:
+                for job in self.added_context["my_jobs"]:
+                    self.added_context["my_job"] = job if "engineer" in str(job.position).lower() else None
+                self.added_context["my_job"] = self.added_context["my_job"] if self.added_context["my_job"] else Job.objects.filter(employee=request.user, gig=self.added_context["gig"]).first()
+            else:
+                self.added_context["my_job"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"]).first()
         except Exception:
             self.added_context["my_job"] = False
         for job in self.added_context["gig"].job_set.all():
@@ -191,7 +193,7 @@ class SendStaffingEmail(SLUGSMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["object_id"])
-        self.added_context["request"] = request
+        self.added_context["email_request"] = request
         template = get_template("gig/components/staff_email_template.html")
         self.added_context["email_template"] = template.render(self.added_context)
         return super().dispatch(request, *args, **kwargs)

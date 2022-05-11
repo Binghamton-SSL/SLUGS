@@ -10,6 +10,9 @@ from utils.models import PricingMixin
 
 # Create your models here.
 class Category(models.Model):
+    """
+    A Category of Equipment at BSSL
+    """
     name = models.CharField(max_length=200)
 
     def __str__(self):
@@ -20,6 +23,9 @@ class Category(models.Model):
 
 
 class Equipment(models.Model):
+    """
+    A piece of Equipment at BSSL. May have multiple instances called Items.
+    """
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     brand = models.CharField(max_length=200, blank=True, null=True)
@@ -41,6 +47,9 @@ class Equipment(models.Model):
 
 
 class System(PricingMixin, models.Model):
+    """
+    A BSSL system rented out to a client
+    """
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
@@ -55,6 +64,9 @@ class System(PricingMixin, models.Model):
 
 
 class SystemAddon(PricingMixin, models.Model):
+    """
+    A BSSL system addon rented out to a client
+    """
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=1024, blank=True, null=True)
     department = models.CharField(max_length=1, choices=DEPARTMENTS)
@@ -68,6 +80,9 @@ class SystemAddon(PricingMixin, models.Model):
 
 
 class BrokenEquipmentReport(models.Model):
+    """
+    A report filed by an Employee during a Gig
+    """
     CASE_TYPES = [
         ("U", "Unread"),
         ("A", "Acknowledged"),
@@ -88,6 +103,9 @@ class BrokenEquipmentReport(models.Model):
 
 # new models
 class Item(models.Model):
+    """
+    An instance of a piece of Equipment BSSL owns
+    """
     ITEM_STATUS = [
         ("R", "In Box/Reserves"),
         ("O", "Operational"),
@@ -126,6 +144,9 @@ class Item(models.Model):
 
 
 class ItemRelationship(models.Model):
+    """
+    The relationship between an item and another.
+    """
     parent = models.ForeignKey(
         Item, on_delete=models.CASCADE, related_name="parent_item"
     )
@@ -136,6 +157,9 @@ class ItemRelationship(models.Model):
 
 
 class ServiceRecord(models.Model):
+    """
+    A service record on a piece of equipment
+    """
     name = models.CharField(max_length=200)
     date_created = models.DateField(auto_now_add=True)
     date_last_modified = models.DateField(auto_now=True)
