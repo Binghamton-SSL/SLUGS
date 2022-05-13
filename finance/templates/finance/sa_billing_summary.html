@@ -1,0 +1,138 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BSSL SA Billing Summary</title>
+
+    {% tailwind_css %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+
+</head>
+
+<body>
+    <table class="w-full border-0">
+        <thead>
+            <tr>
+                <td>
+                    <div class="relative flex w-full">
+                        <div class="absolute">
+                            <p>{% now "h:i A" %}</p>
+                            <p>{% now "m/d/y" %}</p>
+                            <p>Accrual Basis</p>
+                        </div>
+                        <div class="mx-auto font-bold text-center">
+                            <h2 class="text-xl">BSSL</h2>
+                            <h2 class="text-xl">SA Group Billing Summary</h2>
+                            <h4>{{month_name}} {{year}}</h4>
+                        </div>
+                    </div>
+                    <hr>
+                </td>
+            </tr>
+        </thead>
+        <tbody class="w-full">
+            <tr>
+                <td>
+                    <table class="mx-auto mt-5 text-sm border-0" style="width: 75%">
+                        <colgroup>
+                            <col width="75%">
+                            <col width="25%">
+                        </colgroup>
+                        {% for group, details in groups.items %}
+                        <tbody class="dont_break">
+                            <tr>
+                                <td>
+                                    <p>
+                                        {{group.name}} (#{{group.SA_account_num}})
+                                    </p>
+                                </td>
+                            </tr>
+                            {% for e in details.estimates %}
+                            <tr>
+                                <td>&nbsp;&nbsp;&nbsp;&nbsp;{{e.gig.name}}</td>
+                                <td>{{e.outstanding_balance}}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>
+                                    Total {{group.name}} (#{{group.SA_account_num}})
+                                </td>
+                                <td style="border-top-width: 1px;" class="text-right border-black">
+                                    {{details.total}}
+                                </td>
+                            </tr>
+                        </tbody>
+                        {% endfor %}
+                        <tbody>
+                        <tr>
+                            <td>
+                                TOTAL
+                            </td>
+                            <td style="border-bottom: double" class="border-b-2 border-b-black">
+                                {{grand_total}}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+<style>
+    @page {
+        size: letter;
+        counter-increment: page;
+    }
+    @media print {
+        .dont_break {
+            break-inside: avoid;
+        }
+
+    body {
+        width: 8.5in;
+        height: 11in;
+        background-color: white;
+    }
+
+    hr {
+        border-color: black;
+        border-top-width: 4px;
+    }
+</style>
+{% print_this %}
+
+</html>

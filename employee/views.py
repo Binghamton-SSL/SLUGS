@@ -14,9 +14,11 @@ from django.urls import reverse_lazy
 from django.contrib.auth.models import Group
 from django.db.models import Sum
 from django.core.exceptions import PermissionDenied
+from django.contrib.admin.models import LogEntry, CHANGE
 from employee.forms import (
     massAssignPaperworkForm,
     addGroupsForm,
+    signPaperworkForm,
     userCreationForm,
     userChangeForm,
     changePasswordForm,
@@ -24,10 +26,11 @@ from employee.forms import (
 )
 from dev_utils.views import MultipleFormView
 from SLUGS.views import SLUGSMixin, isAdminMixin
+from employee.utils import processAutoSignForm
 from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
 from finance.forms import OfficeHoursShiftFormSet
-from finance.models import Shift
+from finance.models import Shift, TimeSheet
 from employee.models import OfficeHours, PaperworkForm
 
 
@@ -79,6 +82,9 @@ class userOverview(SLUGSMixin, MultipleFormView):
         if not request.user.is_authenticated:
             return redirect("%s?next=%s" % (reverse("login"), request.path))
         self.form_classes["userChangeForm"]["instance"] = request.user
+        self.added_context["timesheets"] = TimeSheet.objects.filter(
+            employee=request.user
+        )
         self.added_context["shifts"] = getShiftsForEmployee(request.user)
         self.added_context["timeworked"] = self.added_context["shifts"].aggregate(
             Sum("total_time")
@@ -195,6 +201,39 @@ class uploadForm(SLUGSMixin, FormView):
         return super().form_valid(form)
 
 
+class automaticallySignForm(SLUGSMixin, FormView):
+    form_class = signPaperworkForm
+    template_name = "employee/automatically_sign_form.html"
+    success_url = reverse_lazy("employee:overview")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.pk is not None:
+            self.form_id = PaperworkForm.objects.get(pk=kwargs["form_id"])
+            if self.form_id.employee.pk != request.user.pk:
+                raise PermissionDenied()
+            self.added_context["paperwork"] = self.form_id
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        processAutoSignForm(self.added_context["paperwork"], self.request.user)
+        LogEntry.objects.log_action(
+            user_id=self.request.user.pk,
+            content_type_id=ContentType.objects.get_for_model(
+                self.added_context["paperwork"], for_concrete_model=False
+            ).pk,
+            object_id=self.added_context["paperwork"].pk,
+            object_repr=str(self.added_context["paperwork"]),
+            action_flag=CHANGE,
+            change_message=f"{self.request.user} signed {self.added_context['paperwork'].form} electronically.",
+        )
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            f"{self.added_context['paperwork'].form} has been signed and uploaded",
+        )
+        return super().form_valid(form)
+
+
 class FormDownload(SLUGSMixin, View):
     def get(self, request, relative_path):
         path = f"forms/{relative_path}"
@@ -228,7 +267,7 @@ class massAssignPaperwork(SLUGSMixin, FormView):
     def form_valid(self, form):
         form.add_forms(self.request)
         messages.add_message(
-            self.request, messages.SUCCESS, f"Forms assigned and emails sent"
+            self.request, messages.SUCCESS, "Forms assigned and emails sent"
         )
         return super().form_valid(form)
 
@@ -245,5 +284,5 @@ class addGroups(SLUGSMixin, isAdminMixin, FormView):
 
     def form_valid(self, form):
         form.add_groups(self.request)
-        messages.add_message(self.request, messages.SUCCESS, f"Groups added")
+        messages.add_message(self.request, messages.SUCCESS, "Groups added")
         return super().form_valid(form)

@@ -52,11 +52,12 @@ class GigsignupView(UnicornView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_id = kwargs["u_id"]
-        self.gig_id = kwargs["gig_id"]
-        self.setJobs()
-        self.args = args
-        self.kwargs = kwargs
+        if "u_id" in kwargs and "gig_id" in kwargs:
+            self.user_id = kwargs["u_id"]
+            self.gig_id = kwargs["gig_id"]
+            self.setJobs()
+            self.args = args
+            self.kwargs = kwargs
 
     def mount(self):
         self.__init__(*self.args, **self.kwargs)

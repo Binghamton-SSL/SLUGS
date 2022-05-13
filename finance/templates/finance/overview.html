@@ -6,10 +6,122 @@
 {% block content %}
 <div class="max-w-5xl m-4 md:mx-auto">
     <h1 class="text-4xl">Financial Overview</h1>
+
+    <div class="flex flex-col md:flex-row md:space-x-8">
+        <div class="flex-1">
+            <h2 class="mt-5 text-2xl">Generate SA Group Billing Summary</h2>
+            <div class="p-4 text-black bg-white rounded">
+                <p>Generate a monthly Billing Summary for all published estimates (invoices) which have a billing contact belonging to an organization containing an SA Account #.</p>
+                <div>
+                    <input type="number" class="w-24" max="12" min="1" id="saBillingSummaryMonth" placeholder="Month"/>
+                    <input type="number" class="w-24" id="saBillingSummaryYear" placeholder="Year"/>
+                    <button onclick="javascript:generateSaBillingSummary()" class="px-2 py-2 m-2 text-white bg-black cursor-pointer">Generate</button>
+                </div>
+                <script>
+                    const month = document.getElementById('saBillingSummaryMonth');
+                    const year = document.getElementById('saBillingSummaryYear');
+                    month.value = (new Date()).getMonth();
+                    year.value = (new Date()).getFullYear();
+    
+                    const generateSaBillingSummary = () => {
+                        let url = "{%url 'finance:sa_billing_summary' month="-1" year="-2" %}";
+                        url = url.replace('-1', month.value);
+                        url = url.replace('-2', year.value);
+                        window.location.href = url;
+                    }
+                </script>
+            </div>
+        </div>
+        <div class="flex-1">
+            {% unicorn 'markTimesheetSigned' %}
+        </div>
+    </div>
+    <h2 class="mt-5 text-2xl">Unsigned Time-Sheets</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <div class="sm:flex">
+            <div class="flex-1">
+                <h2 class="text-xl">
+                    {{unsigned_tms.count}} Unsigned Time-Sheets
+                </h2>
+                <div>
+                    Please have these employees come in and sign ASAP!
+                </div>
+            </div>
+            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
+                <button onclick="javascript:toggleUnsignedTimesheets(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+                    Expand
+                </button>
+                <!-- <div class="UnsignedTimesheetsHidden">
+                    {% unicorn 'financeApproveAllShifts' shiftset=shifts %}
+                </div> -->
+            </div>
+        </div>
+        <div class="UnsignedTimesheetsHidden">
+            {% for timesheet in unsigned_tms %}
+            <div class="p-4 my-4 border-2 border-black rounded-sm">
+                <div class="flex flex-col md:flex-row">
+                    <div class="flex flex-col">
+                        <span>{{timesheet.employee}}</span>
+                        <span class="mt-2">Start: {{timesheet.pay_period.start}}</span>
+                        <span>End: {{timesheet.pay_period.end}}</span>
+                    </div>
+                    <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
+                        <a href="{{timesheet.get_admin_url}}">
+                            <button class="w-52 ml-auto mr-auto text-white bg-black px-4 py-2 my-2 border-2 border-black rounded-sm">
+                                Edit Details
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <h2 class="mt-5 text-2xl">Unprocessed Time-Sheets</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <div class="sm:flex">
+            <div class="flex-1">
+                <h2 class="text-xl">
+                    {{unprocessed_tms.count}} Unprocessed Time-Sheets
+                </h2>
+                <div>
+                    Please add these time sheets to the next pay period to be sent out to payroll. 
+                </div>
+            </div>
+            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
+                <button onclick="javascript:toggleUnprocessedTimesheets(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+                    Expand
+                </button>
+            </div>
+        </div>
+        <div class="UnprocessedTimesheetsHidden">
+            {% for timesheet in unprocessed_tms %}
+            <div class="p-4 my-4 border-2 border-black rounded-sm">
+                <div class="flex flex-col md:flex-row">
+                    <div class="flex flex-col">
+                        <span>{{timesheet.employee}}</span>
+                        <span class="mt-2">Start: {{timesheet.pay_period.start}}</span>
+                        <span>End: {{timesheet.pay_period.end}}</span>
+                        <span>Signed: {{timesheet.signed}}</span>
+                    </div>
+                    <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
+                        <a href="{{timesheet.get_admin_url}}">
+                            <button class="w-52 ml-auto mr-auto text-white bg-black px-4 py-2 my-2 border-2 border-black rounded-sm">
+                                Edit Details
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <h2 class="mt-5 text-2xl">Most Recent Pay Period</h2>
     <div class="p-4 text-black bg-white rounded">
         <div class="sm:flex">
-            <div>
+            <div class="flex-1">
                 <h2 class="text-xl">
                     {{most_recent_pay_period.start}} - {{most_recent_pay_period.end}}; Payday {{most_recent_pay_period.payday}}
                 </h2>
@@ -17,11 +129,16 @@
                     {{shifts.count}} Shifts in period totaling {{shifts_hours.total_time__sum}} man-hours of work and costing ${{shifts_price.cost__sum|floatformat:2}}
                 </div>
             </div>
-            <div class="ml-auto mr-0">
-                {% unicorn 'financeApproveAllShifts' shiftset=shifts%}
+            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
+                <button onclick="javascript:toggleRecentPayPeriod(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+                    Expand
+                </button>
+                <div class="RecentPayPeriodHidden">
+                    {% unicorn 'financeApproveAllShifts' shiftset=shifts %}
+                </div>
             </div>
         </div>
-        <div>
+        <div class="RecentPayPeriodHidden">
             {% for shift in shifts %}
                 {% unicorn 'financeShift' shift=shift %}
             {% endfor %}
@@ -30,4 +147,39 @@
     <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>
     {% unicorn 'previousPayPeriod' %}
 </div>
+<script>
+    const states = {
+        "recentPayPeriodState": false,
+        "unsignedTimesheetsState": false,
+        "unprocessedTimesheetsState": false,
+    }
+
+    const toggleUnsignedTimesheets = (element) => toggleSection(".UnsignedTimesheetsHidden", "unsignedTimesheetsState", element)
+    const toggleUnprocessedTimesheets = (element) => toggleSection(".UnprocessedTimesheetsHidden", "unprocessedTimesheetsState", element)
+    const toggleRecentPayPeriod = (element) => toggleSection(".RecentPayPeriodHidden", "recentPayPeriodState", element)
+
+    const toggleSection = (sectionClass, state, element) => {
+        if (!states[state]) {
+            document.querySelectorAll(sectionClass).forEach((el) => el.classList.add('hidden-shown'));
+            element.innerText = "Contract";
+            states[state] = true;
+        }
+        else if (states[state]) {
+            document.querySelectorAll(sectionClass).forEach((el) => el.classList.remove('hidden-shown'));
+            element.innerText = "Expand";
+            states[state] = false;
+        }
+    }
+</script>
+<style>
+    .RecentPayPeriodHidden, .UnsignedTimesheetsHidden, .UnprocessedTimesheetsHidden {
+        max-height: 0rem;
+        overflow: hidden;
+        transition: max-height 1s cubic-bezier(1, -0.01, 0.25, 1)
+    }
+    .hidden-shown {
+        max-height: 10000rem;
+        overflow: auto;
+    }
+</style>
 {% endblock %}

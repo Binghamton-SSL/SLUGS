@@ -1,3 +1,84 @@
+### V2.3.0 - 12/13/2022
+* Add Djangoql Admin Search
+* Add DEBUG banner to admin
+* Add ability to automatically sign forms using user signature
+* Email sent when broken equipment report is filed
+* Add action to restart the server via admin
+* Add chosen/preferred name
+* Contact info is now restricted to employees you are working a show with (not available to everyone on every showview)
+* Added validation
+    * Each system in gig must have a load in
+    * Shifts cannot overlap for a given employee
+    * Shifts cannot be a negative payout
+* Wages now have dateframes that they are in effect
+* Time Sheets are now available to employees electronically
+* Time Sheets can now be signed electronically
+* Make signup button more noticeable / add redirect on Shows page
+* Add print tag
+* Quickly mark time sheets as signed using Financial Overview
+* Add barcode to timesheets
+* Add timesheet quick process
+* Add customized shift calendar ICS for all employees
+* Systems and Addons can now adjust in price over time
+* "Awaiting Paperwork" and "Cannot Work" groups are automatically added and removed based on paperwork status
+* Move all fees to an inline and subclass prepared fees
+* Allow fees to be sorted naturally
+* Allow pricing of fees to change over time
+* Improve code reuse/duplication
+* Add equipment management (Kene)
+* Add barcode field to Item
+* Allow for multiple of same system to be booked (road to new booking equipment validation)
+* Add pricing set validation
+* Process timesheets on pay period submission if not previously processed
+* Send email to FD when timesheet is auto-signed
+* Add sent to payroll stamp
+* Adding booking overview page
+* Add event contact to showView
+* Add children to items in inventory
+* Add status' to items
+* Add reservation number to estimate object
+* Add billing contact signature to estimate
+* Choose employees to send staffing email to (defaults to all)
+* Booking page: Show gigs without estimate and highlight those less than 3 weeks out
+* Add validation to Jobs in addition to Systems on Gigs to ensure load in/out
+* Add Employee ID module
+* Add search to Timesheet admin
+* Update SA billing summary to include estimates where payment date is set to specific month/year
+* Add DjangoQL search to Job Admin
+* Add BSSL Bingo Board
+* Add gig notes to staffing email
+* Distinguish between graduation year and final year with BSSL (grad students)
+* Add field to store final date of employment
+<br><br>
+BUG FIXES:
+    * Fix formatting error in estimate signature box
+    * Move 404 page to correct place
+    * Wages would still have been overwritten due to Job-Wage relationship. Changed Wage date/pay structure
+    * Updated outstandingpaperwork script to 
+    * Adjust issue with upside down form filling
+    * Log when employee signs paperwork
+    * Move purchase date to unit not Equipment
+    * Fix shift validation where person is not clocked out
+    * WIP new summary processing w timesheets
+    * Make finance widgets responsive
+    * Fix summary table to expand with as many rates as paid
+    * Fix formatting of setup time / view estimate to be more space efficient
+    * Remove ordering from predefined fees (no longer needed with drag and drop)
+    * Add manager notes to estimate admin
+    * Fix issue with unassigned shift crashing showview
+    * Fix inconsistent financial summary generation
+    * Timesheet ID clears on enter when using quick action on finance page
+    * Add all active rates to new finance summary page
+    * Estimate would show first load out time, not last
+    * Validation for overlapping shifts would only apply once a shift is entered. Locking the shift in.
+    * Allow for an employee to work multiple Jobs in a shift and clock in/out appropriately 
+    * SA Billing summary now sorted by group entry, not account #
+    * Fix PayPeriod issue where shifts overlapping periods were unassigned.
+    * Fix phantom login bug
+    * Fix bug where FinanceShift crashed out (gracefully handled)
+    * Sign Timesheet widget now fades background color to provide greater visual clarity
+    * Add travel time required for venue (currently unused)
+
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin
 * Add access for SA Employees
@@ -30,6 +111,7 @@
 * Add next/current show timeline
 * Accept all button for financial overview
 * Add DEV mode indicator for superusers
+* Add Job pay rate validation directly to model
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"

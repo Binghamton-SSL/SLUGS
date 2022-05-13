@@ -1,15 +1,22 @@
+import re
 from django.db import models
 from django.urls import reverse
 import django.utils.timezone as timezone
 from tinymce.models import HTMLField
 from django_ical.views import ICalFeed
 from icalendar import vCalAddress, vText
-from gig.models import Gig
+from gig.models import Gig, Job
+from employee.models import Employee
 from django.contrib.auth.models import Group
+from django.db.models import Q
+from datetime import datetime
 
 
 # Create your models here.
 class Notification(models.Model):
+    """
+    A Notification that is displayed on the homepage. Type impacts the color of the message: Success->Green, Warning->Yellow, Danger/Error->Red, Normal->Gray.
+    """
     MESSAGE_TYPES = [
         ("normal bg-white text-black", "Normal"),
         ("bg-green-500", "Success"),
@@ -71,11 +78,11 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.all()])}
+{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
 Staff:
-{''.join([f"{staff.department} - {staff.position}: {staff.employee.first_name if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
+{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
         """  # noqa
 
     def item_link(self, item):
@@ -95,7 +102,7 @@ Staff:
             if job.employee is not None:
                 attendee = vCalAddress(f"MAILTO:{job.employee.email}")
                 attendee.params["cn"] = vText(
-                    f"{job.employee.first_name} {job.employee.last_name}"
+                    f"{(job.employee.preferred_name if job.employee.preferred_name else job.employee.first_name)} {job.employee.last_name}"
                 )
                 attendees.append(attendee)
         return attendees
@@ -150,11 +157,11 @@ Organization: {item.org}
 Contact: {item.contact.name}
 
 Systems:
-{''.join([f"{system.name} - {system.get_department_display()}{' + '+(' + '.join([addon.name for addon in system.systeminstance_set.get(gig=item.pk).addons.all()])) if len(system.systeminstance_set.get(gig=item.pk).addons.all()) else ''}{nl}" for system in item.systems.filter(department=self.department[0])])}
+{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
 Load in/out:
 {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
 Staff:
-{''.join([f"{staff.department} - {staff.position}: {staff.employee.first_name if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
+{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
         """  # noqa
 
     def item_link(self, item):
@@ -174,7 +181,7 @@ Staff:
             if job.employee is not None:
                 attendee = vCalAddress(f"MAILTO:{job.employee.email}")
                 attendee.params["cn"] = vText(
-                    f"{job.employee.first_name} {job.employee.last_name}"
+                    f"{(job.employee.preferred_name if job.employee.preferred_name else job.employee.first_name)} {job.employee.last_name}"
                 )
                 attendees.append(attendee)
         return attendees
@@ -199,3 +206,116 @@ class SoundFeed(DeptFeed):
 
 class StageFeed(DeptFeed):
     department = ("T", "Stage")
+
+
+# Item Schema:
+# {
+#     start: datetime,
+#     end: datetime,
+#     title: str,
+#     description: str,
+#     location: str,
+#     link: str,
+# }
+class EmployeeFeed(ICalFeed):
+    employee = None
+
+    def get_object(self, request, *args, **kwargs):
+        return int(kwargs["emp_id"])
+
+    def __init__(self):
+        self.product_id = "-//slugs.bssl.binghamtonsa.org//SHIFT_CAL//EN"
+        self.title = "BSSL Work Calendar"
+        self.description = "Shifts you work for BSSL"
+        self.file_name = "BSSL_shifts.ics"
+
+    def items(self, emp_id):
+        # TODO - Add trainings
+        self.employee = Employee.objects.get(pk=emp_id)
+        items = []
+        jobs = Job.objects.filter(employee=self.employee)
+        for job in jobs.all():
+            gig = Gig.objects.get(pk=job.gig.pk)
+            your_load_ins = gig.loadin_set.filter(department=job.department).order_by(
+                "load_in"
+            )
+            for load_in in your_load_ins.all():
+                items.append(
+                    {
+                        "start": load_in.shop_time,
+                        "end": load_in.load_out,
+                        "title": f"{gig.org} - {gig.name}",
+                        "description": "",
+                        "location": gig.location,
+                        "link": reverse("gig:showView", args=[gig.pk]),
+                    }
+                )
+            items.append(
+                {
+                    "start": gig.setup_by,
+                    "end": gig.setup_by,
+                    "title": f"SETUP BY TIME: {gig.org} - {gig.name}",
+                    "description": "",
+                    "location": gig.location,
+                    "link": reverse("gig:showView", args=[gig.pk]),
+                }
+            )
+            items.append(
+                {
+                    "start": gig.start,
+                    "end": gig.end,
+                    "title": f"SHOW: {gig.org} - {gig.name}",
+                    "description": re.sub("<[^<]+?>", "", gig.notes),
+                    "location": gig.location,
+                    "link": reverse("gig:showView", args=[gig.pk]),
+                }
+            )
+        return items
+
+    def item_title(self, item):
+        return item["title"]
+
+    def item_description(self, item):
+        return item["description"]
+
+    def item_guid(self, item):
+        return f'{self.product_id}-{item["title"]}-{item["start"]}-{item["link"]}'
+
+    def item_link(self, item):
+        return item["link"]
+
+    def item_location(self, item):
+        return item["location"]
+
+    def item_organizer(self, item):
+        organizer = vCalAddress("MAILTO:bssl@binghamtonsa.org")
+        organizer.params["cn"] = vText("Binghamton Sound Stage & Lighting")
+        return organizer
+
+    def item_start_datetime(self, item):
+        return item["start"]
+
+    def item_end_datetime(self, item):
+        return item["end"]
+
+    def item_status(self, item):
+        return "CONFIRMED"
+
+
+class PricingMixin:
+    pricing_set = None
+
+    def get_current_price(self):
+        return self.pricing_set.get(
+            Q(date_active__lte=datetime.now())
+            & (Q(date_inactive__gte=datetime.now()) | Q(date_inactive=None))
+        )
+
+    def get_is_active(self):
+        return True if self.get_current_price() is not None else False
+
+    def get_price_at_date(self, date):
+        return self.pricing_set.get(
+            Q(date_active__lte=date)
+            & (Q(date_inactive__gte=date) | Q(date_inactive=None))
+        )

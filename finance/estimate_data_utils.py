@@ -19,11 +19,16 @@ def calculateGigCost(estimate):
     # Format first/last loadin times for use on printed documents
     ret["first_shop_time"] = ret["loadins"].first().shop_time
     ret["first_load_in"] = ret["loadins"].first().load_in
-    ret["last_load_out"] = ret["loadins"].first().load_out
+    ret["last_load_out"] = ret["gig"].loadin_set.order_by("-load_out").first().load_out
     # Format All system / addon costs
-    for system in ret["gig"].systems.all().order_by("department"):
+    for systeminstance in (
+        ret["gig"].systeminstance_set.all().order_by("system__department")
+    ):
+        system = systeminstance.system
         dept = system.department
         dept_loadins = ret["loadins"].filter(department=dept)
+
+        current_price = system.get_price_at_date(ret["gig"].start)
 
         system_subtotal = decimal.Decimal(0.00)
 
@@ -58,32 +63,32 @@ def calculateGigCost(estimate):
             )
 
         system_subtotal += round(
-            system.base_price + system.price_per_hour * total_time_rented,
+            current_price.base_price + current_price.price_per_hour * total_time_rented,
             2,
         )
 
-        ret["systems"][system] = [
+        ret["systems"][systeminstance] = [
             system,
-            total_time_rented if system.price_per_hour else 1,
+            total_time_rented if current_price.price_per_hour else 1,
             system_subtotal,
             False,
         ]
-        addons = system.systeminstance_set.get(
-            gig_id=ret["gig"].pk
-        ).addoninstance_set.all()
+        addons = systeminstance.addoninstance_set.all()
         for addon_set_item in addons:
             addon = addon_set_item.addon
             addon.addl_description = addon_set_item.description
 
+            current_price = addon.get_price_at_date(ret["gig"].start)
+
             addon_subtotal = round(
-                addon.base_price * addon_set_item.qty
+                current_price.base_price * addon_set_item.qty
                 + (
-                    addon.price_per_hour_for_duration_of_gig
+                    current_price.price_per_hour
                     * addon_set_item.qty
                     * total_time_rented
                 )
                 + (
-                    addon.price_per_hour_for_load_in_out_ONLY
+                    current_price.price_per_hour_for_load_in_out_ONLY
                     * addon_set_item.qty
                     * total_loadin_time
                 ),
@@ -94,9 +99,9 @@ def calculateGigCost(estimate):
             ret["systems"][addon_set_item.pk] = [
                 addon,
                 addon_set_item.qty * total_time_rented
-                if addon.price_per_hour_for_duration_of_gig != 0.00
+                if current_price.price_per_hour != 0.00
                 else addon_set_item.qty * total_loadin_time
-                if addon.price_per_hour_for_load_in_out_ONLY
+                if current_price.price_per_hour_for_load_in_out_ONLY
                 else addon_set_item.qty,
                 addon_subtotal,
                 True,
@@ -104,17 +109,7 @@ def calculateGigCost(estimate):
         ret["subtotal"] += system_subtotal
         ret["total_amt"] += system_subtotal
 
-    for fee in ret["estimate"].onetimefee_set.order_by("percentage").all():
-        fee_amt = (
-            fee.amount
-            if fee.amount
-            else round(ret["total_amt"] * (fee.percentage / 100), 2)
-        )
-        ret["fees"][fee] = [fee, fee_amt]
-        ret["fees_amt"] += fee_amt
-        ret["total_amt"] += fee_amt
-
-    for fee in ret["estimate"].fees.order_by("percentage").all():
+    for fee in ret["estimate"].onetimefee_set.order_by("order").all():
         fee_amt = (
             fee.amount
             if fee.amount

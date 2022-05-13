@@ -10,14 +10,23 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from dev_utils.views import MultipleFormView
 from django.views.generic.base import TemplateView
-from SLUGS.views import SLUGSMixin
+from django.views.generic.edit import FormView
+from SLUGS.views import SLUGSMixin, isAdminMixin
 from gig.models import Gig, Job, JobInterest
 from employee.models import Employee
-from gig.models import Job
+from datetime import datetime
+from django.db.models import F, DateTimeField, ExpressionWrapper
+from django.utils import timezone
+
 
 from finance.forms import ShiftFormSet
-from gig.forms import shiftFormHelper, engineerNotesForm, StaffShowForm
-from finance.models import Shift
+from gig.forms import (
+    sendStaffingEmailForm,
+    shiftFormHelper,
+    engineerNotesForm,
+    StaffShowForm,
+)
+from finance.models import Shift, Estimate
 from utils.models import signupStatus
 
 
@@ -26,7 +35,10 @@ class gigIndex(SLUGSMixin, MultipleFormView):
     template_name = "gig/gig.html"
     form_classes = {}
 
-    def get_context_data(self, **kwargs):
+    def post_valid_reject(self, context):
+        return self.get_context_data(context)
+
+    def get_context_data(self, ctext=False, **kwargs):
         context = super().get_context_data(**kwargs)
         for form in context["forms"]:
             if form != "show_notes":
@@ -46,14 +58,16 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         jobs = {}
         self.added_context["helper"] = shiftFormHelper()
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
-        if not self.added_context["gig"].published:
+        if not self.added_context["gig"].published or not request.user.is_authenticated:
             raise PermissionDenied()
         try:
-            self.added_context["my_job"] = (
-                Job.objects.get(employee=request.user, gig=self.added_context["gig"])
-                if request.user.is_authenticated
-                else ""
-            )
+            self.added_context["my_jobs"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"])
+            if len(self.added_context["my_jobs"]) > 1:
+                for job in self.added_context["my_jobs"]:
+                    self.added_context["my_job"] = job if "engineer" in str(job.position).lower() else None
+                self.added_context["my_job"] = self.added_context["my_job"] if self.added_context["my_job"] else Job.objects.filter(employee=request.user, gig=self.added_context["gig"]).first()
+            else:
+                self.added_context["my_job"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"]).first()
         except Exception:
             self.added_context["my_job"] = False
         for job in self.added_context["gig"].job_set.all():
@@ -101,7 +115,7 @@ class workSignup(SLUGSMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not signupStatus.objects.all().first().is_open or has_group(
-            request.user, "New Hire"
+            request.user, "Cannot Work"
         ):
             raise PermissionDenied()
         self.added_context["gigs"] = list(
@@ -111,6 +125,7 @@ class workSignup(SLUGSMixin, TemplateView):
                     available_for_signup__lte=timezone.now(),
                     job__employee=None,
                     published=True,
+                    archived=False,
                 ).order_by("-start")
             )
         )
@@ -123,7 +138,8 @@ class gigList(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gigs"] = Gig.objects.filter(published=True).order_by(
             "-start"
-        )[:50]
+        )[:150]
+        self.added_context["signup_open"] = signupStatus.objects.first().is_open
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -171,25 +187,46 @@ class staffShow(SLUGSMixin, MultipleFormView):
         return redirect("admin:gig_gig_change", object_id=self.added_context["gig"].pk)
 
 
-class SendStaffingEmail(SLUGSMixin, TemplateView):
+class SendStaffingEmail(SLUGSMixin, FormView):
     template_name = "gig/send_email.html"
+    form_class = sendStaffingEmailForm
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["object_id"])
-        self.added_context["request"] = request
+        self.added_context["email_request"] = request
         template = get_template("gig/components/staff_email_template.html")
         self.added_context["email_template"] = template.render(self.added_context)
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, **kwargs):
-        recipient_list = []
-        for emp in self.added_context["gig"].job_set.all():
-            recipient_list.append(emp.employee.email)
-        # subject = f"You've been staffed for {self.added_context['gig'].name}"
-        # html_message = self.added_context['email_template']
-        # plain_message = strip_tags(html_message)
-        # email_from = settings.EMAIL_HOST_USER
-        # send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["employees"] = (
+            self.added_context["gig"]
+            .job_set.exclude(employee=None)
+            .values_list(
+                "employee__preferred_name",
+                "employee__first_name",
+                "employee__last_name",
+                "employee__pk",
+            )
+            .distinct()
+        )
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["employees_working"] = list(
+            self.added_context["gig"]
+            .job_set.values_list("employee__pk", flat=True)
+            .distinct()
+        )
+        return initial
+
+    def form_valid(self, form):
+        recipient_list = [
+            Employee.objects.get(pk=emp_id).email
+            for emp_id in form.cleaned_data["employees_working"]
+        ]
         email = EmailMessage(
             f"You've been staffed for {self.added_context['gig'].name}",
             self.added_context["email_template"],
@@ -212,4 +249,26 @@ class generateEmailTemplate(SLUGSMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+
+class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
+    template_name = "gig/booking.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context["outstanding_bookings"] = (
+            Estimate.objects.filter(
+                gig__start__gte=datetime.now(), status__in=["E", "L"]
+            )
+            .order_by("gig__start")
+            .annotate(
+                three_weeks_prior=ExpressionWrapper(
+                    F("gig__start") - timezone.timedelta(weeks=3),
+                    output_field=DateTimeField(),
+                )
+            )
+        )
+        self.added_context["gig_wo_estimate"] = Gig.objects.filter(
+            estimate=None, start__gte=datetime.now()
+        )
         return super().dispatch(request, *args, **kwargs)

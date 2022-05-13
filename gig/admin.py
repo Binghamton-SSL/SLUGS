@@ -3,12 +3,15 @@ from django.urls import path
 from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
+from gig.forms import GigJobChangeForm, GigSystemsChangeForm, GigLoadinChangeForm
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
+from djangoql.admin import DjangoQLSearchMixin
 
 
 class JobSubInline(NestedTabularInline):
+    formset = GigJobChangeForm
     inlines = (ShiftInlineAdmin,)
     autocomplete_fields = ["employee", "position"]
     model = Job
@@ -31,6 +34,7 @@ class AddonInline(NestedTabularInline):
 
 
 class SystemInline(NestedStackedInline):
+    formset = GigSystemsChangeForm
     autocomplete_fields = ["system"]
     model = SystemInstance
     inlines = (JobSubInline, AddonInline)
@@ -38,14 +42,16 @@ class SystemInline(NestedStackedInline):
 
 
 class LoadInInline(NestedTabularInline):
+    formset = GigLoadinChangeForm
     model = LoadIn
     extra = 0
 
 
 @admin.register(Gig)
-class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
+class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
+    djangoql_completion_enabled_by_default = False
     search_fields = ["name", "org__name", "contact__name", "location__name"]
-    inlines = (SystemInline, LoadInInline)
+    inlines = (LoadInInline, SystemInline)
     autocomplete_fields = ["org", "contact", "location"]
     list_display = (
         "__str__",
@@ -73,8 +79,8 @@ class GigAdmin(FieldsetsInlineMixin, NestedModelAdmin):
                 )
             },
         ),
-        SystemInline,
         LoadInInline,
+        SystemInline,
         ("Day of Show Info", {"fields": ("day_of_show_notes",)}),
         (
             None,
@@ -128,6 +134,7 @@ class JobAdmin(admin.ModelAdmin):
 
 
 @admin.register(JobInterest)
-class JobInterestAdmin(admin.ModelAdmin):
+class JobInterestAdmin(DjangoQLSearchMixin ,admin.ModelAdmin):
+    djangoql_completion_enabled_by_default = False
     search_fields = ["employee__first_name", "employee__last_name"]
     pass

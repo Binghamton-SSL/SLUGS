@@ -10,6 +10,9 @@ urlpatterns = [
     path("office_hours", views.officeHours.as_view(), name="office_hours"),
     path("form/<form_id>/upload", views.uploadForm.as_view(), name="upload_form"),
     path(
+        "form/<form_id>/sign", views.automaticallySignForm.as_view(), name="sign_form"
+    ),
+    path(
         "mass-assign-paperwork/<selected>",
         views.massAssignPaperwork.as_view(),
         name="mass_assign",

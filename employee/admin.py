@@ -8,16 +8,10 @@ from import_export.admin import ImportExportMixin
 from finance.admin import ShiftInlineAdmin
 from employee.models import PaperworkForm, Paperwork
 from utils.generic_email import send_generic_email
+from djangoql.admin import DjangoQLSearchMixin
 
 
 from .models import Employee, OfficeHours
-
-
-@admin.register(Paperwork)
-class PaperworkAdmin(admin.ModelAdmin):
-    search_fields = ["form_name"]
-    readonly_fields = ["associated_forms"]
-    pass
 
 
 class PaperworkInline(admin.StackedInline):
@@ -28,18 +22,39 @@ class PaperworkInline(admin.StackedInline):
     readonly_fields = ["uploaded", "requested"]
 
 
+@admin.register(PaperworkForm)
+class PaperworkAdmin(admin.ModelAdmin):
+    search_fields = [
+        "form__form_name",
+        "employee__first_name",
+        "employee__preferred_name",
+        "employee__last_name",
+    ]
+    pass
+
+
+@admin.register(Paperwork)
+class PaperworkAdmin(admin.ModelAdmin):
+    search_fields = ["form_name"]
+    readonly_fields = ["associated_forms"]
+    inlines = [PaperworkInline]
+    pass
+
+
 class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         fields = (
             "id",
             "email",
+            "preferred_name",
             "first_name",
             "last_name",
             "bnum",
             "phone_number",
             "is_grad_student",
             "graduation_year",
+            "final_year_with_bssl",
             "last_login",
             "date_joined",
             "is_active",
@@ -49,7 +64,7 @@ class EmployeeResource(resources.ModelResource):
 
 
 @admin.register(Employee)
-class EmployeeAdmin(ImportExportMixin, UserAdmin):
+class EmployeeAdmin(DjangoQLSearchMixin, ImportExportMixin, UserAdmin):
     resource_class = EmployeeResource
 
     def group(self, user):
@@ -58,13 +73,19 @@ class EmployeeAdmin(ImportExportMixin, UserAdmin):
             groups.append(group.name)
         return ", ".join(groups)
 
+    def signature_on_file(self, user):
+        if user.signature:
+            return "Signature Stored"
+        else:
+            return "No Signature"
+
     def save_model(self, request, obj, form, change):
         if "is_active" in form.changed_data and form.instance.is_active:
             send_generic_email(
                 request=request,
                 title="Your SLUGS account has been activated",
                 included_text=f"""
-Hey there {form.instance.first_name},
+Hey there {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)},
 <br><br>
 Got some good news for ya, Your SLUGS account has been activated. Feel free to <a href="https://slugs.bssl.binghamtonsa.org/">head over to SLUGS</a> and take a peek around.
 """,  # noqa
@@ -76,7 +97,7 @@ Got some good news for ya, Your SLUGS account has been activated. Feel free to <
                 request=request,
                 title="Your SLUGS account has been deactivated",
                 included_text=f"""
-Hey there {form.instance.first_name},
+Hey there {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)},
 <br><br>
 We're sorry to see ya go. One of our managers has deactivated your account. If you believe this was done in error please <a href="mailto:bssl@binghamtonsa.org">reach out</a>.
 """,  # noqa
@@ -100,7 +121,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         subject=f"[ACTION REQUIRED] Fill out '{form.instance.form.form_name}' on SLUGS",
                         title=f"Paperwork needed: {form.instance.form.form_name}",
                         included_html=email_template,
-                        included_text=f"How's it going {form.instance.employee.first_name}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
+                        included_text=f"How's it going {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
                         to=[form.instance.employee.email],
                         attachments=attachments,
                     )
@@ -135,7 +156,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     )
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
-    readonly_fields = ["last_login"]
+    readonly_fields = ["last_login", "signature_on_file"]
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -155,17 +176,20 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
             perm_fields = ("is_active", "is_staff", "groups")
 
         return [
-            (None, {"fields": ("email", "password", "last_login")}),
+            (None, {"fields": ("email", "password", "last_login", "date_joined", "end_of_employment")}),
             (
                 "Personal info",
                 {
                     "fields": (
+                        "preferred_name",
                         "first_name",
                         "last_name",
                         "phone_number",
                         "bnum",
-                        "is_grad_student",
                         "graduation_year",
+                        "is_grad_student",
+                        "final_year_with_bssl",
+                        "signature_on_file",
                         "employee_notes",
                     )
                 },
@@ -184,23 +208,29 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "email",
                     "password1",
                     "password2",
+                    "preferred_name",
                     "first_name",
                     "last_name",
                     "bnum",
                     "graduation_year",
+                    "is_grad_student",
+                    "final_year_with_bssl",
                 ),
             },
         ),
     )
     search_fields = (
         "email",
+        "preferred_name",
         "first_name",
         "last_name",
         "bnum",
         "graduation_year",
+        "final_year_with_bssl",
         "phone_number",
         "groups__name",
     )
+    djangoql_completion_enabled_by_default = False
     ordering = (
         "-is_active",
         "last_name",

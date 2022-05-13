@@ -1,47 +1,31 @@
-{% extends "admin/base_site.html" %}
-{% load i18n admin_urls static admin_modify %}
-{% load gig_admin %}
-{% load crispy_forms_tags %}
-
-{% block extrahead %}{{ block.super }}
+{% extends "admin/base_site.html" %} {% load i18n admin_urls static admin_modify %} {% load gig_admin %} {% load crispy_forms_tags %} {% block extrahead %}{{ block.super }}
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
-{{ media }}
-{% endblock %}
-
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
-
-{% block coltype %}colM{% endblock %}
-
-{% if not is_popup %}
-{% block breadcrumbs %}
+{{ media }} {% endblock %} {% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static " admin/css/forms.css " %}">{% endblock %} {% block coltype %}colM{% endblock %} {% if not is_popup %} {% block breadcrumbs %}
 <div class="breadcrumbs">
-<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-&rsaquo; <a href="{% url 'admin:app_list' app_label='gig' %}">Gig</a>
-&rsaquo; <a href="{% url 'admin:gig_gig_changelist' %}">Gigs</a>
-&rsaquo; <a href="../change">{{gig}}</a>
-&rsaquo; Send Staffing Email
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> &rsaquo; <a href="{% url 'admin:app_list' app_label='gig' %}">Gig</a> &rsaquo; <a href="{% url 'admin:gig_gig_changelist' %}">Gigs</a> &rsaquo; <a href="../change">{{gig}}</a> &rsaquo; Send
+    Staffing Email
 </div>
-{% endblock %}
-{% endif %}
-
-{% block content %}
+{% endblock %} {% endif %} {% block content %}
 <div id="content-main">
     <h1>Send staffing email</h1>
-    <h2>Clicking send will send an email to the following people</h2>
-    <div>
-        <ul>
-            {% for job in gig.job_set.all %}
-                <li>{{job.employee}}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div style="background-color: white; padding: 1rem;">
-        <h1 style=" color: black;">Email Template</h1>
-        <div>
-            <iframe style="width: 100%; height:50rem;" src="{% url 'gig:staff_email_template' gig_id=gig.id %}">
+    <h2>Send a staffing email to the following employees</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            {% crispy form %}
+            <style>
+                .mr-3 {
+                    margin-top: .5rem;
+                    margin-bottom: .5rem;
+                }
+            </style>
+        </div>
+        <div style="background-color: white; padding: 1rem;">
+            <h1 style=" color: black;">Email Template</h1>
+            <div>
+                <iframe style="width: 100%; height:50rem;" src="{% url 'gig:staff_email_template' gig_id=gig.id %}">
             </iframe>
-            <form method="POST">
-                {% csrf_token %}
                 <div style="display: flex; background-color: #93C5FD; color: black; border-radius: 5px; width: fit-content; padding: .25rem .5rem .25rem .5rem; margin: 1rem;">
                     <div style="margin: auto .5rem auto 0;">
                         <svg xmlns="http://www.w3.org/2000/svg" style="width: 2rem; height: 2rem; margin: auto 0 auto 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,40 +35,42 @@
                     <p style="margin: auto;">Please be patient after hitting send! Gary is a snail after all. He can only lick envelopes so fast.</p>
                 </div>
                 <button type="submit">Send</button>
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 <style>
     button {
-    cursor: pointer;
-    -webkit-text-size-adjust: 100%;
-    tab-size: 4;
-    box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-    border-color: #e5e7eb;
-    --tw-shadow: 0 0 #0000;
-    --tw-ring-inset: var(--tw-empty,/*!*/ /*!*/);
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-    --tw-ring-color: rgba(59, 130, 246, 0.5);
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    font-family: inherit;
-    font-size: 100%;
-    margin: 0;
-    line-height: inherit;
-    -webkit-appearance: button;
-    border-radius: 0.125rem;
-    --tw-bg-opacity: 1;
-    background-color: rgba(0, 0, 0, var(--tw-bg-opacity));
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    --tw-text-opacity: 1;
-    color: rgba(255, 255, 255, var(--tw-text-opacity));
+        cursor: pointer;
+        -webkit-text-size-adjust: 100%;
+        tab-size: 4;
+        box-sizing: border-box;
+        border-width: 0;
+        border-style: solid;
+        border-color: #e5e7eb;
+        --tw-shadow: 0 0 #0000;
+        --tw-ring-inset: var(--tw-empty, /*!*/
+        /*!*/
+        );
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgba(59, 130, 246, 0.5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        font-family: inherit;
+        font-size: 100%;
+        margin: 0;
+        line-height: inherit;
+        -webkit-appearance: button;
+        border-radius: 0.125rem;
+        --tw-bg-opacity: 1;
+        background-color: rgba(0, 0, 0, var(--tw-bg-opacity));
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        --tw-text-opacity: 1;
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
     }
 </style>
 {% endblock %}

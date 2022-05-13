@@ -8,6 +8,9 @@ from django.utils import timezone
 
 # Create your models here.
 class Training(models.Model):
+    """
+    A training conducted by Managerial staff for employees.
+    """
     date = models.DateTimeField()
     dept = models.CharField(max_length=1, choices=DEPARTMENTS)
     location = models.ForeignKey(
@@ -25,10 +28,13 @@ class Training(models.Model):
     systems = models.ManyToManyField("equipment.System", blank=True)
 
     def __str__(self):
-        return f"{self.get_dept_display()} Training - {timezone.localtime(self.date).strftime('%m/%d/%Y, %H:%M:%S')}"
+        return f"{self.get_dept_display()} Training"
 
 
 class Trainee(models.Model):
+    """
+    An employee who participates in a training. Position defaults to New Hire
+    """
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
     training = models.ForeignKey("training.Training", on_delete=models.CASCADE)
     position = models.ForeignKey(
@@ -41,9 +47,16 @@ class Trainee(models.Model):
 
 
 class TrainingRequest(models.Model):
+    """
+    A request from an employee for Training on a particular system
+    """
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
     systems = models.ManyToManyField("equipment.System", blank=True)
-    notes = models.TextField(null=True, blank=True, help_text="Be sure to include when you're free in the upcoming weeks to schedule the training")
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Be sure to include when you're free in the upcoming weeks to schedule the training",
+    )
     submitted = models.DateTimeField(auto_now_add=True)
     answered = models.BooleanField(default=False)
 

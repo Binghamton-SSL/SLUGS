@@ -2,6 +2,7 @@
 {% load slugs_components %}
 {% load humanize %}
 {% load static %}
+{% load finance_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
         rel="stylesheet">
     <meta name="title" content="SLUGS">
     <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
@@ -98,7 +99,7 @@
                         Name
                     </td>
                     {% for rate in rates %}
-                    <td>{{rate.name}}</td>
+                    <td>{{rate.wage.name}}</td>
                     {% endfor %}
                     <td>Total Hours</td>
                     <td>Gross Pay</td>
@@ -118,8 +119,8 @@
                 <tr>
                     <td>{{emp.bnum}}</td>
                     <td>{{emp.name}}</td>
-                    {% for rate in emp.rates.values %}
-                        <td>{% if rate.1 is not 0 %}{{rate.1}}{% else %}-{% endif %}</td>
+                    {% for rate in rates %}
+                        <td>{% if emp.rates|get_hour_value:rate %}{{emp.rates|get_hour_value:rate}}{% else %}-{% endif %}</td>
                     {% endfor %}
                     <td>{{emp.total_hours}}</td>
                     <td>${{emp.total_amount|floatformat:2|intcomma}}</td>
@@ -128,7 +129,7 @@
             </tbody>
             <tfoot>
                 <tr class="text-lg font-bold ">
-                    <td class="pl-4 " colspan="8">Total:</td>
+                    <td class="pl-4 " colspan="{{ rates|length|add:2 }}">Total:</td>
                     <td class="text-center">{{total_hours}}</td>
                     <td class="text-center">${{total_sum|floatformat:2|intcomma}}</td>
                 </tr>
@@ -195,8 +196,6 @@
         border-right: black solid 1px;
     }
 </style>
-<script>
-    print()
-</script>
+{% print_this %}
 
 </html>

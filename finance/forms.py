@@ -1,9 +1,13 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import BaseModelFormSet
 from finance.models import PayPeriod, Shift
+from gig.models import Job
+from employee.models import OfficeHours
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
+from django.db.models import Q
 
 
 class BaseShiftForm(forms.ModelForm):
@@ -21,8 +25,69 @@ class BaseShiftForm(forms.ModelForm):
 
 
 class BaseShiftFormset(BaseModelFormSet):
-    pass
-
+    def clean(self):
+        super(BaseShiftFormset, self).clean()
+        if self.cleaned_data is None:
+            raise ValidationError("Data didn't reach server. Try again.")
+        for shift in self.cleaned_data:
+                employee = None
+                # if gig job, use that ref
+                if self.prefix.split('_')[0] == 'job':
+                    employee = Job.objects.get(pk=self.prefix.split('_')[-1]).employee
+                # otherwise fallback to an office hour
+                elif self.prefix.split('_')[0] == 'office':
+                    employee = OfficeHours.objects.get(pk=self.prefix.split('_')[-1]).employee
+                # if all else fails, fallback to self ref
+                else:
+                    employee = shift["id"].content_object.employee
+                if shift:
+                    if "time_out" not in shift:
+                        shifts = Shift.objects.filter(
+                            (
+                                Q(time_in__lt=shift["time_in"])
+                                & Q(time_out__gt=shift["time_in"])
+                            )  # Ends during this shift
+                        )
+                        if "id" in shift and shift["id"] is not None:
+                            shifts = shifts.filter(~Q(pk=shift["id"].pk))
+                        for s in shifts:
+                            if s.content_object.employee == employee:
+                                # pass
+                                raise ValidationError(
+                                    "Overlapping shifts. Please correct and try again"
+                                )
+                    else:
+                        if (
+                            shift["time_in"] is not None
+                            and shift["time_out"] is not None
+                        ):
+                            shifts = Shift.objects.filter(
+                                (
+                                    (
+                                        Q(time_in__lt=shift["time_in"])
+                                        & Q(time_out__gt=shift["time_in"])
+                                    )  # Ends during this shift
+                                    | (
+                                        Q(time_in__gt=shift["time_in"])
+                                        & Q(time_out__lt=shift["time_out"])
+                                    )  # entirely during this shift
+                                    | (
+                                        Q(time_in__lt=shift["time_in"])
+                                        & Q(time_out__gt=shift["time_out"])
+                                    )
+                                    | (
+                                        Q(time_in__lt=shift["time_out"])
+                                        & Q(time_out__gt=shift["time_out"])
+                                    )  # Starts during this shift
+                                )
+                            )
+                            if "id" in shift and shift["id"] is not None:
+                                shifts = shifts.filter(~Q(pk=shift["id"].pk))
+                            for s in shifts:
+                                if s.content_object.employee == employee:
+                                    raise ValidationError(
+                                        "Overlapping shifts. Please correct and try again"
+                                    )
 
 ShiftFormSet = modelformset_factory(
     Shift,

@@ -54,9 +54,10 @@ class LogEntryAdmin(admin.ModelAdmin):
 
 admin.site.unregister(Group)
 
+
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ["name", "hourly_rate","description"]
+    list_display = ["name", "hourly_rate", "description"]
     ordering = ["name"]
     search_fields = ["name", "description"]
     pass

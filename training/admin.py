@@ -20,6 +20,7 @@ class TraineeInlineAdmin(nested_admin.NestedStackedInline):
 @admin.register(Training)
 class TrainingAdmin(nested_admin.NestedModelAdmin):
     inlines = [TraineeInlineAdmin]
+    list_display = ["__str__", "date"]
     filter_horizontal = ["trainers", "attendees", "systems"]
     autocomplete_fields = ["location"]
 

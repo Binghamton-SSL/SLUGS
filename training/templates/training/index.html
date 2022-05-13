@@ -25,7 +25,7 @@
                         <div class="flex flex-col mt-1">
                             {% for trainer in training.trainers.all %}
                             <div class="flex px-2 py-1 mb-2 text-white bg-gray-600 rounded-sm">
-                                <div class="my-auto mr-2">{{trainer.first_name}} {{trainer.last_name}}</div>
+                                <div class="my-auto mr-2">{% if trainer.preferred_name %}{{trainer.preferred_name}} {% else %} {{trainer.first_name}} {% endif %} {{trainer.last_name}}</div>
                                 <div class="flex ml-auto mr-0 space-x-2">
                                     <a class="p-1" href="tel:{{trainer.phone_number}}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"

@@ -1,6 +1,7 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
 {% load static %}
+{% load finance_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
         rel="stylesheet">
     <meta name="title" content="SLUGS">
     <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
@@ -52,7 +53,7 @@
                                 <h1 class="text-8xl font-stencil">BSSL</h1>
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
-                                    <span class="text-xs text-center">Binghamton Sound Stage and Lighting</span><br>
+                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
                                     <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
                                     <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
                                     <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
@@ -176,7 +177,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                {{estimate.gig.org.name}}
+                                                {{estimate.billing_contact.organization.name}}
                                             </td>
                                             {% if estimate.gig.org.SA_account_num %}
                                             <td>
@@ -208,7 +209,7 @@
                                     {{estimate.notes|safe}}
                                 </div>
                                 {% if estimate.gig.notes %}
-                                <h3 class="text-md font-bold">ATTN ENG:</h3>
+                                <h3 class="font-bold text-md">ATTN ENG:</h3>
                                 <div class="text-sm">
                                     {{estimate.gig.notes|safe}}
                                 </div>
@@ -273,31 +274,35 @@
                                             {% if system.addl_description %}
                                             <span class="text-xs">{{system.addl_description}}</span><br>
                                             {% endif %}
-                                            {% if system.base_price %}
-                                            Flat Rate
-                                            {% endif %}
-                                            {% if system.price_per_hour %}
-                                            Hourly Rate
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                {% if pricing.base_price %}
+                                                Flat Rate
+                                                {% endif %}
+                                                {% if pricing.price_per_hour %}
+                                                Hourly Rate
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{qty}}
+                                            {{qty|floatformat:2}}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {% if system.base_price %}
-                                            {{system.base_price}}
-                                            {% elif system.price_per_hour %}
-                                            {{system.price_per_hour}}
-                                            {% elif system.price_per_hour_for_duration_of_gig %}
-                                            {{system.price_per_hour_for_duration_of_gig}}
-                                            {% elif system.price_per_hour_for_load_in_out_ONLY %}
-                                            {{system.price_per_hour_for_load_in_out_ONLY}}
-                                            {% else %}
-                                            0.00
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                {% if pricing.base_price %}
+                                                {{pricing.base_price}}
+                                                {% elif pricing.price_per_hour %}
+                                                {{pricing.price_per_hour}}
+                                                {% elif pricing.price_per_hour_for_duration_of_gig %}
+                                                {{pricing.price_per_hour_for_duration_of_gig}}
+                                                {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
+                                                {{pricing.price_per_hour_for_load_in_out_ONLY}}
+                                                {% else %}
+                                                0.00
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{total_price}}
+                                            ${{total_price}}
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -315,7 +320,7 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                            {% if estimate.fees.all.count > 0 or estimate.onetimefee_set.all.count > 0 %}
+                            {% if estimate.onetimefee_set.all.count > 0 %}
                             <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
                                 <colgroup>
                                     <col span="1" style="width: 20%;">
@@ -436,7 +441,7 @@
                                         Engineers are not required to work more than 15 minutes past the End Time. If
                                         the engineers
                                         agree to work beyond contracted hours, the
-                                        promoter will be billed a $20 late fee, as well as the extra labor per hour at
+                                        promoter will be billed $20 per hour in addition to the extra labor per hour at
                                         the current
                                         hourly rate.
                                     </li>
@@ -498,31 +503,66 @@
                                 <div class="flex mt-10 text-sm dont_break" style="width: 8.75in;">
                                     <div class="flex mx-auto">
                                         <p class="mr-4">BSSL</p>
-                                        <div class="flex flex-col">
+                                        <div class="text-center">
                                             <p class="mx-auto">_________________________________</p>
                                             <p class="mx-auto">{{request.user.first_name}} {{request.user.last_name}}
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex mx-auto">
-                                        <p class="mr-4">{{estimate.gig.org}}</p>
-                                        <div class="flex flex-col">
-                                            <p class="mx-auto">_________________________________</p>
-                                            <p class="mx-auto">{{estimate.gig.contact.name}}</p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
-                                            </p>
-                                            <p class="mx-auto text-xs">
-                                                {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
-                                            </p>
+                                    <div class="flex-col mx-auto">
+                                        <div class="flex ml-auto mr-0 w-max">
+                                            <p class="mr-4">{{estimate.gig.org.name}}</p>
+                                            <div class="text-center">
+                                                <p class="mx-auto">_________________________________</p>
+                                                <p class="mx-auto">{{estimate.gig.contact.name}}</p>
+                                                <p class="mx-auto text-xs">
+                                                    {% if estimate.gig.contact.phone_number %}{{estimate.gig.contact.phone_number}}{% endif %}
+                                                </p>
+                                                <p class="mx-auto text-xs">
+                                                    {% if estimate.gig.contact.email %}{{estimate.gig.contact.email}}{% endif %}
+                                                </p>
+                                            </div>
                                         </div>
+                                        {% if estimate.billing_contact != estimate.gig.contact %}
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                            have read the contract and BSSL Reservation Policy in
+                                            full
+                                            and agree to the terms and conditions.</p>
+                                            <p class="text-center text-md my-4 font-bold">Please complete one of the following:</p>
+                                            <div class="flex mx-auto w-max">
+                                                <div class="h-4 w-4 border-black border-2 mr-4 my-auto text-transparent">.</div>
+                                                <p class="text-xs w-52">
+                                                    I, {{estimate.gig.contact.name}} am authorized to execute on behalf of {{estimate.billing_contact.organization.name}}
+                                                </p>
+                                            </div>
+                                            <p class="text-center text-md font-bold">OR</p>
+                                            <div class="flex ml-auto mr-0 w-max">
+                                                <p class="mr-4">{{estimate.billing_contact.organization.name}}</p>
+                                                <div class="text-center">
+                                                    <p class="mx-auto">_________________________________</p>
+                                                    <p class="mx-auto">{{estimate.billing_contact.name}}</p>
+                                                    <p class="mx-auto text-xs">
+                                                        {% if estimate.billing_contact.phone_number %}{{estimate.billing_contact.phone_number}}{% endif %}
+                                                    </p>
+                                                    <p class="mx-auto text-xs">
+                                                        {% if estimate.billing_contact.email %}{{estimate.billing_contact.email}}{% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                                have read the contract and BSSL Reservation Policy in
+                                                full
+                                                and agree to the terms and conditions. I agree to pay the
+                                                total amount in full upon receipt of invoice.</p>
+                                        {% else %}
+                                            <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
+                                                have read the contract and BSSL Reservation Policy in
+                                                full
+                                                and agree to the terms and conditions. I agree to pay the
+                                                total amount in full upon receipt of invoice.</p>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <p class="mt-1 ml-auto mr-0 text-xs text-right w-[20rem]">My signature signifies that I
-                                    have read the contract and BSSL Reservation Policy in
-                                    full
-                                    and agree to the terms and conditions. I agree to pay the
-                                    total amount in full upon receipt of invoice.</p>
                             </div>
                         </div>
                     </div>
@@ -588,8 +628,6 @@
         /* border: none!important; */
     }
 </style>
-<script>
-    print()
-</script>
+{% print_this %}
 
 </html>

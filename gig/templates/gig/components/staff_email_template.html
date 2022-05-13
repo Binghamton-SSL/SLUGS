@@ -173,7 +173,7 @@
                                                     href="https://slugs.bssl.binghamtonsa.org/" style="outline:none"
                                                     tabindex="-1" target="_blank"><img align="center" border="0"
                                                         class="center autowidth"
-                                                        src="{{request.scheme}}://{{request.get_host}}{% static 'img/logo/logo.png' %}"
+                                                        src="{{email_request.scheme}}://{{email_request.get_host}}{% static 'img/logo/logo.png' %}"
                                                         style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 100px; display: block;"
                                                         width="100" /></a>
                                                 <!--[if mso]></td></tr></table><![endif]-->
@@ -318,7 +318,7 @@
                                                         {% if job|isEngineer %}
                                                         <li
                                                             style="font-size: 14px; line-height: 1.2; mso-line-height-alt: 17px;">
-                                                            {{job.employee.first_name}} {{job.employee.last_name}} </li>
+                                                            {% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}} </li>
                                                         {% endif %}
                                                         {% endfor %}
                                                     </ul>
@@ -353,7 +353,7 @@
                                             <div align="center" class="button-container"
                                                 style="padding-top:10px;padding-right:10px;padding-bottom:10px;padding-left:10px;">
                                                 <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;"><tr><td style="padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://slugs.bssl.binghamtonsa.org/" style="height:31.5pt;width:196.5pt;v-text-anchor:middle;" arcsize="10%" stroke="false" fillcolor="#009961"><w:anchorlock/><v:textbox inset="0,0,0,0"><center style="color:#ffffff; font-family:'Trebuchet MS', Tahoma, sans-serif; font-size:16px"><![endif]--><a
-                                                    href="{{request.scheme}}://{{request.get_host}}{% url 'gig:showView' gig_id=gig.pk %}"
+                                                    href="{{email_request.scheme}}://{{email_request.get_host}}{% url 'gig:showView' gig_id=gig.pk %}"
                                                     style="-webkit-text-size-adjust: none; text-decoration: none; display: inline-block; color: #ffffff; background-color: #009961; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; width: auto; width: auto; border-top: 1px solid #009961; border-right: 1px solid #009961; border-bottom: 1px solid #009961; border-left: 1px solid #009961; padding-top: 5px; padding-bottom: 5px; font-family: 'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif; text-align: center; mso-border-alt: none; word-break: keep-all;"
                                                     target="_blank"><span
                                                         style="padding-left:15px;padding-right:15px;font-size:16px;display:inline-block;letter-spacing:undefined;"><span
@@ -373,6 +373,12 @@
                                                         style="margin: 0; font-size: 14px; line-height: 1.2; word-break: break-word; mso-line-height-alt: 17px; margin-top: 0; margin-bottom: 0;">
                                                         Date and Time: {{gig.start}} - {{gig.end}}</p>
                                                     <p
+                                                    style="margin: 0; line-height: 1.2; word-break: break-word; font-size: 14px; mso-line-height-alt: 17px; margin-top: 0; margin-bottom: 0;">
+                                                    <span style="font-size: 14px;">Gig Notes:</span></p>
+                                                    <div>
+                                                        {{gig.notes|safe}}
+                                                    </div>
+                                                    <p
                                                         style="margin: 0; font-size: 14px; line-height: 1.2; word-break: break-word; mso-line-height-alt: 17px; margin-top: 0; margin-bottom: 0;">
                                                         Systems:</p>
                                                     <ul>
@@ -387,11 +393,11 @@
                                                         <span style="font-size: 14px;">Load In:</span></p>
                                                     <p
                                                     style="margin: 0; line-height: 1.2; word-break: break-word; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;">
-                                                     </p>
+                                                    </p>
                                                     {% for loadin in gig.loadin_set.all %}
                                                         <p
                                                             style="margin: 0; line-height: 1.2; word-break: break-word; font-size: 12px; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;">
-                                                            <span style="font-size: 12px;">{{loadin.get_department_display}}</span></p>
+                                                            <span style="font-size: 12px;">{{loadin.get_department_display}} {% if loadin.note %} - {{loadin.note}}{% endif %}</span></p>
                                                         <p
                                                             style="margin: 0; line-height: 1.2; word-break: break-word; font-size: 12px; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;">
                                                             <span style="font-size: 12px;">Shop Time: {{loadin.shop_time}}</span></p>
@@ -412,7 +418,7 @@
                                                         {% for job in gig.job_set.all %}
                                                         <li
                                                             style="line-height: 1.2; font-size: 14px; mso-line-height-alt: 17px;">
-                                                            <span style="font-size: 14px;">{{job.employee.first_name}} {{job.employee.last_name}}</span></li>
+                                                            <span style="font-size: 14px;">{% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}}</span></li>
                                                         {% endfor %}
                                                     </ul>
                                                 </div>
@@ -486,7 +492,7 @@
                                                 style="padding-right: 0px;padding-left: 0px;">
                                                 <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]--><img
                                                     align="center" border="0" class="center autowidth"
-                                                    src="{{request.scheme}}://{{request.get_host}}{% static 'img/logo/logo.png' %}"
+                                                    src="{{email_request.scheme}}://{{email_request.get_host}}{% static 'img/logo/logo.png' %}"
                                                     style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 100%; max-width: 100px; display: block;"
                                                     width="100" />
                                                 <!--[if mso]></td></tr></table><![endif]-->

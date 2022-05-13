@@ -1,0 +1,49 @@
+{% extends "theme/base.html" %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% block title %} - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}} - Sign Timesheet{% endblock %}
+{% block content %}
+<div class="flex flex-col max-w-5xl mx-auto mt-10">
+    <h1 class="text-3xl">Sign Timesheet {{timesheet.pay_period}}</h1>
+    <div class="bg-white w-full sm:w-[9in] mx-auto">
+        <iframe src="{% url 'finance:timesheetnoprint' timesheet.pay_period.pk request.user.pk %}" class="h-[11in] w-full sm:w-[8.5in] mx-auto"></iframe>
+    </div>
+    <div class="p-5 m-4 text-black bg-red-300 rounded-sm"> 
+        <h2>
+            By signing this form electronically using your signature, you agree to the following:
+        </h2>
+        <ul class="list-disc">
+            <li class="text-black">
+                Your signature will be binding and held to the same standard as a physical signature
+            </li>
+            <li class="text-black">
+                Clicking "Sign using Signature on File" shows your clear intent to sign <b>Timesheet {{timesheet.pay_period}}</b>
+            </li>
+            <li class="text-black">
+                You've been given the option to sign and submit this form manually and are opting out
+            </li>
+            <li class="text-black">
+                You would like us to swing💰you🤑that💸bag
+            </li>
+        </ul>
+    </div>
+    <div class="mt-5">
+        {% crispy form %}
+    </div>
+</div>
+<style>
+    label {
+        color: white!important;
+    }
+    ul {
+        color: rgb(228, 225, 225)!important;
+    }
+    .clearablefileinput {
+        color:rgb(228, 225, 225);
+        border-radius: 2px;
+    }
+    #div_id_pdf a {
+        text-decoration: underline;
+        margin-right: 1rem;
+    }
+</style>
+{% endblock %}

@@ -1,6 +1,7 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
 {% load static %}
+{% load finance_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
         rel="stylesheet">
     <meta name="title" content="SLUGS">
     <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
@@ -52,7 +53,7 @@
                                 <h1 class="text-8xl font-stencil">BSSL</h1>
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
-                                    <span class="text-xs text-center">Binghamton Sound Stage and Lighting</span><br>
+                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
                                     <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
                                     <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
                                     <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
@@ -86,10 +87,10 @@
                                                 {% now "n/j/Y" %}
                                             </td>
                                             <td>
-                                                {% if estimate.gig.payment_due %} {{estimate.gig.payment_due|date:"n/j/Y"}} {% else %} Upon Receipt {% endif %}
+                                                {% if estimate.payment_due %} {{estimate.payment_due|date:"n/j/Y"}} {% else %} Upon Receipt {% endif %}
                                             </td>
                                             <td>
-                                                I{{2500|add:estimate.pk}}
+                                                SA7400-I{{2500|add:estimate.pk}}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -237,31 +238,35 @@
                                             {% if system.description %}
                                             <span class="text-xs">{{system.description}}</span><br>
                                             {% endif %}
-                                            {% if system.base_price %}
-                                            Flat Rate
-                                            {% endif %}
-                                            {% if system.price_per_hour %}
-                                            Hourly Rate
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start %}
+                                                {% if pricing.base_price %}
+                                                Flat Rate
+                                                {% endif %}
+                                                {% if pricing.price_per_hour %}
+                                                Hourly Rate
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{qty}}
+                                            {{qty|floatformat:2}}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {% if system.base_price %}
-                                            {{system.base_price}}
-                                            {% elif system.price_per_hour %}
-                                            {{system.price_per_hour}}
-                                            {% elif system.price_per_hour_for_duration_of_gig %}
-                                            {{system.price_per_hour_for_duration_of_gig}}
-                                            {% elif system.price_per_hour_for_load_in_out_ONLY %}
-                                            {{system.price_per_hour_for_load_in_out_ONLY}}
-                                            {% else %}
-                                            0.00
-                                            {% endif %}
+                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                {% if pricing.base_price %}
+                                                {{pricing.base_price}}
+                                                {% elif pricing.price_per_hour %}
+                                                {{pricing.price_per_hour}}
+                                                {% elif pricing.price_per_hour_for_duration_of_gig %}
+                                                {{pricing.price_per_hour_for_duration_of_gig}}
+                                                {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
+                                                {{pricing.price_per_hour_for_load_in_out_ONLY}}
+                                                {% else %}
+                                                0.00
+                                                {% endif %}
+                                            {% endwith %}
                                         </td>
                                         <td style="padding: 0;" class="text-center">
-                                            {{total_price}}
+                                            ${{total_price}}
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -279,7 +284,7 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                            {% if estimate.fees.all.count > 0 or estimate.onetimefee_set.all.count > 0 %}
+                            {% if estimate.onetimefee_set.all.count > 0 %}
                             <table style="border-bottom: none; border-top: none;" class="w-full text-sm no-border">
                                 <colgroup>
                                     <col span="1" style="width: 20%;">
@@ -424,7 +429,7 @@
                                     Payment due upon receipt of Invoice by way of Check of SA inter-organization transfer.
                                 </p>
                                 <p>
-                                    Make checks payable to: <br>Binghamton Sound, Staging, and Lighting (SA Account #7400) / Student Association of Binghamton University Inc.
+                                    Make checks payable to: <br>Binghamton University Student Association inc. <br>Memo: BSSL Invoice #SA7400-I{{estimate.pk|add:2500}}
                                 </p>
                                 <p>
                                     Invoices unpaid after two weeks will be subject to late fee.
@@ -486,8 +491,7 @@
         /* border: none!important; */
     }
 </style>
-<script>
-    print()
-</script>
+{% print_this %}
+
 
 </html>

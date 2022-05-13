@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -46,11 +47,9 @@ class index(SLUGSMixin, TemplateView):
         self.added_context["signup_open"] = signupStatus.objects.first().is_open
         self.added_context["gigs"] = (
             (
-                Gig.objects.filter(job__employee=request.user).distinct().order_by("-start")
-                # Job.objects.all()
-                # .filter(employee=request.user)
-                # .select_related("gig")
-                # .order_by("-gig__start")
+                Gig.objects.filter(job__employee=request.user)
+                .distinct()
+                .order_by("-start")
             )
             if request.user.is_authenticated
             else None
@@ -70,5 +69,14 @@ class index(SLUGSMixin, TemplateView):
                 Gig.objects.get(pk=next_gig_id[0]["gig__id"])
                 if (len(next_gig_id) > 0)
                 else None
+            )
+            self.added_context[
+                "outstanding_paperwork"
+            ] = request.user.paperworkform_set.filter(
+                Q(processed=False)
+                & (
+                    Q(form__required_for_employment=True)
+                    | Q(form__required_for_payroll=True)
+                )
             )
         return super().dispatch(request, *args, **kwargs)

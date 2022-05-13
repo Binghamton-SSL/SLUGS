@@ -4,6 +4,14 @@
 
 {% block content %}
 <div class="max-w-5xl mx-auto mt-10">
+    {% if signup_open %}
+    <a class="m-4" href="{% url 'index' %}">
+        <div
+            class="flex max-w-5xl px-12 py-6 mx-auto text-center text-black transition bg-red-300 rounded-sm hover:bg-red-200">
+            <div style="margin: auto;"> Looking for work signup? It's on the homepage. Click here or the snail above to go there. You'll find it in a box much like this one.</div>
+        </div>
+    </a>
+    {% endif %}
     <h1 class="text-4xl text-bold">
         Shows
     </h1>

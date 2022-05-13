@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Allerta+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
         rel="stylesheet">
     <meta name="title" content="SLUGS">
     <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
@@ -76,6 +76,11 @@
     <p class="font-mono text-xs text-gray-300"><span class="font-stencil">S.L.U.G.S</span> is created for the exclusive use of BSSL</p>
     <p class="text-xs text-gray-600">We use Google Analytics to monitor usage and make sure all is well. <br> If you're worried about your privacy contact <a href="mailto:slugs@joebabbitt.com" class="underline">Joe</a></p>
     <p class="text-xs text-gray-700">S.L.U.G.S. version: {% settings_value "VERSION" %} - {% settings_value "BUILD" %}</p>
+    <div class="text-xs text-gray-700">
+        <p>Debug Info:</p>
+        <p>UID - {{request.user.pk}}</p>
+        <p>User-UID - {{user.pk}}</p>
+    </div>
 </footer>
 {% endblock %}
 </html>

@@ -1,18 +1,62 @@
 from django.contrib import admin
-from equipment.models import System, BrokenEquipmentReport, SystemAddon
-
-
-@admin.register(SystemAddon)
-class SystemAddon(admin.ModelAdmin):
-    search_fields = ["name"]
-    pass
+from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
+from import_export.admin import ImportExportMixin
+from import_export import resources
+from equipment.models import (
+    System,
+    BrokenEquipmentReport,
+    SystemAddon,
+    Equipment,
+    Category,
+    ServiceRecord,
+    Item,
+    SystemQuantity,
+    SystemQuantityAddon,
+)
+from finance.admin import SystemAddonPricingInline, SystemPricingInline
 
 
 # Register your models here.
+class ServiceRecordInline(NestedStackedInline):
+    model = ServiceRecord
+    readonly_fields = ["date_created", "date_last_modified"]
+    extra = 0
+
+
+class ItemThroughInline(NestedStackedInline):
+    verbose_name = "Child"
+    verbose_name_plural = "Children"
+    model = Item.children.through
+    fk_name = "parent"
+    extra = 0
+
+
+class ItemInline(NestedStackedInline):
+    model = Item
+    inlines = [ItemThroughInline]
+    extra = 0
+
+
+class EquipmentInline(admin.StackedInline):
+    model = SystemQuantity
+    extra = 0
+
+
+class EquipmentAddonInline(admin.StackedInline):
+    model = SystemQuantityAddon
+    extra = 0
+
+
+@admin.register(SystemAddon)
+class SystemAddonAdmin(admin.ModelAdmin):
+    inlines = [SystemAddonPricingInline, EquipmentAddonInline]
+    search_fields = ["name"]
+
+
 @admin.register(System)
 class SystemAdmin(admin.ModelAdmin):
+    inlines = [SystemPricingInline, EquipmentInline]
     search_fields = ["name"]
-    pass
 
 
 @admin.register(BrokenEquipmentReport)
@@ -28,3 +72,55 @@ class BrokenEquipmentReportAdmin(admin.ModelAdmin):
         ),
         (None, {"fields": ("investigation",)}),
     ]
+
+
+@admin.register(Equipment)
+class EquipmentAdmin(NestedModelAdmin):
+    inlines = [ItemInline]
+    list_filter = ["category", "brand", "department"]
+    search_fields = ["name", "brand", "model_number", "reorder_link"]
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+
+
+@admin.register(ServiceRecord)
+class ServiceRecordAdmin(admin.ModelAdmin):
+    verbose_name = "Service Record / Equipment Note"
+    verbose_name_plural = "Service Records & Equipment Notes"
+    search_fields = ["name", "date_created"]
+
+
+class ItemResource(resources.ModelResource):
+    class Meta:
+        model = Item
+        fields = (
+            "id",
+            "status",
+            "label",
+            "serial_no",
+            "purchase_date",
+            "item_type__name",
+            "item_type__description",
+            "item_type__brand",
+            "item_type__model_number",
+            "item_type__name",
+            "item_type__department",
+            "item_type__value",
+            "item_type__wattage",
+            "item_type__category",
+            "barcode",
+            "children",
+            "last_updated",
+        )
+
+
+@admin.register(Item)
+class ItemAdmin(ImportExportMixin, NestedModelAdmin):
+    resource_class = ItemResource
+    inlines = [ServiceRecordInline, ItemThroughInline]
+    # list_filter = ["equipment__department"]
+    exclude = ["children"]
+    search_fields = ["pk", "barcode", "serial_no"]

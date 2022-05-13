@@ -1,4 +1,5 @@
 from django.views.generic.base import TemplateView
+from django.contrib import messages
 
 
 # Create your views here.
@@ -78,8 +79,20 @@ class MultipleFormView(TemplateView):
         if valid:
             return self.process_forms(forms_initialized)
         else:
-            context = merge_dicts(self.get_context_data(), forms_initialized)
+            context = super(MultipleFormView, self).get_context_data(**kwargs)
+            try:
+                context = self.post_valid_reject(context)
+            except NotImplementedError:
+                context = merge_dicts(self.get_context_data(), forms_initialized)
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                "Something is wrong. Make sure you're filling out the form properly.",
+            )
             return self.render_to_response(context)
 
     def process_forms(self, form_instances):
+        raise NotImplementedError
+
+    def post_valid_reject(self, context):
         raise NotImplementedError

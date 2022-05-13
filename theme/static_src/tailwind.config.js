@@ -18,22 +18,20 @@ module.exports = {
         '../../*/templates/**/*.html',
         '../../**/forms.py',
         '../../*/templatetags/*.py',
-        // // Templates within theme app (e.g. base.html)
-        // '../templates/**/*.html',
-        // // Templates in other apps. Adjust the following line so that it matches
-        // // your project structure.
-        // '../../templates/**/*.html',
     ],
     darkMode: false, // or 'media' or 'class'
     theme: {
         extend: {
             fontFamily: {
-                'stencil': ['Allerta Stencil', 'sans-serif'],
+                'stencil': ['Stardos Stencil', 'sans-serif'],
                 'brand': ['Rubik', 'sans-serif'],
             },
             transitionProperty: {
                 'height': 'height',
                 'width': 'width',
+            },
+            screens: {
+                'xs-landscape': '500px'
             }
         },
     },

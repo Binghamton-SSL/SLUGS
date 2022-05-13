@@ -1,9 +1,7 @@
 *.json
-*/settings.py
 *.sqlite3
 __pycache__
 .env
-SLUGS/settings.py
 .vscode/
 *.sqlite3
 passenger_wsgi.py
@@ -16,3 +14,4 @@ exports/
 .coverage
 migrations/
 htmlcov/
+dependancy_tree.txt

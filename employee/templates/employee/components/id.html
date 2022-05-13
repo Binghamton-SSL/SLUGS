@@ -1,0 +1,75 @@
+{% load grouping %}
+<div class="p-2 bg-gray-300 text-black">
+This ID may be cross-referenced with a BU ID for photo identification.
+</div>
+<div class="border-2 border-white max-w-prose my-4 p-4 rounded-lg w-full mx-auto">
+    <p class="font-stencil text-center text-xl">BSSL EMPLOYEE ID</p>
+    <div class="flex">
+        <p class="text-xl mr-auto">{% if user.preferred_name %}{{user.preferred_name}} {% else %} {{user.first_name}} {% endif %} {{user.last_name}}</p>
+        <p class="text-xl ml-auto">Hired: {{user.date_joined|date:"n/j/Y"}}</p>
+    </div>
+    {% if user|has_group:"Manager" %}
+    <div class="m-2 font-stencil p-4 bg-white text-black text-center">
+        {% if user.preferred_name %}{{user.preferred_name|upper}} {% else %} {{user.first_name|upper}} {% endif %} {{user.last_name|upper}} IS A BSSL MANAGER
+    </div>
+    {% endif %}
+    {% if gig_happening %}
+    <div class="pt-4">
+        <p class="text-center">This employee is currently authorized to work at:</p>
+        <p class="text-2xl text-center">{{next_gig.name}}</p>
+        <p class="text-center pt-4">Their duties include:</p>
+        {% for job in jobs_in_gig %}
+        <p class="text-2xl text-center">{{job.position}}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="pt-4 text-stencil p-1 bg-red-300 text-black text-center" >
+        ID ONLY VALID IF BSSL LOGO IS MOVING BELOW
+    </div>
+    <div>
+        <div class="bg-white font-stencil p-4 text-3xl animate-text overflow-hidden">
+            <p class="animate-bounce text-center">BSSL</p>
+        </div>
+        <p class="text-center text-2xl">Today's Date: {% now "n/j/Y" %}</p>
+    </div>
+</div>
+<style>
+.animate-bounce {
+    animation-name: bsslBounce;
+    animation-duration: 7s;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+.animate-text {
+    animation-name: bsslText;
+    animation-duration: 11s;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+@keyframes bsslBounce {
+  0% {
+    tranform: translateX(0);
+    }
+  33% {
+    transform: translateX(-10rem);
+    }
+  66% {
+    transform: translateX(10rem);
+    }
+  100% {
+    transform: translateX(0rem);
+    }
+  
+}
+@keyframes bsslText {
+  from {
+    color: black;
+    }
+  to {
+    color: white;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+}
+</style>

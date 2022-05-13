@@ -1,13 +1,20 @@
+from django.contrib import messages
+from django.urls.base import reverse_lazy
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from employee.forms import signPaperworkForm
 from finance.estimate_data_utils import calculateGigCost
 from django.http.response import HttpResponse
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 import django.utils.timezone as timezone
 import pytz
 import csv
 from datetime import datetime
+from django.utils.timezone import localtime, now
 from django.db.models import Q
 from django.views import View
 from django.conf import settings
@@ -16,9 +23,13 @@ from django.db.models import Sum
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
-from finance.models import Estimate, SystemInstance, PayPeriod, Shift, Wage
+from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet, Wage
 from employee.models import Employee
+from utils.generic_email import send_generic_email
 import decimal
+import calendar
+import barcode
+from functools import reduce
 
 
 class viewEstimate(SLUGSMixin, TemplateView):
@@ -41,19 +52,41 @@ class viewInvoice(SLUGSMixin, TemplateView):
 
 
 class viewTimesheet(SLUGSMixin, TemplateView):
-    template_name = "finance/timesheet.html"
+    template_name = "finance/printed_timesheet.html"
 
     def dispatch(self, request, *args, **kwargs):
         pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
         employee = Employee.objects.get(pk=kwargs["emp_id"])
+        timesheet = TimeSheet.objects.get(employee=employee, pay_period=pay_period)
+        barc = barcode.get("code128", str(timesheet.pk))
+        barc.default_writer_options.update(
+            {
+                "module_height": 8.0,
+                "font_size": 0,
+                "text_distance": 0,
+            }
+        )
+        self.added_context["barcode"] = (
+            str(barc.render()).replace("\\n", "").replace("b'", "").replace("'", "")
+        )
+        if request.user.pk is not None:
+            if employee.pk != request.user.pk and (
+                not has_group(request.user, "Manager")
+            ):
+                raise PermissionDenied()
         shifts = pay_period.shifts.none()
         rates = {}
-        for rate in Wage.objects.all().order_by("hourly_rate"):
-            rates[rate] = [rate, 0]
         for shift in pay_period.shifts.all():
             if shift.content_object.employee == employee and shift.processed:
                 shifts |= Shift.objects.filter(pk=shift.pk)
-                rates[shift.content_object.position.hourly_rate][1] += (
+                rate_of_pay = HourlyRate.objects.get(
+                    Q(wage=shift.content_object.position.hourly_rate)
+                    & Q(date_active__lte=shift.time_in)
+                    & (Q(date_inactive__gt=shift.time_in) | Q(date_inactive=None))
+                )
+                if rate_of_pay not in rates:
+                    rates[rate_of_pay] = [rate_of_pay, 0]
+                rates[rate_of_pay][1] += (
                     round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                 )
         table_rows = []
@@ -149,11 +182,94 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["shifts"] = shifts
         self.added_context["employee"] = employee
         self.added_context["pay_period"] = pay_period
+        self.added_context["timesheet"] = timesheet
         self.added_context["table_rows"] = table_rows
-        self.added_context["rates"] = rates
+        self.added_context["rates"] = dict(
+            sorted(rates.items(), key=lambda item: item[0].hourly_rate)
+        )
         self.added_context["t_total"] = t_total
-        self.added_context["t_amt"] = shifts.aggregate(Sum("cost"))
+        self.added_context["t_amt"] = round(
+            float(
+                reduce(
+                    lambda sum, shift: (
+                        sum
+                        + float(
+                            HourlyRate.objects.get(
+                                Q(wage=shift.content_object.position.hourly_rate)
+                                & Q(date_active__lte=shift.time_in)
+                                & (
+                                    Q(date_inactive__gt=shift.time_in)
+                                    | Q(date_inactive=None)
+                                )
+                            ).hourly_rate
+                        )
+                        * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
+                    ),
+                    shifts,
+                    0,
+                )
+            ),
+            2,
+        )
         return super().dispatch(request, *args, **kwargs)
+
+
+class ViewTimesheetNoPrint(viewTimesheet):
+    template_name = "finance/timesheet.html"
+
+    @xframe_options_sameorigin
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+class SignTimesheet(SLUGSMixin, FormView):
+    form_class = signPaperworkForm
+    template_name = "finance/sign_timesheet.html"
+    success_url = reverse_lazy("employee:overview")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.pk is not None:
+            self.timesheet = TimeSheet.objects.get(pk=kwargs["timesheet_id"])
+            if self.timesheet.employee.pk != request.user.pk:
+                raise PermissionDenied()
+            self.added_context["timesheet"] = self.timesheet
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        LogEntry.objects.log_action(
+            user_id=self.added_context["timesheet"].employee.pk,
+            content_type_id=ContentType.objects.get_for_model(
+                self.added_context["timesheet"], for_concrete_model=False
+            ).pk,
+            object_id=self.added_context["timesheet"].pk,
+            object_repr=str(self.added_context["timesheet"]),
+            action_flag=CHANGE,
+            change_message=f"{self.added_context['timesheet'].employee} signed timesheet electronically.",
+        )
+        self.added_context["timesheet"].signed = localtime(now()).date()
+        self.added_context["timesheet"].save()
+        send_generic_email(
+            request=None,
+            title=f"TIMESHEET SIGNED - {self.added_context['timesheet']}",
+            included_text=(
+                f"""
+                Ayo FD,
+                <br><br>
+                {(self.added_context['timesheet'].employee.preferred_name if self.added_context['timesheet'].employee.preferred_name else self.added_context['timesheet'].employee.first_name)} {self.added_context['timesheet'].employee.last_name} signed their timesheet for the pay period {self.added_context['timesheet'].pay_period.start} through {self.added_context['timesheet'].pay_period.end}.
+                <br><br>
+                <b>Go to SLUGS to print it</b>
+                <br><br>
+                """
+            ),  # noqa
+            subject=f"[SLUGS] TIMESHEET SIGNED - {self.added_context['timesheet']}",
+            to=["bssl.finance@binghamtonsa.org"],
+        )
+        messages.add_message(
+            self.request,
+            messages.SUCCESS,
+            f"Timesheet: {self.added_context['timesheet'].pay_period} has been signed electronically.",
+        )
+        return super().form_valid(form)
 
 
 class viewSummary(SLUGSMixin, TemplateView):
@@ -184,7 +300,10 @@ class exportSummaryCSV(SLUGSMixin, View):
         writer = csv.writer(response)
         writer.writerow(
             ["B-num", "Name"]
-            + [f"{rate.name} Hours - ${rate.hourly_rate}" for rate in sumData["rates"]]
+            + [
+                f"{rate.wage.name} Hours - ${rate.hourly_rate}"
+                for rate in sumData["rates"]
+            ]
             + ["Total Hours", "Gross Pay"]
             + ["Pay Period Start", "Pay Period End", "Payday"]
         )
@@ -203,8 +322,10 @@ class exportSummaryCSV(SLUGSMixin, View):
             writer.writerow(
                 [emp["bnum"], emp["name"]]
                 + [
-                    "-" if emp["rates"][rate][1] == 0 else emp["rates"][rate][1]
-                    for rate in emp["rates"]
+                    "-"
+                    if (rate not in emp["rates"] or emp["rates"][rate][1] == 0)
+                    else emp["rates"][rate][1]
+                    for rate in sumData["rates"]
                 ]
                 + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]
             )
@@ -218,6 +339,50 @@ class exportSummaryCSV(SLUGSMixin, View):
             ]
         )
         return response
+
+
+class saBillingSummary(SLUGSMixin, TemplateView):
+    template_name = "finance/sa_billing_summary.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        month = kwargs["month"]
+        year = kwargs["year"]
+        estimates = Estimate.objects.filter(
+            Q(
+            gig__start__month=month,
+            gig__start__year=year,
+            billing_contact__organization__SA_account_num__isnull=False,
+            gig__published=True,
+            payment_due=None
+            )
+            |
+            Q(
+            payment_due__month=month,
+            payment_due__year=year,
+            billing_contact__organization__SA_account_num__isnull=False,
+            gig__published=True,
+            )
+        ).order_by("billing_contact__organization")
+        groups = {}
+        grand_total = decimal.Decimal(0)
+        for e in estimates:
+            if e.billing_contact.organization not in groups:
+                groups[e.billing_contact.organization] = {
+                    "estimates": [e],
+                    "total": decimal.Decimal(e.outstanding_balance),
+                }
+            else:
+                groups[e.billing_contact.organization]["estimates"].append(e)
+                groups[e.billing_contact.organization][
+                    "total"
+                ] += e.outstanding_balance
+            grand_total += e.outstanding_balance
+        self.added_context["groups"] = groups
+        self.added_context["grand_total"] = grand_total
+        self.added_context["month"] = month
+        self.added_context["year"] = year
+        self.added_context["month_name"] = calendar.month_name[int(month)]
+        return super().dispatch(request, *args, **kwargs)
 
 
 class RollOverAllShifts(SLUGSMixin, FormView):
@@ -248,19 +413,25 @@ class FinancialOverview(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not has_group(request.user, "Financial Director/GM"):
             raise PermissionDenied
-        most_recent_pay_period = PayPeriod.objects.all().order_by("-end").first()
+        # most_recent_pay_period = PayPeriod.objects.all().order_by("-end").first()
+        most_recent_pay_period = PayPeriod.objects.filter(end__lte=datetime.now()).order_by("end").last()
         shifts = Shift.objects.filter(
             Q(time_in__gte=most_recent_pay_period.start)
-            & Q(time_out__lte=most_recent_pay_period.end + timezone.timedelta(days=1))
-        ).order_by("-time_out")
+            & Q(time_in__lte=most_recent_pay_period.end + timezone.timedelta(days=1))
+        ).order_by("processed", "-time_out")
         most_recent_pay_period.shifts.set(shifts)
         most_recent_pay_period.save()
         shifts_hours = shifts.aggregate(Sum("total_time"))
         shifts_price = shifts.aggregate(Sum("cost"))
 
+        unsigned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=True)
+        unprocessed_tms = TimeSheet.objects.filter(~Q(signed=None) & Q(processed=None))
+
         self.added_context["most_recent_pay_period"] = most_recent_pay_period
         self.added_context["shifts"] = shifts
         self.added_context["shifts_hours"] = shifts_hours
         self.added_context["shifts_price"] = shifts_price
+        self.added_context["unsigned_tms"] = unsigned_tms
+        self.added_context["unprocessed_tms"] = unprocessed_tms
 
         return super().dispatch(request, *args, **kwargs)

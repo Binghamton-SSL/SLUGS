@@ -1,0 +1,91 @@
+{% extends "theme/base.html" %} {% load unicorn %} {% load grouping %} {% load crispy_forms_tags %} {% load static %} {% block title %} - Booking Homepage{% endblock %} {% block headincludes %}{% unicorn_scripts %}{% endblock %} {% block content %}
+<div class="max-w-5xl m-4 md:mx-auto">
+    <h1 class="text-4xl">Booking Overview</h1>
+    <div class="flex">
+        <a class="mx-auto" href="{% url 'admin:finance_estimate_add' %}"> <button class="px-8 py-4 mt-4 text-white bg-[#009961] text-xl rounded-sm">Create Estimate</button> </a>
+    </div>
+        
+    {% if gig_wo_estimate.count > 0 %}
+    <div>
+        <h2 class="mt-5 text-2xl">Gigs without Estimates</h2>
+        <div class="bg-red-500 text-black p-4">
+            <b>There are Gigs without estimates!</b>
+            <ul class="list-disc ml-6">
+            {% for gig in gig_wo_estimate %}
+                <li>
+                    {{gig}}
+                </li>
+            {% endfor %}
+            </ul>
+            <b>Go create estimates for these gigs please :)</b>
+        </div>
+    </div>
+    {% endif %}
+
+    <div>
+        <h2 class="mt-5 text-2xl">Outstanding Bookings</h2>
+        <h6 class="text-sm">These are all bookings that have not been finalized and are after today's date.</h6>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% now "Y-m-d" as today_date %}
+            {% for estimate in outstanding_bookings %}
+            <div class="flex flex-col p-4 text-center text-black {% if estimate.three_weeks_prior|date:'Y-m-d' < today_date %}bg-red-300{% else %}bg-white{% endif %} rounded-sm">
+                {% if estimate.three_weeks_prior|date:'Y-m-d' < today_date %}
+                    <p class="text-lg font-bold">EVENT IS LESS THAN 3 WEEKS OUT</p>
+                {% endif %}
+                <p class="text-2xl">{{estimate.gig.name}}</p>
+                {% if estimate.status == "L" %}
+                <p class="text-lg font-bold">ESTIMATE IN LIMBO / POSTPONED</p>
+                {% endif %}
+                <p class="text-xl">{{estimate.gig.org}}</p>
+                <p class="text-lg">{{estimate.gig.start|date:"n/j/y"}}</p>
+                <p class="text-md">${{estimate.total_amt|floatformat:2}}</p>
+                <div class="max-h-96 flex space-x-2 overflow-scroll">
+                    <div class="flex flex-col mx-auto mb-4 space-y-2">
+                        {% for system in estimate.gig.systeminstance_set.all %}
+                        <div class="flex flex-col p-4 mx-auto text-white bg-gray-800 rounded-sm">
+                            <h3 class="text-2xl text-center">{{system.system.get_department_display}}</h3>
+                            <h3 class="text-lg text-center ">{{system.system.name}}</h3>
+                            {% if system.addons %}
+                            <ul class="text-center">
+                                {% for addon in system.addons.all %}
+                                <li>+ {{addon}}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if estimate.gig.manager_only_notes or estimate.gig.notes %}
+                    <div class="">
+                        {% if estimate.gig.manager_only_notes %}
+                        <div class="p-2 bg-gray-300 text-md">
+                            <p class="text-center font-bold">MANAGER ONLY NOTES:</p>
+                            {{estimate.gig.manager_only_notes|safe }}
+                        </div>
+                        {% endif %} {% if estimate.gig.notes %}
+                        <div class="p-2 bg-gray-300 text-md">
+                            <p class="text-center font-bold">ATTN ENG:</p>
+                            {{estimate.gig.notes|safe }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex mt-auto mb-0 space-x-2">
+                    <a class="flex-1" href="{% url 'admin:finance_estimate_change' estimate.pk %}"> <button class="px-4 py-2 mt-2 text-white bg-black rounded">Goto Estimate</button> </a>
+                    <a class="flex-1" href="{% url 'admin:gig_gig_change' estimate.gig.pk %}"> <button class="px-4 py-2 mt-2 text-white bg-black rounded">Goto Gig</button> </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <h2 class="mt-5 text-2xl">Event Calendar</h2>
+        <h6 class="text-sm">Bookings both reserved and tentative appear here. Tentative events appear with "[TENTATIVE]" in the title</h6>
+        <div>
+            <iframe id="open-web-calendar" style="background:url('https://raw.githubusercontent.com/niccokunzmann/open-web-calendar/master/static/img/loaders/circular-loader.gif') center center no-repeat;" src="https://openwebcalendar.herokuapp.com/calendar.html?url=https%3A%2F%2Fslugs.bssl.binghamtonsa.org%2Futils%2Flatest%2Fevents.ics&amp;url=https%3A%2F%2Fslugs.bssl.binghamtonsa.org%2Futils%2Flatest%2Ftentative_events.ics&amp;title=BSSL%20MANAGER%20EVENT%20CALENDAR&amp;skin=dhtmlxscheduler.css&amp;css=.dhx_cal_navline%2C%20.dhx_scale_bar%2C%20.dhx_cal_container%2C%20.dhx_cal_header%20%7Bbackground-color%3A%20black%3B%7D%0A.event%2C%20.dhx_cal_tab.active%2C%20.dhx_cal_tab.active%3Ahover%20%7Bbackground-color%3A%20%23009961%3B%7D%20.dhx_month_head%2C%20.dhx_cal_tab%2C%20.dhx_cal_today_button%20%7Bcolor%3A%20%23009961%3B%7D%20.dhx_cal_tab%2C%20.dhx_cal_tab.active%20%7Bborder-color%3A%20%23009961%3B%7D%0A.dhx_month_body%2C%20.dhx_month_head%2C%20.dhx_cal_container%20%7B%20background-color%3A%20black%3B%20%7D%0A.dhx_after%20.dhx_month_body%2C%20.dhx_before%20.dhx_month_body%2C%20.dhx_after%20.dhx_month_head%2C%20.dhx_before%20.dhx_month_head%20%7B%20background-color%3A%20gray%3B%20%7D%0A.event%20%7B%0Acolor%3A%20white%0A%7D%0A.dhx_cal_date%20%7B%0Acolor%3A%20white!important%3B%0A%7D.dhx_cal_next_button%2C%20.dhx_cal_prev_button%20%7B%0Afilter%3A%20invert(1)%3B%0A%7D&amp;target=_blank"
+                sandbox="allow-scripts allow-same-origin allow-popups" allowTransparency="true" scrolling="no" frameborder="0" height="600px" width="100%"></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}

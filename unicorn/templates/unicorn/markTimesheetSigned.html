@@ -1,0 +1,40 @@
+<div>
+    <h2 class="mt-5 text-2xl">Mark Time Sheet as Signed</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <p>Type in a Time Sheet ID in order to quickly mark it as signed. Just press enter.</p>
+        <p class="p-1 m-2 text-sm bg-yellow-100 rounded-sm">There is a bug where the date will go away if you type it in. Don't worry, it got the date. It's just not showing it...</p>
+        <div class="flex space-x-2">
+            <input unicorn:model="date" type="date" id="timesheet_signed_date" />
+            <input type="number" class="w-24" min="1" id="TimeSheedMarkedID" placeholder="TS ID" onkeydown="test(event)">
+            <p id="tmSignMessage" class="{% if message %}p-2 m-2 my-auto bg-white rounded-sm {% if status == 'g' %} process-success {% elif status == 'b' %} process-fail {% endif %} {% endif %}">{{message}}</p>
+        </div>
+        <script>
+            const test = (e) => {
+                if(e.target.value.trim().length > 0 && e.keyCode == 13) {
+                    Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, e.target.value.trim())
+                    document.querySelector("#TimeSheedMarkedID").value = '';
+                    setTimeout(() => {
+                        document.querySelector("#tmSignMessage").classList.remove("process-success", "process-fail")
+                        Unicorn.call('markTimesheetSigned', 'updateTS', e.keyCode, "")
+                    }, 800);
+                }
+            }
+        </script>
+        <style>
+            .process-success {
+                animation: processed 0.75s forwards cubic-bezier(1, -0.07, 0.61, 0.57);
+            }
+            .process-fail {
+                animation: failed 0.75s forwards cubic-bezier(1, -0.07, 0.61, 0.57);
+            }
+            @keyframes processed {
+                from {background-color: rgb(16, 185, 129);}
+                to {background-color: white;}
+            }
+            @keyframes failed {
+                from {background-color: rgb(239, 68, 68);}
+                to {background-color: white;}
+            }
+        </style>
+    </div>
+</div>
