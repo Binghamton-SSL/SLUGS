@@ -377,6 +377,8 @@ class Shift(models.Model):
 
     def clean(self, *args, **kwargs):
         # add custom validation here
+        if self.content_object.position.hourly_rate is None:
+            raise ValidationError(f"This position does not have an associated hourly rate. Please add one or choose another position.")
         super().clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):

@@ -1,4 +1,4 @@
-### V2.3.0 - In Progress
+### V2.3.0 - 12/13/2022
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
 * Add ability to automatically sign forms using user signature
@@ -47,6 +47,8 @@
 * Add DjangoQL search to Job Admin
 * Add BSSL Bingo Board
 * Add gig notes to staffing email
+* Distinguish between graduation year and final year with BSSL (grad students)
+* Add field to store final date of employment
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
@@ -75,6 +77,7 @@ BUG FIXES:
     * Fix phantom login bug
     * Fix bug where FinanceShift crashed out (gracefully handled)
     * Sign Timesheet widget now fades background color to provide greater visual clarity
+    * Add travel time required for venue (currently unused)
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin
@@ -108,6 +111,7 @@ BUG FIXES:
 * Add next/current show timeline
 * Accept all button for financial overview
 * Add DEV mode indicator for superusers
+* Add Job pay rate validation directly to model
 <br><br>
 BUG FIXES: 
     * Show "Signed Reservation" instead of "Signed Estimate"

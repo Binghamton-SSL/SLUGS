@@ -54,6 +54,7 @@ class EmployeeResource(resources.ModelResource):
             "phone_number",
             "is_grad_student",
             "graduation_year",
+            "final_year_with_bssl",
             "last_login",
             "date_joined",
             "is_active",
@@ -175,7 +176,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
             perm_fields = ("is_active", "is_staff", "groups")
 
         return [
-            (None, {"fields": ("email", "password", "last_login", "date_joined")}),
+            (None, {"fields": ("email", "password", "last_login", "date_joined", "end_of_employment")}),
             (
                 "Personal info",
                 {
@@ -185,8 +186,9 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "last_name",
                         "phone_number",
                         "bnum",
-                        "is_grad_student",
                         "graduation_year",
+                        "is_grad_student",
+                        "final_year_with_bssl",
                         "signature_on_file",
                         "employee_notes",
                     )
@@ -211,6 +213,8 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     "last_name",
                     "bnum",
                     "graduation_year",
+                    "is_grad_student",
+                    "final_year_with_bssl",
                 ),
             },
         ),
@@ -222,6 +226,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
         "last_name",
         "bnum",
         "graduation_year",
+        "final_year_with_bssl",
         "phone_number",
         "groups__name",
     )

@@ -123,6 +123,8 @@ class userChangeForm(ModelForm):
             "last_name",
             "phone_number",
             "graduation_year",
+            "is_grad_student",
+            "final_year_with_bssl",
             "signature",
         ]
 
@@ -141,11 +143,16 @@ class userChangeForm(ModelForm):
                 <p class="my-2 text-gray-700">{{request.user.bnum}}</p>
             """  # noqa
             ),
-            "graduation_year",
             Div(
                 Div("first_name", css_class="flex-1"),
                 Div("preferred_name", css_class="flex-1"),
                 Div("last_name", css_class="flex-1"),
+                css_class="md:flex md:space-x-2",
+            ),
+            Div(
+                Div("graduation_year", css_class="flex-1"),
+                Div("final_year_with_bssl", css_class="flex-1"),
+                Div("is_grad_student", css_class="text-center"),
                 css_class="md:flex md:space-x-2",
             ),
             "phone_number",

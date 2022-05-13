@@ -65,8 +65,10 @@ class Employee(AbstractUser):
     last_name = models.CharField(max_length=100)
     bnum = models.CharField(null=True, max_length=12, verbose_name="B Number")
     phone_number = PhoneNumberField(null=True)
-    is_grad_student = models.BooleanField(default=False)
-    graduation_year = models.IntegerField(blank=True, null=True)
+    is_grad_student = models.BooleanField(default=False, verbose_name="Currently a Graduate Student")
+    graduation_year = models.IntegerField(blank=True, null=True, help_text="The year you receive(d) your undergraduate degree")
+    final_year_with_bssl = models.IntegerField(blank=True, null=True, verbose_name="Final year @ BSSL", help_text="The final year you will be a fully matriculated student at Binghamton University, be it at the undergrad or graduate level. Defaults on save to your Graduation year unless a Grad Student.")
+    end_of_employment = models.DateField(blank=True, null=True)
     signature = JSignatureField(
         null=True,
         blank=True,
@@ -98,6 +100,12 @@ class Employee(AbstractUser):
         verbose_name_plural = "Employees"
 
     objects = EmployeeManager()
+
+    def save(self, *args, **kwargs):
+        if self.final_year_with_bssl is None and self.graduation_year is not None and self.is_grad_student is False:
+            self.final_year_with_bssl = self.graduation_year
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return f"{(self.preferred_name if self.preferred_name else self.first_name)} {self.last_name} ({self.email})"
