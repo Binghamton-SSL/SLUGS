@@ -20,7 +20,7 @@ cssselect2==0.4.1
 decorator==4.4.2
 defusedxml==0.7.1
 diff-match-patch==20200713
-Django==3.2.8
+Django==3.2.14
 django-admin-sortable2==1.0.3
 django-appconf==1.0.5
 django-cleanup==5.2.0
