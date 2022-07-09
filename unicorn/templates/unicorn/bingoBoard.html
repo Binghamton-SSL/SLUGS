@@ -1,0 +1,35 @@
+<div unicorn:poll-10000 class="w-full max-w-3xl pt-6 mx-auto">
+    <div class="text-center">
+        <h1 class="text-2xl font-stencil">BSSL BINGO</h1>
+        <h3>The Bingo Board automatically refreshes every 10 seconds, so don't all jump on a square at once.</h3>
+        <sub>If a square isn't changing color when you click it there might be network issues. Wait a second or refresh the page</sub>
+    </div>
+    <div class="grid grid-cols-4 text-xs sm:text-sm md:text-lg select-none">
+        {% for tile in board.tileonboard_set.all %}
+        <div unicorn:click="toggle_tile({{tile.pk}})" class="tile text-center m-1 p-2 break-words {% if tile.checked_by %} bg-[#009961]{% else %} bg-gray-600 {% endif %}">
+            <div class="content">
+                <p>{{tile.tile.action}}</p>
+                {% if tile.checked_by %}
+                    <sub>({% if tile.checked_by.preferred_name %}{{tile.checked_by.preferred_name}}{% else %}{{tile.checked_by.first_name}}{% endif %})</sub> 
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<style>
+.tile {
+    position: relative;
+    width: 95%;
+}
+.tile:after{
+    content: "";
+    display: block;
+    padding-bottom: 100%;
+}
+.tile .content {
+    position: absolute;
+    width: 95%;
+    width: 95%;
+}
+</style>

@@ -1,4 +1,4 @@
 <div class="flex flex-col">
-    <button unicorn:click="acceptAll" onclick="setTimeout(()=>{location.reload()}, 2000)" class="ml-auto mr-0 {% if allAccepted %} bg-yellow-100 text-black {% else %} bg-[#AEFFE1] text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if allAccepted %} Mark all as unprocessed {% else %} Accept All {% endif %}</button>
-    <p class="text-xs text-right max-w-xs">Please be gentle with the button, Gary has to click all the accept buttons!!! This process can take up to 5 seconds. The page will automatically reload when completed.</p class="text-xs">
+    <button unicorn:click="acceptAll" onclick="setTimeout(()=>{location.reload()}, 2000)" class="md:ml-auto mr-0 {% if allAccepted %} bg-yellow-100 text-black {% else %} bg-[#AEFFE1] text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if allAccepted %} Mark all as unprocessed {% else %} Accept All {% endif %}</button>
+    <p class="text-xs text-right max-w-xs mx-auto md:mr-0 md:ml-auto">Please be gentle with the button, Gary has to click all the accept buttons!!! This process can take up to 5 seconds. The page will automatically reload when completed.</p class="text-xs">
 </div>

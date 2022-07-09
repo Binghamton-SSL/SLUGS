@@ -201,6 +201,11 @@ class OneTimeFee(models.Model):
             self.percentage = pricing.percentage
             self.description = self.prepared_fee.description
         super().save(*args, **kwargs)
+        self.estimate.save()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.estimate.save()
 
     def __str__(self):
         return f"{self.name} - {f'${self.amount}' if self.amount else f'{self.percentage}%' if self.percentage else ''}"  # noqa
@@ -335,7 +340,7 @@ class Estimate(models.Model):
             )
 
     def __str__(self):
-        return f"{self.get_status_display()} - {self.gig} - ${self.total_amt}"
+        return f"{self.get_status_display()}{f' (OB: ${self.outstanding_balance})' if (self.outstanding_balance != 0 and self.status == 'A') else ''} - {self.gig} - ${self.total_amt}"
 
 
 class CannedNote(models.Model):
@@ -377,8 +382,6 @@ class Shift(models.Model):
 
     def clean(self, *args, **kwargs):
         # add custom validation here
-        if self.content_object.position.hourly_rate is None:
-            raise ValidationError(f"This position does not have an associated hourly rate. Please add one or choose another position.")
         super().clean(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -554,6 +557,14 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=7, decimal_places=2)
     payment_type = models.CharField(choices=PAYMENT_TYPES, max_length=1)
     estimate = models.ForeignKey("Estimate", on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.estimate.save()
+        
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.estimate.save()
 
     def __str__(self):
         return f"{self.payment_date} - ${self.amount}"

@@ -4,9 +4,15 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import AbstractUser
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils import timezone
+from dateutil.relativedelta import *
+import html
+from dateutil.rrule import rrule, WEEKLY
+import functools
 
 from tinymce.models import HTMLField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -117,6 +123,158 @@ class Employee(AbstractUser):
         ).all():
             papers.append(form.form.form_name)
         return ", ".join(papers)
+
+    def employee_metrics(self):
+        jobs_held = set([job.position for job in self.job_set.all()])
+        return format_html("""
+            <div style="display: flex; flex-direction: column;">
+                <div class="metric-container" style="display: flex; margin: 0px auto 1rem auto;">
+                    <div class="number-metric">
+                        <p class="metric-title">Total jobs worked</p>
+                        <p class="metric-number">{6}</p>
+                    </div>
+                    <div class="number-metric">
+                        <p class="metric-title">Total trainings attended</p>
+                        <p class="metric-number">{7}</p>
+                    </div>
+                    <div class="number-metric">
+                        <p class="metric-title">Time with company</p>
+                        <p class="metric-number">{8}</p>
+                    </div>
+                    <div class="number-metric">
+                        <p class="metric-title">Staffing score</p>
+                        <p class="metric-number">{11}</p>
+                    </div>
+                </div>
+                <div class="graph-flex metric-container" style="display: flex">
+                    <div>
+                        <div style="position: relative; margin: auto">
+                            <p class="metric-title" >Job interest/placed over employee lifetime</p>
+                            <canvas id="jobsOverLifetime"></canvas>
+                        </div>
+                    </div>
+                    <div style="position: relative; margin: auto">
+                        <p class="metric-title" >Types of Jobs Worked</p>
+                        <canvas id="jobsTypesOverLifetime"></canvas>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .graph-flex > * {{
+                    width: 50%;
+                }}
+                .number-metric {{
+                    border: 1px solid white;
+                    padding: 0.5rem;
+                    margin: 0px 1rem 0px 1rem;
+                    text-align: center;
+                }}
+                .metric-title {{
+                    font-size: 1rem!important;
+                    font-weight: bold!important;
+                }}
+                .metric-number {{
+                    font-size: 2rem!important;
+                }}
+            @media (max-width: 767px) {{
+                .readonly {{
+                    width: 100%;
+                }}
+                .metric-container {{
+                    flex-direction: column
+                }}
+                .graph-flex > * {{
+                    width: 100%!important;
+                }}
+            }}
+            </style>
+            <script>
+            const jobsOverLifetimedata = {{
+                labels: {0},
+                datasets: [
+                    {{
+                        label: "{1}",
+                        backgroundColor: '#009961',
+                        borderColor: '#009961',
+                        data: {2},
+                    }},
+                    {{
+                        "type": "bar",
+                        label: "{9}",
+                        backgroundColor: '#fff',
+                        borderColor: '#fff',
+                        data: {10},
+                    }},
+                ]
+            }};
+
+            const jobsOverLifetimeconfig = {{
+                type: 'line',
+                data: jobsOverLifetimedata,
+                options: {{
+                    scales: {{
+                        y: {{
+                            beginAtZero: true,
+                            ticks: {{
+                                precision: 0,
+                            }},
+                        }}
+                    }}
+                }}
+            }};
+
+            const jobsOverLifetime = new Chart(
+                document.getElementById('jobsOverLifetime'),
+                jobsOverLifetimeconfig
+            );
+
+            const jobsTypesOverLifetimedata = {{
+                labels: {3},
+                datasets: [
+                    {{
+                        label: "{4}",
+                        backgroundColor: ['#009961', "#000"],
+                        borderColor: '#fff',
+                        data: {5},
+                    }},
+                ]
+            }};
+
+            const jobsTypesOverLifetimeconfig = {{
+                type: 'polarArea',
+                data: jobsTypesOverLifetimedata,
+                options: {{
+                    scales: {{
+                        y: {{
+                            beginAtZero: true,
+                            ticks: {{
+                                precision: 0,
+                            }},
+                        }}
+                    }}
+                }}
+            }};
+
+            const jobsTypesOverLifetime = new Chart(
+                document.getElementById('jobsTypesOverLifetime'),
+                jobsTypesOverLifetimeconfig
+            );
+            </script>
+
+        """,
+        mark_safe(str([dt.strftime('%m.%d.%y')+"-"+((dt+relativedelta(days=+6)).strftime('%m.%d.%y')) for dt in rrule(WEEKLY, byweekday=1,dtstart=self.job_set.order_by("gig__start").first().gig.start, until=self.job_set.order_by("gig__start").last().gig.start)])),
+        mark_safe(f"{self.preferred_name if self.preferred_name else self.first_name}'s jobs worked per week"),
+        mark_safe(str([self.job_set.filter(gig__start__gte=dt, gig__end__lt=(dt+relativedelta(weeks=+1))).count() for dt in rrule(WEEKLY, byweekday=1,dtstart=self.job_set.order_by("gig__start").first().gig.start, until=self.job_set.order_by("gig__start").last().gig.start)])),
+        mark_safe(str([position.name for position in jobs_held])),
+        mark_safe(f"{self.preferred_name if self.preferred_name else self.first_name}'s types of jobs worked"),
+        mark_safe(str([self.job_set.filter(position=pos).count() for pos in jobs_held])),
+        str(self.job_set.count()),
+        str(self.trainee_set.count()),
+        naturaltime(self.end_of_employment - self.date_joined.date() if self.end_of_employment else timezone.now()-self.date_joined),
+        mark_safe(f"{self.preferred_name if self.preferred_name else self.first_name}'s jobs requested per week"),
+        mark_safe(str([self.jobinterest_set.filter(job__gig__start__gte=dt, job__gig__end__lt=(dt+relativedelta(weeks=+1))).count() for dt in rrule(WEEKLY, byweekday=1,dtstart=self.job_set.order_by("gig__start").first().gig.start, until=self.job_set.order_by("gig__start").last().gig.start)])),
+        str(functools.reduce(lambda a, b: a+(1 if self.job_set.filter(gig__pk=b[0]).first() is not None else -1), self.jobinterest_set.all().values_list("job__gig").distinct(), 0)*((timezone.now() - self.job_set.order_by("-gig__start").first().gig.start).days if self.job_set.order_by("-gig__start").first() is not None else 0))
+        )
 
 
 class OfficeHours(models.Model):

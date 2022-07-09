@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
 from gig.forms import GigJobChangeForm, GigSystemsChangeForm, GigLoadinChangeForm
-from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
+from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance, BingoBoard, BingoTile, TileOnBoard
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin
 from djangoql.admin import DjangoQLSearchMixin
@@ -137,4 +137,18 @@ class JobAdmin(admin.ModelAdmin):
 class JobInterestAdmin(DjangoQLSearchMixin ,admin.ModelAdmin):
     djangoql_completion_enabled_by_default = False
     search_fields = ["employee__first_name", "employee__last_name"]
+
+
+class TileOnBoardInline(admin.StackedInline):
+    model = TileOnBoard
+    extra = 0
+
+
+@admin.register(BingoBoard)
+class BingoBoardAdmin(admin.ModelAdmin):
+    inlines = [TileOnBoardInline]
+
+
+@admin.register(BingoTile)
+class BingoTileAdmin(admin.ModelAdmin):
     pass

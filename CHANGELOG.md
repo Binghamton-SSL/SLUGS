@@ -1,4 +1,21 @@
-### V2.3.0 - 12/13/2022
+### V2.3.1 - In Progress
+* Added basic employee metrics
+    * Number of jobs worked
+    * Trainings attended
+    * Time with company
+    * Staffing score
+    * Job Interest + placement over time
+    * Types of jobs worked 
+* Added end of employment date field
+* Estimates will show the outstanding balance in their title
+* BSSL Bingo board 
+* Expand/Contract finance portal
+<br><br>
+BUG FIXES:
+    * Saving a fee will now save the associated estimate to update price
+    * Saving a payment will now save the associated estimate to update price
+
+### V2.3.0 - 05/18/2022
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
 * Add ability to automatically sign forms using user signature
@@ -49,6 +66,8 @@
 * Add gig notes to staffing email
 * Distinguish between graduation year and final year with BSSL (grad students)
 * Add field to store final date of employment
+* Add travel time required for venue (currently unused)
+* Show outstanding balance in title of Estimates that are "Awaiting Payment" `eg. (OB: $100)`
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
@@ -77,7 +96,7 @@ BUG FIXES:
     * Fix phantom login bug
     * Fix bug where FinanceShift crashed out (gracefully handled)
     * Sign Timesheet widget now fades background color to provide greater visual clarity
-    * Add travel time required for venue (currently unused)
+    * Fix bug where you had to save Estimate twice
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

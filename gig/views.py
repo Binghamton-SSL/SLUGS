@@ -12,7 +12,7 @@ from dev_utils.views import MultipleFormView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin, isAdminMixin
-from gig.models import Gig, Job, JobInterest
+from gig.models import Gig, Job, JobInterest, BingoBoard
 from employee.models import Employee
 from datetime import datetime
 from django.db.models import F, DateTimeField, ExpressionWrapper
@@ -83,6 +83,11 @@ class gigIndex(SLUGSMixin, MultipleFormView):
             }
         self.form_classes["show_notes"]["instance"] = self.added_context["gig"]
         self.added_context["job_forms"] = jobs
+        if BingoBoard.objects.filter(gig=self.added_context["gig"]).count() < 1:
+            self.added_context["bingo_board"] = BingoBoard(gig=self.added_context["gig"])
+            self.added_context["bingo_board"].save()
+        else:
+            self.added_context["bingo_board"] = BingoBoard.objects.get(gig=self.added_context["gig"])
         return super().dispatch(request, *args, **kwargs)
 
     def process_forms(self, form_instances):

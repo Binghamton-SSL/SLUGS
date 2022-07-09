@@ -57,6 +57,7 @@ class EmployeeResource(resources.ModelResource):
             "final_year_with_bssl",
             "last_login",
             "date_joined",
+            "end_of_employment",
             "is_active",
             "is_staff",
             "is_superuser",
@@ -156,7 +157,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
     )
     list_filter = ("is_active", "is_staff", "is_superuser", "groups", "graduation_year")
     actions = [mass_assign_paperwork, add_groups]
-    readonly_fields = ["last_login", "signature_on_file"]
+    readonly_fields = ["last_login", "signature_on_file", "employee_metrics"]
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
@@ -171,8 +172,6 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                 "user_permissions",
             )
         else:
-            # modify these to suit the fields you want your
-            # is_staff user to be able to edit
             perm_fields = ("is_active", "is_staff", "groups")
 
         return [
@@ -194,6 +193,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                     )
                 },
             ),
+            ("Employee Metrics", {"fields": ["employee_metrics"]}),
             ("Permissions", {"fields": perm_fields}),
         ]
 
