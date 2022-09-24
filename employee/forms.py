@@ -44,6 +44,7 @@ class UserCreationForm(forms.ModelForm):
             "first_name",
             "last_name",
             "bnum",
+            "id_barcode",
             "graduation_year",
             "phone_number",
         )
@@ -80,6 +81,9 @@ class UserCreationForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
+            for form in Paperwork.objects.filter(assign_to_all_new_employees=True).all():
+                pform = PaperworkForm(form=form, employee=user)
+                pform.save()
         return user
 
 
@@ -101,7 +105,10 @@ class userCreationForm(UserCreationForm):
                     "last_name",
                 ),
                 "phone_number",
-                "bnum",
+                Div(
+                    "bnum",
+                    "id_barcode",
+                ),
                 "graduation_year",
                 Submit(
                     "submit",
@@ -121,6 +128,7 @@ class userChangeForm(ModelForm):
             "preferred_name",
             "first_name",
             "last_name",
+            "id_barcode",
             "phone_number",
             "graduation_year",
             "is_grad_student",
@@ -138,10 +146,19 @@ class userChangeForm(ModelForm):
                 <div onclick="window.location='{% url 'employee:change_password' %}'" class="px-4 py-2 my-2 text-white bg-black rounded-sm cursor-pointer w-max">
                     Change Password
                 </div>
-                <label for="id_userChangeForm-bnum" class="block mb-2 text-sm font-bold text-gray-700">
-                B-Number</label>
-                <p class="my-2 text-gray-700">{{request.user.bnum}}</p>
             """  # noqa
+            ),
+            Div(
+                HTML("""
+                <div class="flex-1">
+                    <label for="id_userChangeForm-bnum" class="block text-gray-700 text-sm font-bold mb-2">
+                    B-Number</label>
+                    <p class="my-2 text-gray-700">{{request.user.bnum}}</p>
+                    <small id="hint_id_userChangeForm-bnum" class="text-gray-600">Your B-Number will not change throughout your time here at Binghamton. If for any reason you need to change the value displayed, please speak to a manager.</small>
+                </div>
+                """),
+                Div("id_barcode", css_class="flex-1"),
+                css_class="md:flex md:space-x-2"
             ),
             Div(
                 Div("first_name", css_class="flex-1"),

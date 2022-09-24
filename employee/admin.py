@@ -9,6 +9,7 @@ from finance.admin import ShiftInlineAdmin
 from employee.models import PaperworkForm, Paperwork
 from utils.generic_email import send_generic_email
 from djangoql.admin import DjangoQLSearchMixin
+from django.conf import settings
 
 
 from .models import Employee, OfficeHours
@@ -22,15 +23,6 @@ class PaperworkInline(admin.StackedInline):
     readonly_fields = ["uploaded", "requested"]
 
 
-@admin.register(PaperworkForm)
-class PaperworkAdmin(admin.ModelAdmin):
-    search_fields = [
-        "form__form_name",
-        "employee__first_name",
-        "employee__preferred_name",
-        "employee__last_name",
-    ]
-    pass
 
 
 @admin.register(Paperwork)
@@ -38,6 +30,7 @@ class PaperworkAdmin(admin.ModelAdmin):
     search_fields = ["form_name"]
     readonly_fields = ["associated_forms"]
     inlines = [PaperworkInline]
+    ordering = ["-edited"]
     pass
 
 
@@ -93,6 +86,20 @@ Got some good news for ya, Your SLUGS account has been activated. Feel free to <
                 subject=f"SLUGS account activation - {form.instance.email}",
                 to=[form.instance.email],
             )
+            if form.instance.paperworkform_set.filter(processed=False).count() != 0:
+                forms = form.instance.paperworkform_set.filter(processed=False).all()
+                attachments = [f.form.form_pdf.file.name for f in forms]
+                template = get_template("employee/components/general_forms.html")
+                email_template = template.render({"request": request})
+                send_generic_email(
+                    request=request,
+                    subject="[ACTION REQUIRED] New forms to fill out on SLUGS",
+                    title=f"Paperwork needed: {', '.join([f.form.form_name for f in forms])}",
+                    included_html=email_template,
+                    included_text=f"How's it going {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)}, <br><br> Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>",  # noqa
+                    to=[form.instance.email],
+                    attachments=attachments,
+                )
         elif "is_active" in form.changed_data and not form.instance.is_active:
             send_generic_email(
                 request=request,
@@ -100,7 +107,7 @@ Got some good news for ya, Your SLUGS account has been activated. Feel free to <
                 included_text=f"""
 Hey there {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)},
 <br><br>
-We're sorry to see ya go. One of our managers has deactivated your account. If you believe this was done in error please <a href="mailto:bssl@binghamtonsa.org">reach out</a>.
+We're sorry to see ya go. One of our managers has deactivated your account. If you believe this was done in error please <a href="mailto:{settings.BSSL_EMAIL_ADDRESS}">reach out</a>.
 """,  # noqa
                 subject=f"SLUGS account deactivation - {form.instance.email}",
                 to=[form.instance.email],
@@ -185,6 +192,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "last_name",
                         "phone_number",
                         "bnum",
+                        "id_barcode",
                         "graduation_year",
                         "is_grad_student",
                         "final_year_with_bssl",

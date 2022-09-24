@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.urls.base import reverse_lazy
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from employee.forms import signPaperworkForm
-from finance.estimate_data_utils import calculateGigCost
+from finance.estimate_data_utils import calcuateSubcontractedCost, calculateGigCost
 from django.http.response import HttpResponse
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
@@ -23,8 +23,9 @@ from django.db.models import Sum
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
-from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet, Wage
+from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet
 from employee.models import Employee
+from gig.models import SubcontractedEquipment
 from utils.generic_email import send_generic_email
 import decimal
 import calendar
@@ -51,6 +52,15 @@ class viewInvoice(SLUGSMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
 
+class viewSubcontractedEquipment(SLUGSMixin, TemplateView):
+    template_name = "finance/subcontracted_equipment.html"
+    added_context = {}
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context = calcuateSubcontractedCost(SubcontractedEquipment.objects.get(pk=kwargs["v_id"]))
+        return super().dispatch(request, *args, **kwargs)
+
+
 class viewTimesheet(SLUGSMixin, TemplateView):
     template_name = "finance/printed_timesheet.html"
 
@@ -70,8 +80,10 @@ class viewTimesheet(SLUGSMixin, TemplateView):
             str(barc.render()).replace("\\n", "").replace("b'", "").replace("'", "")
         )
         if request.user.pk is not None:
-            if employee.pk != request.user.pk and (
-                not has_group(request.user, "Manager")
+            if employee.pk != request.user.pk and not (
+                has_group(request.user, "Manager")
+                or
+                has_group(request.user, "SA Employee")
             ):
                 raise PermissionDenied()
         shifts = pay_period.shifts.none()

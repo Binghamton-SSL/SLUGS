@@ -137,6 +137,14 @@ class SystemAddonPricing(BasePricing):
         super().clean(*args, **kwargs)
 
 
+class VendorEquipmentPricing(BasePricing):
+    equipment = models.ForeignKey("equipment.VendorEquipment", on_delete=models.CASCADE)
+
+    def clean(self, *args, **kwargs):
+        kwargs["item_set"] = self.__class__.objects.filter(equipment=self.equipment)
+        super().clean(*args, **kwargs)
+
+
 class Fee(PricingMixin, models.Model):
     """
     A predefined fee. Name is from a deprecated version of fees on Gigs.
@@ -166,6 +174,13 @@ class FeePricing(Pricing):
     def clean(self, *args, **kwargs):
         kwargs["item_set"] = self.__class__.objects.filter(fee=self.fee)
         super().clean(*args, **kwargs)
+
+
+class BaseFee(models.Model):
+    name = models.CharField(max_length=64, blank=True, null=True)
+    amount = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    description = models.CharField(max_length=512, blank=True, null=True)
 
 
 class OneTimeFee(models.Model):
@@ -209,6 +224,10 @@ class OneTimeFee(models.Model):
 
     def __str__(self):
         return f"{self.name} - {f'${self.amount}' if self.amount else f'{self.percentage}%' if self.percentage else ''}"  # noqa
+
+
+class VendorFee(BaseFee):
+    equipment_order = models.ForeignKey("gig.SubcontractedEquipment", on_delete=models.CASCADE)
 
 
 class Estimate(models.Model):

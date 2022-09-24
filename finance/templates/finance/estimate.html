@@ -320,6 +320,75 @@
                                     </tr>
                                 </tfoot>
                             </table>
+                            {% if estimate.gig.subcontractedequipment_set.all.count > 0 %}
+                            <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
+                                <colgroup>
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 45%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <tr class="font-bold bg-[#CCC]">
+                                        <td colspan="5"">
+                                            Subcontracted Equipment
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Item
+                                        </td>
+                                        <td>
+                                            Description
+                                        </td>
+                                        <td>
+                                            Qty
+                                        </td>
+                                        <td>
+                                            Rate
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% for instance, qty, rate, amt in subcontracted_equipment.values %}
+                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                        <td>
+                                            {{instance.equipment.name}}
+                                        </td>
+                                        <td class="text-xs">
+                                            {% if instance.equipment.description %}
+                                            <span class="text-xs">{{instance.equipment.description}}</span><br>
+                                            {% endif %}
+                                            {% if instance.description %}
+                                            <span class="text-xs">{{instance.description}}</span><br>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{qty}}
+                                        </td>
+                                        <td class="text-center">
+                                            {{rate}}
+                                        </td>
+                                        <td class="text-center">
+                                            ${{amt}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment
+                                            Total:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{subcontracted_amount}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            {% endif %}
                             {% if estimate.onetimefee_set.all.count > 0 %}
                             <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
                                 <colgroup>
@@ -528,14 +597,14 @@
                                             have read the contract and BSSL Reservation Policy in
                                             full
                                             and agree to the terms and conditions.</p>
-                                            <p class="text-center text-md my-4 font-bold">Please complete one of the following:</p>
+                                            <p class="my-4 font-bold text-center text-md">Please complete one of the following:</p>
                                             <div class="flex mx-auto w-max">
-                                                <div class="h-4 w-4 border-black border-2 mr-4 my-auto text-transparent">.</div>
+                                                <div class="w-4 h-4 my-auto mr-4 text-transparent border-2 border-black">.</div>
                                                 <p class="text-xs w-52">
                                                     I, {{estimate.gig.contact.name}} am authorized to execute on behalf of {{estimate.billing_contact.organization.name}}
                                                 </p>
                                             </div>
-                                            <p class="text-center text-md font-bold">OR</p>
+                                            <p class="font-bold text-center text-md">OR</p>
                                             <div class="flex ml-auto mr-0 w-max">
                                                 <p class="mr-4">{{estimate.billing_contact.organization.name}}</p>
                                                 <div class="text-center">

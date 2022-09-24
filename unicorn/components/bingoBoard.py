@@ -9,7 +9,7 @@ class BingoboardView(UnicornView):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.board_id = kwargs.get("board_id")
-        self.board = BingoBoard.objects.get(pk=self.board_id)
+        self.board = BingoBoard.objects.filter(pk=self.board_id).first()
 
     def toggle_tile(self, tile_pk, *args, **kwargs):
         tile = TileOnBoard.objects.get(pk=tile_pk)

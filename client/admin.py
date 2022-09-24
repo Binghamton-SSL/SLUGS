@@ -1,5 +1,5 @@
 from django.contrib import admin
-from client.models import OrgContact, Organization
+from client.models import OrgContact, Organization, Communication
 
 
 # Register your models here.
@@ -14,3 +14,7 @@ class OrgContactAdmin(admin.ModelAdmin):
     search_fields = ["name", "organization__name", "email", "phone_number"]
     autocomplete_fields = ["organization"]
     ordering = ["organization__name", "name"]
+
+@admin.register(Communication)
+class CommunicationAdmin(admin.ModelAdmin):
+    pass

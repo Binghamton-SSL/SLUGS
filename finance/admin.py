@@ -7,16 +7,18 @@ from finance.models import (
     Payment,
     SystemAddonPricing,
     SystemPricing,
+    VendorEquipmentPricing,
     TimeSheet,
     Wage,
     Shift,
     Estimate,
     Fee,
+    VendorFee,
     OneTimeFee,
     PayPeriod,
     CannedNote,
 )
-from nested_admin import NestedGenericTabularInline
+from nested_admin import NestedGenericTabularInline, NestedTabularInline
 from djangoql.admin import DjangoQLSearchMixin
 from adminsortable2.admin import SortableInlineAdminMixin
 
@@ -40,6 +42,15 @@ class SystemAddonPricingInline(admin.StackedInline):
     model = SystemAddonPricing
     extra = 0
 
+
+class VendorEquipmentPricingInline(admin.StackedInline):
+    model = VendorEquipmentPricing
+    extra = 0
+
+
+class VendorFeeInline(NestedTabularInline):
+    model = VendorFee
+    extra = 0
 
 @admin.register(Wage)
 class WageAdmin(admin.ModelAdmin):

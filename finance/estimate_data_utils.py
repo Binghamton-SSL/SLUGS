@@ -6,8 +6,10 @@ from django.utils import timezone
 def calculateGigCost(estimate):
     ret = {
         "systems": {},
+        "subcontracted_equipment": {},
         "fees": {},
         "subtotal": decimal.Decimal(0.00),
+        "subcontracted_amount": decimal.Decimal(0.00),
         "fees_amt": decimal.Decimal(0.00),
         "payment_amt": decimal.Decimal(0.00),
         "total_amt": decimal.Decimal(0.00),
@@ -109,6 +111,34 @@ def calculateGigCost(estimate):
         ret["subtotal"] += system_subtotal
         ret["total_amt"] += system_subtotal
 
+    for rental in ret["estimate"].gig.subcontractedequipment_set.all():
+        vendor_subtotal = decimal.Decimal(0.00)
+        for instance in rental.subcontractedequipmentinstance_set.all():
+            subtotal = decimal.Decimal(0.00)
+            total_time_rented = decimal.Decimal(
+                (rental.returned - rental.arrival) / timezone.timedelta(minutes=15) / 4
+            )
+            current_price = instance.equipment.get_price_at_date(rental.arrival)
+            subtotal += round(
+                current_price.base_price * instance.qty
+                + (
+                    current_price.price_per_hour
+                    * instance.qty
+                    * total_time_rented
+                ), 2
+            )
+            vendor_subtotal += subtotal
+            ret["subcontracted_equipment"][instance] = [
+                instance,
+                instance.qty * total_time_rented
+                if current_price.price_per_hour != 0.00
+                else instance.qty,
+                current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
+                subtotal
+            ]
+        ret["subcontracted_amount"] += vendor_subtotal
+        ret["total_amt"] += vendor_subtotal
+
     for fee in ret["estimate"].onetimefee_set.order_by("order").all():
         fee_amt = (
             fee.amount
@@ -124,4 +154,36 @@ def calculateGigCost(estimate):
 
     ret["total_amt"] = ret["total_amt"] + ret["estimate"].adjustments
     ret["outstanding_balance"] = ret["total_amt"] - ret["payment_amt"]
+    return ret
+
+
+def calcuateSubcontractedCost(subcontracted):
+    ret = {
+        "subcontracted": subcontracted,
+        "total_amt": decimal.Decimal(0.00),
+        "equipment": {},
+    }
+    for instance in subcontracted.subcontractedequipmentinstance_set.all():
+        subtotal = decimal.Decimal(0.00)
+        total_time_rented = decimal.Decimal(
+            (subcontracted.returned - subcontracted.arrival) / timezone.timedelta(minutes=15) / 4
+        )
+        current_price = instance.equipment.get_price_at_date(subcontracted.arrival)
+        subtotal += round(
+            current_price.base_price * instance.qty
+            + (
+                current_price.price_per_hour
+                * instance.qty
+                * total_time_rented
+            ), 2
+        )
+        ret["total_amt"] += subtotal
+        ret["equipment"][instance] = [
+            instance,
+            instance.qty * total_time_rented
+            if current_price.price_per_hour != 0.00
+            else instance.qty,
+            current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
+            subtotal
+        ]
     return ret

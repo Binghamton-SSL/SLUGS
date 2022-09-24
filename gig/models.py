@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 from django.forms import ValidationError
@@ -19,6 +20,51 @@ DEPARTMENTS = [
     ("O", "Other"),
     ("T", "Staging"),
 ]
+
+DELIVERY_METHODS = [
+    ("H", "Vendor Delivery"),
+    ("S", "Vendor Shipping"),
+    ("P", "BSSL Delivery"),
+    ("B", "BSSL Shipping"),
+    ("O", "Other Arrangements"),
+
+]
+
+
+class SubcontractedEquipmentInstance(models.Model):
+    equipment = models.ForeignKey("equipment.VendorEquipment", on_delete=models.PROTECT)
+    subcontracted_equipment = models.ForeignKey("SubcontractedEquipment", on_delete=models.CASCADE)
+    qty = models.IntegerField(default=1)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+
+class SubcontractedEquipment(models.Model):
+    equipment = models.ManyToManyField("equipment.VendorEquipment", through="SubcontractedEquipmentInstance")
+    vendor = models.ForeignKey("equipment.Vendor", on_delete=models.PROTECT)
+    arrival = models.DateTimeField()
+    returned = models.DateTimeField()
+    delivery_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
+    return_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
+    purchase_order = models.CharField(max_length=64, null=True, blank=True)
+    notes = HTMLField(blank=True, null=True)
+    gig = models.ForeignKey("Gig", on_delete=models.CASCADE)
+    signed_agreement = models.FileField(upload_to="vendors", null=True, blank=True)
+
+    def get_printout_link(self):
+        return format_html(
+                "<a href='%s?time=%s'>%s</a>"
+                % (
+                    reverse("finance:vendor", args=(self.id,)),
+                    datetime.now(),
+                    "Print Subcontracted Equipment Form",
+                )
+            )
+
+    def __str__(self):
+        return f"{self.vendor} - {self.gig}"
+
+    class Meta:
+        verbose_name_plural = "Subcontracted Equipment"
 
 
 class Gig(models.Model):
@@ -48,6 +94,7 @@ class Gig(models.Model):
         help_text="If left blank, this value will be set to 7 days prior to the start date.",
     )
     systems = models.ManyToManyField("equipment.System", through="SystemInstance")
+    subcontracted_equipment = models.ManyToManyField("SubcontractedEquipment", related_name="vendor_equipment")
 
     def get_staff_link(self):
         return format_html(

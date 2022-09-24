@@ -1,0 +1,496 @@
+{% load static tailwind_tags %}
+{% load slugs_components %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BSSL - {{subcontracted}}</title>
+
+    {% tailwind_css %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Stardos+Stencil&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="title" content="SLUGS">
+    <meta name="description" content="The Sound and Lights User Grouping System for BSSL employees">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="og:title" content="S.L.U.G.S.">
+    <meta property="og:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="og:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://slugs.bssl.binghamtonsa.org{{request.get_full_path}}">
+    <meta property="twitter:title" content="S.L.U.G.S.">
+    <meta property="twitter:description" content="The Sound and Lights User Grouping System for BSSL employees">
+    <meta property="twitter:image" content="https://slugs.bssl.binghamtonsa.org/static/img/logo/logo-social.png">
+    {% block headincludes %} {% endblock %}
+</head>
+
+<body>
+    <table style="border: none;">
+        <thead class="bg-white">
+            <tr style="border: none;">
+                <td>
+                </td>
+            </tr>
+        </thead>
+        <tbody class="relative">
+            <tr style="border: none;">
+                <td style="border: none;">
+                    <div id="page-content">
+                        <div class="flex">
+                            <div class="flex flex-col" style="width: 2.5in">
+                                <h1 class="text-8xl font-stencil">BSSL</h1>
+                                <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
+                                <h1 class="font-brand">
+                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
+                                    <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
+                                    <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
+                                    <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+                                </h1>
+                                <p class="mt-4 text-xs">
+                                    Student Assoc. of SUNY Binghamton, Inc.<br>
+                                    UU B19 - BSSL<br>
+                                    4400 Vestal Parkway, East<br>
+                                    Binghamton, NY 13902-6000<br>
+                                </p>
+                            </div>
+                            <div class="flex-col space-y-4" style="width:6in">
+                                <h1 class="ml-auto mr-4 text-3xl font-bold text-right">Subcontracted Equipment Order Form</h1>
+                                <table class="w-full ml-6">
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Delivery Date
+                                            </td>
+                                            <td>
+                                                Event Date
+                                            </td>
+                                            <td>
+                                                Return Date
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{subcontracted.arrival|date:"n/j/Y"}}<br>
+                                                {{subcontracted.arrival|date:"f A"}}
+                                            </td>
+                                            <td>
+                                                {{subcontracted.gig.start|date:"n/j/Y"}}
+                                            </td>
+                                            <td>
+                                                {{subcontracted.returned|date:"n/j/Y"}}<br>
+                                                {{subcontracted.returned|date:"f A"}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="w-full ml-6">
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Event
+                                            </td>
+                                            {% if subcontracted.purchase_order %}
+                                            <td>
+                                                PO #
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                Reference #
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{subcontracted.gig.name}}
+                                            </td>
+                                            {% if subcontracted.purchase_order %}
+                                            <td>
+                                                {{subcontracted.purchase_order}}
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                SEOF{{subcontracted.id}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="mt-2" style="width: 8.75in">
+                            <div class="flex w-full">
+                                <table class="w-full mr-2">
+                                    <thead>
+                                        <tr>
+                                            <td>
+                                                Vendor
+                                            </td>
+                                            <td>
+                                                Delivery Location
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                {{subcontracted.vendor.name}}<br/>
+                                                {% if subcontracted.vendor.phone_number %}
+                                                {{subcontracted.vendor.phone_number}}<br/>
+                                                {% endif %}
+                                                {% if subcontracted.vendor.email %}
+                                                {{subcontracted.vendor.email}}<br/>
+                                                {% endif %}
+                                                {% if subcontracted.vendor.physical_address %}
+                                                {{subcontracted.vendor.physical_address}}
+                                                {% endif %}
+                                                {% if subcontracted.vendor.website %}
+                                                {{subcontracted.vendor.website}}<br/>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                BSSL<br/>
+                                                4440 Vestal Parkway East<br/>
+                                                Binghamton, NY 13902<br/>
+                                                Location:
+                                                {{subcontracted.gig.location}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="my-auto space-y-2 text-center">
+                                    <table style="width: 2in">
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    Delivery Method
+                                                </td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-sm">
+                                                        {{subcontracted.get_delivery_method_display}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                    </table>
+                                    <table style="width: 2in">
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    Return Method
+                                                </td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-sm">
+                                                        {{subcontracted.get_return_method_display}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% if subcontracted.subcontractedequipmentinstance_set.all.count > 0 %}
+                            <table style="border-bottom: none; border-top: none" class="w-full mt-4 text-sm no-border">
+                                <colgroup>
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 45%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            Item
+                                        </td>
+                                        <td>
+                                            Description
+                                        </td>
+                                        <td>
+                                            Qty
+                                        </td>
+                                        <td>
+                                            Rate
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% for instance, qty, rate, amt in equipment.values %}
+                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                        <td>
+                                            {{instance.equipment.name}}
+                                        </td>
+                                        <td class="text-xs">
+                                            {% if instance.equipment.description %}
+                                            <span class="text-xs">{{instance.equipment.description}}</span><br>
+                                            {% endif %}
+                                            {% if instance.description %}
+                                            <span class="text-xs">{{instance.description}}</span><br>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{qty}}
+                                        </td>
+                                        <td class="text-center">
+                                            {{rate}}
+                                        </td>
+                                        <td class="text-center">
+                                            ${{amt}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% endif %}
+                            {% if subcontracted.vendorfee_set.all.count > 0 %}
+                            <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
+                                <colgroup>
+                                    <col span="1" style="width: 20%;">
+                                    <col span="1" style="width: 45%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 10%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            Fee
+                                        </td>
+                                        <td>
+                                            Description
+                                        </td>
+                                        <td>
+                                            % of total
+                                        </td>
+                                        <td>
+                                            Rate
+                                        </td>
+                                        <td>
+                                            Total
+                                        </td>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="item_table">
+                                    {% for fee, amt in fees.values %}
+                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                        <td>
+                                            {{fee.name}}
+                                        </td>
+                                        <td class="text-xs">
+                                            {% if fee.description %}{{fee.description}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if fee.percentage %}{{fee.percentage}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if fee.amount %}{{fee.amount}}{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            ${{amt}}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">Fee
+                                            Total:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{total_amt}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            {% endif %}
+                            <table class="w-full">
+                                <colgroup>
+                                    <col span="1" style="width: 50%;">
+                                    <col span="1" style="width: 35%;">
+                                    <col span="1" style="width: 15%;">
+                                </colgroup>
+                                <tbody>
+                                    <tr class="text-lg font-black">
+                                        <td class="border-r-0">
+                                            <!-- <div class="flex font-mono text-xs">
+                                            <span class="my-auto">Initial:</span>
+                                            <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                                                <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                            </div>
+                                            <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                                <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                            </div>
+                                        </div> -->
+                                        </td>
+                                        <td class="text-right border-l-0" style="border-right:none!important;">Total:
+                                        </td>
+                                        <td class="text-center" style="border-left:none!important;">
+                                            ${{total_amt}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="dont_break">
+                            <div>
+                                <ul class="mt-4 text-[.8rem] list-disc list-inside">
+                                    <li>
+                                       Signing of this form acknowledges either receipt or delivery (as marked by the appropriate section) of the agreed upon items in correct quantity and condition, in a timely manner.
+                                    </li>
+                                    <li>
+                                        The named vendor is to have presented proof of liability insurance with "The Student Association of Binghamton University Inc." listed as additionally insured. Should the vendor have foregone this requirement, they assume full liability for their equipment personally and absolve both BSSL as well as The Student Association of Binghamton University Inc of liability.
+                                    </li>
+                                    <li>
+                                        BSSL is not responsible for any damage deemed to be regular "wear and tear" on rented equipment. Any damage exceeding a reasonable level is to be brought to BSSL's attention at the time of return and first be covered by aforementioned liability insurance of the vendor, with an agreed upon remainder covered by The Student Association of Binghamton University Inc should BSSL be determined to be at fault.
+                                    </li>
+                                    <li>
+                                        Failure of the vendor to deliver or pickup equipment in a timely manner may be grounds for cancellation. BSSL has the right to use it's discretion to determine a fair course of action in these circumstances.
+                                    </li>
+                                    <li>
+                                        Equipment delivered in any other state than that exactly agreed upon may be grounds for cancellation at BSSL's discretion.
+                                    </li>
+                                    <li>
+                                        BSSL is responsible for the protection and oversight of the subcontracted equipment, starting from delivery time up until return time. Should
+                                        the vendor wish to have: representatives, additional equipment, or anything other than that stated above 
+                                        present during the rental period prior approval from BSSL. 
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="flex mt-10 space-x-4 dont_break" style="width: 8.75in;">
+                                    <table>
+                                        <thead class="text-center">
+                                            <tr>
+                                                <td colspan="2">Delivery</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">BSSL Representative:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">BSSL Signature:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">Vendor Representative:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">Vendor Signature:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <table>
+                                        <thead class="text-center">
+                                            <tr>
+                                                <td colspan="2">Return</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">BSSL Representative:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">BSSL Signature:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">Vendor Representative:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-2 border-r-0">Vendor Signature:</td>
+                                                <td class="pb-2 border-l-0">_________________________</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr style="border: none;">
+                <td style="border: none; padding-top: .25in;">
+                    <div class="flex">
+                        <span class="my-auto">Initial:</span>
+                        <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                        </div>
+                        <div class="flex ml-4"><span class="my-auto">{{subcontracted.vendor.name}}</span>
+                            <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                        </div>
+                    </div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+<style>
+    @page {
+        size: 8.5in 11in;
+        counter-increment: page;
+
+    }
+
+    @media print {
+        .dont_break {
+            break-inside: avoid;
+        }
+    }
+
+    body {
+        width: 8.5in;
+        height: 11in;
+        background-color: white;
+    }
+
+    table {
+        border: black solid 2px;
+    }
+
+    table thead {
+        background-color: #CCC;
+    }
+
+    table tr {
+        border-top: black solid 1px;
+    }
+
+    table td {
+        border-left: black solid 1px;
+        border-right: black solid 1px;
+        padding-left: .5rem;
+    }
+
+    #item_table tr {
+        /* border: none!important; */
+    }
+</style>
+{% print_this %}
+
+</html>

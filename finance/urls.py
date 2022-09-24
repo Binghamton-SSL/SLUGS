@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.FinancialOverview.as_view(), name="overview"),
     path("estimate/<e_id>", views.viewEstimate.as_view(), name="estimate"),
     path("invoice/<e_id>", views.viewInvoice.as_view(), name="invoice"),
+    path("vendor/<v_id>", views.viewSubcontractedEquipment.as_view(), name="vendor"),
     path("timesheet/<pp_id>/<emp_id>", views.viewTimesheet.as_view(), name="timesheet"),
     path(
         "noprint/timesheet/<pp_id>/<emp_id>",

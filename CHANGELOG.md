@@ -10,6 +10,14 @@
 * Estimates will show the outstanding balance in their title
 * BSSL Bingo board 
 * Expand/Contract finance portal
+* Add communication model
+* Allow paperwork to be auto-assigned to employees on account creation (send email about paperwork on account activation if outstanding)
+* Add ID barcode field to employee
+* Add 3rd party vendor support
+    * Add vendor equipment 
+    * Add vendor rentals to Gig
+    * Add subcontracted equipment to invoice and estimate
+    * Add Subcontracted Equipment Order Form Generation
 <br><br>
 BUG FIXES:
     * Saving a fee will now save the associated estimate to update price

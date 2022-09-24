@@ -4,9 +4,9 @@ from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
 from fieldsets_with_inlines import FieldsetsInlineMixin
 from gig.forms import GigJobChangeForm, GigSystemsChangeForm, GigLoadinChangeForm
-from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance, BingoBoard, BingoTile, TileOnBoard
+from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance, BingoBoard, BingoTile, TileOnBoard, SubcontractedEquipment, SubcontractedEquipmentInstance
 from .views import staffShow, SendStaffingEmail
-from finance.admin import ShiftInlineAdmin
+from finance.admin import ShiftInlineAdmin, VendorFeeInline
 from djangoql.admin import DjangoQLSearchMixin
 
 
@@ -47,11 +47,28 @@ class LoadInInline(NestedTabularInline):
     extra = 0
 
 
+class SubcontractedEquipmentInstanceInline(NestedTabularInline):
+    verbose_name = "Rented Equipment"
+    verbose_name_plural = "Rented Equipment"
+    model = SubcontractedEquipmentInstance
+    extra = 0
+    autocomplete_fields = ["equipment"]
+
+
+class SubcontractedEquipmentInline(NestedStackedInline):
+    model = SubcontractedEquipment
+    exclude = ["fees"]
+    readonly_fields = ["get_printout_link"]
+    autocomplete_fields = ["vendor"]
+    inlines = [SubcontractedEquipmentInstanceInline, VendorFeeInline]
+    extra = 0
+
+
 @admin.register(Gig)
 class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
     djangoql_completion_enabled_by_default = False
     search_fields = ["name", "org__name", "contact__name", "location__name"]
-    inlines = (LoadInInline, SystemInline)
+    inlines = (LoadInInline, SystemInline, SubcontractedEquipmentInline)
     autocomplete_fields = ["org", "contact", "location"]
     list_display = (
         "__str__",
@@ -81,6 +98,7 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
         ),
         LoadInInline,
         SystemInline,
+        SubcontractedEquipmentInline,
         ("Day of Show Info", {"fields": ("day_of_show_notes",)}),
         (
             None,
@@ -152,3 +170,10 @@ class BingoBoardAdmin(admin.ModelAdmin):
 @admin.register(BingoTile)
 class BingoTileAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(SubcontractedEquipment)
+class SubcontractedEquipmentAdmin(NestedModelAdmin):
+    exclude = ["equipment", "fees"]
+    readonly_fields = ["get_printout_link"]
+    autocomplete_fields = ["gig", "vendor"]
+    inlines = [SubcontractedEquipmentInstanceInline, VendorFeeInline]
