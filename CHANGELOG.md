@@ -18,6 +18,7 @@
     * Add vendor rentals to Gig
     * Add subcontracted equipment to invoice and estimate
     * Add Subcontracted Equipment Order Form Generation
+* Add auto-sign functionality to contracts for managers
 <br><br>
 BUG FIXES:
     * Saving a fee will now save the associated estimate to update price

@@ -39,7 +39,8 @@
     {% block headincludes %} {% endblock %}
 </head>
 
-<body class="relative flex flex-col">
+<body class="relative">
+    {% block autosigninclude %} {% endblock %}
     <div class="flex">
         <div style="width: 4.25in" class="flex flex-col">
             <div class="flex">
@@ -212,11 +213,19 @@
                 I Certify to the best of my knowledge the hours and wages listed above are correct.
             </div>
             <div class="flex mt-10" style="width: 8.5in;">
-                <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">
+                <div style="width: 8.0in;" class="flex relative mx-auto ml-auto space-x-8">
                     {% if timesheet.signed and timesheet.available_to_auto_sign and employee.signature %}
-                    <div class="absolute" style="width: 4in; bottom: 0.3in; left: 0.55in">
+                    <div class="absolute" style="width: 4in; bottom: 0.3in; left: 0.4in">
                         <div class="flex space-x-4">
                             <img src="{{employee.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
+                            <p class="mt-auto text-right">{{timesheet.signed}}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if request.user.signature %}
+                    <div class="autosign hidden absolute" style="width: 4in; bottom: 0.3in; right: -0.4in">
+                        <div class="flex space-x-4">
+                            <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
                             <p class="mt-auto text-right">{{timesheet.signed}}</p>
                         </div>
                     </div>
@@ -264,10 +273,9 @@
     {% endif %}
 </body>
 <style type="text/css">
-    @media print {
-        .dont_break {
-            break-inside: avoid;
-        }
+    .dont_break {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 
     .stamp {

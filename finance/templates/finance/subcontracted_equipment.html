@@ -1,6 +1,8 @@
 {% load static tailwind_tags %}
 {% load slugs_components %}
+{% load finance_components %}
 {% load static %}
+{% load jsignature_filters %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -36,6 +38,7 @@
 </head>
 
 <body>
+    {% autosign %}
     <table style="border: none;">
         <thead class="bg-white">
             <tr style="border: none;">
@@ -154,7 +157,7 @@
                                                 {{subcontracted.vendor.email}}<br/>
                                                 {% endif %}
                                                 {% if subcontracted.vendor.physical_address %}
-                                                {{subcontracted.vendor.physical_address}}
+                                                {{subcontracted.vendor.physical_address|safe}}
                                                 {% endif %}
                                                 {% if subcontracted.vendor.website %}
                                                 {{subcontracted.vendor.website}}<br/>
@@ -374,8 +377,28 @@
                                 </ul>
                             </div>
                             <div>
-                                <div class="flex mt-10 space-x-4 dont_break" style="width: 8.75in;">
-                                    <table>
+                                <table class="mt-4 mx-auto"> 
+                                    <thead class="text-center">
+                                        <tr>
+                                            <td colspan="4">Agreed to</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="pt-2 border-r-0">{{request.user.first_name}} {{request.user.last_name}} (BSSL):</td>
+                                            <td class="pb-2 pr-2 border-l-0 relative">
+                                                {% if request.user.signature %}
+                                                <img src="{{request.user.signature|signature_base64}}" class="autosign hidden absolute" style="width: 2.0in;max-height: 0.6in;top: -0.3in">
+                                                {% endif %}
+                                                _________________________
+                                            </td>
+                                            <td class="pt-2 border-r-0">{{subcontracted.vendor.name}}:</td>
+                                            <td class="pb-2 pr-2 border-l-0">_________________________</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="flex mt-2 space-x-4 dont_break" style="width: 8.75in;">
+                                    <table class="mx-auto">
                                         <thead class="text-center">
                                             <tr>
                                                 <td colspan="2">Delivery</td>
@@ -384,23 +407,23 @@
                                         <tbody>
                                             <tr>
                                                 <td class="pt-2 border-r-0">BSSL Representative:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">BSSL Signature:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">Vendor Representative:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">Vendor Signature:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                    <table>
+                                    <table class="mx-auto">
                                         <thead class="text-center">
                                             <tr>
                                                 <td colspan="2">Return</td>
@@ -409,19 +432,19 @@
                                         <tbody>
                                             <tr>
                                                 <td class="pt-2 border-r-0">BSSL Representative:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">BSSL Signature:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">Vendor Representative:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
                                                 <td class="pt-2 border-r-0">Vendor Signature:</td>
-                                                <td class="pb-2 border-l-0">_________________________</td>
+                                                <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -437,8 +460,9 @@
                 <td style="border: none; padding-top: .25in;">
                     <div class="flex">
                         <span class="my-auto">Initial:</span>
-                        <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                        <div class="flex ml-4 relative"><span class="my-auto">BSSL</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                            <div class="absolute autosign hidden" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
                         </div>
                         <div class="flex ml-4"><span class="my-auto">{{subcontracted.vendor.name}}</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>

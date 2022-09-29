@@ -169,6 +169,15 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     def invoice_number(obj):
         return f"SA7400-I{2500+obj.pk}"
 
+    @staticmethod
+    def vendor_subcontracted_equipment_orders(obj):
+        vendorset = obj.gig.subcontractedequipment_set
+        return "None" if vendorset.count() == 0 else format_html(f"""
+        <div>
+        {" ".join([vendorcontract.get_printout_link() for vendorcontract in vendorset.all()])}
+        </div>
+        """)
+
     actions = [make_concluded, make_awaiting_payment, make_closed, make_abandoned]
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
@@ -194,6 +203,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         "total_amt",
         "outstanding_balance",
         "get_printout_link",
+        "vendor_subcontracted_equipment_orders",
         "gig__notes",
         "gig__day_of_show_notes",
         "gig__manager_notes",
@@ -213,6 +223,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
                     "canned_notes",
                     "notes",
                     "get_printout_link",
+                    "vendor_subcontracted_equipment_orders",
                 ]
             },
         ),

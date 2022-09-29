@@ -1,0 +1,37 @@
+<div class="dont_print bg-black text-white flex space-x-2 p-1 w-full">
+    <p class="my-auto">Print Utility Bar</p>
+    <button id="autosign" onclick="javascript:toggleAutosign()" class="my-auto rounded-sm bg-white text-black p-2">Auto-sign off</button>
+    <script>
+        let autosignOn = !!localStorage.getItem("autoSign")
+        console.log(autosignOn)
+        const button = document.querySelector("#autosign")
+        const toggleAutosign = () => {
+            if (autosignOn) {
+                button.classList.remove("bg-green-500")
+                button.classList.add("bg-white")
+                document.querySelectorAll(".autosign").forEach(e => e.classList.add("hidden"))
+                button.innerHTML = "Auto-sign off"
+            } else {
+                console.log("show")
+                button.classList.add("bg-green-500")
+                button.classList.remove("bg-white")
+                document.querySelectorAll(".autosign").forEach(e => e.classList.remove("hidden"))
+                button.innerHTML = "Auto-sign on"
+            }
+            autosignOn = !autosignOn
+            localStorage.setItem("autoSign", (autosignOn) ? 1 : 0)
+            console.log(autosignOn)
+        }
+        document.onload = () => {
+            toggleAutosign()
+            toggleAutosign()
+        }
+    </script>
+    <style>
+        @media print {
+        .dont_print {
+            display: none;
+        }
+    }
+    </style>
+</div>

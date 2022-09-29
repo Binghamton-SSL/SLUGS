@@ -2,6 +2,8 @@
 {% load slugs_components %}
 {% load static %}
 {% load finance_tags %}
+{% load finance_components %}
+{% load jsignature_filters %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,6 +39,7 @@
 </head>
 
 <body>
+    {% autosign %}
     <table style="border: none;">
         <thead class="bg-white">
             <tr style="border: none;">
@@ -572,8 +575,11 @@
                                 <div class="flex mt-10 text-sm dont_break" style="width: 8.75in;">
                                     <div class="flex mx-auto">
                                         <p class="mr-4">BSSL</p>
-                                        <div class="text-center">
+                                        <div class="text-center relative">
                                             <p class="mx-auto">_________________________________</p>
+                                            {% if request.user.signature %}
+                                                <img src="{{request.user.signature|signature_base64}}" class="autosign hidden absolute" style="width: 2.5in;max-height: 0.75in;top: -0.5in">
+                                            {% endif %}
                                             <p class="mx-auto">{{request.user.first_name}} {{request.user.last_name}}
                                             </p>
                                         </div>
@@ -643,8 +649,9 @@
                 <td style="border: none; padding-top: .25in;">
                     <div class="flex">
                         <span class="my-auto">Initial:</span>
-                        <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                        <div class="flex ml-4 relative"><span class="my-auto">BSSL</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                            <div class="absolute autosign hidden" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
                         </div>
                         <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>

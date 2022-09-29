@@ -255,3 +255,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
 class OfficeHoursAdmin(admin.ModelAdmin):
     inlines = [ShiftInlineAdmin]
     list_display = ["employee", "position"]
+
+@admin.register(PaperworkForm)
+class PaperworkFormAdmin(admin.ModelAdmin):
+    pass

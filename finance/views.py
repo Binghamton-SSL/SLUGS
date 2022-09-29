@@ -248,6 +248,8 @@ class SignTimesheet(SLUGSMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        self.added_context["timesheet"].signed = localtime(now()).date()
+        self.added_context["timesheet"].save()
         LogEntry.objects.log_action(
             user_id=self.added_context["timesheet"].employee.pk,
             content_type_id=ContentType.objects.get_for_model(
@@ -258,8 +260,6 @@ class SignTimesheet(SLUGSMixin, FormView):
             action_flag=CHANGE,
             change_message=f"{self.added_context['timesheet'].employee} signed timesheet electronically.",
         )
-        self.added_context["timesheet"].signed = localtime(now()).date()
-        self.added_context["timesheet"].save()
         send_generic_email(
             request=None,
             title=f"TIMESHEET SIGNED - {self.added_context['timesheet']}",

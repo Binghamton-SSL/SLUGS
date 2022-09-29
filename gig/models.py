@@ -56,7 +56,7 @@ class SubcontractedEquipment(models.Model):
                 % (
                     reverse("finance:vendor", args=(self.id,)),
                     datetime.now(),
-                    "Print Subcontracted Equipment Form",
+                    f"Print Subcontracted Equipment Form - {self.vendor}",
                 )
             )
 
