@@ -1,0 +1,50 @@
+{% extends "theme/base.html" %}
+{% load static %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<div class="w-full h-full">
+    <div class="flex-col p-5 mx-auto my-auto max-w-prose">
+        <div class="flex-col">
+            <div class="flex my-4">
+                <object class="mx-auto w-52 filter invert" type="image/svg+xml" data="{% static 'img/logo/logo-in.svg' %}">SLUGS logo</object>
+                {% if client.logo %}
+                    <p class="my-auto font-6xl">X</p>
+                    <img class="mx-auto w-52" src="{{client.logo.url}}"/>
+                {% endif %}
+            </div>
+            <h1 class="text-4xl text-center">Login with <span class="font-stencil">S.L.U.G.S</span></h1>
+        </div>
+
+        <div>
+            <p class="text-xl text-center">Hey, {{user.preferred_name}}, <strong>{{ client.name }}</strong> is asking to use your BSSL's SLUGS account to log in. When creating your account with {{client.name}} we'll also pass along the following info</p>
+            <p class="text-center">Please review this carefully. Only authorize websites you trust</p>
+            <form method="post" action="{% url 'oidc_provider:authorize' %}">
+            
+                {% csrf_token %}
+            
+                {{ hidden_inputs }}
+            
+                <ul class="text-center">
+                {% for scope in scopes %}
+                    <li><strong class="text-left">{{ scope.name }}</strong>
+                        <!-- <br><i>{{ scope.description }}</i> -->
+                    </li>
+                {% endfor %}
+                </ul>
+
+                <div class="flex mx-auto my-4 w-max">
+                    <input class="px-2 py-2 m-2 bg-red-500 rounded-sm" type="submit" value="Decline" />
+                    <input class="m-2 bg-[#009961] py-2 px-2 rounded-sm" name="allow" type="submit" value="Authorize" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

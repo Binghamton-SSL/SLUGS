@@ -80,9 +80,12 @@ INSTALLED_APPS = [
     "djangoql",
     "jsignature",
     "adminsortable2",
+    "oidc_provider",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -246,3 +249,9 @@ ADMINS = [("SLUGS", "bssl.slugs@binghamtonsa.org")]
 
 BSSL_EMAIL_ADDRESS = env("BSSL_EMAIL_ADDRESS")
 BSSL_FINANCE_EMAIL_ADDRESS = env("BSSL_FINANCE_EMAIL_ADDRESS")
+
+OIDC_USERINFO = 'SLUGS.oidc_provider_settings.userinfo'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]

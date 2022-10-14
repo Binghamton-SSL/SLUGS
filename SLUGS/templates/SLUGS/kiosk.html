@@ -1,0 +1,162 @@
+{% extends "theme/base.html" %}
+{% load grouping %}
+{% load static %}
+{% load gig_components %}
+{% load tz %}
+
+
+{% block title %}Kiosk{% endblock %}
+{% block content %}
+<div class="flex flex-col mx-auto max-w-7xl">
+    <div class="mx-4 mt-10 space-y-10 sm:mx-10">
+        <div>
+            <h1 class="text-4xl text-bold">
+                Notifications
+            </h1>
+            <div class="flex flex-col my-4 space-y-4">
+                {% if request.user|show_notifications:notifications or signup_open %}
+                <style>
+                    .notification a {
+                        text-decoration: underline;
+                    }
+                </style>
+                {% for notification in notifications %}
+                {% if request.user|show_notification:notification %}
+                <div class="notification max-w-5xl mx-auto rounded-sm py-2 px-4 {{notification.message_type}}">
+                    {{notification.message|safe}}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if outstanding_paperwork %}
+                <div class="max-w-5xl px-4 py-2 mx-auto bg-red-500 rounded-sm notification">
+                    <h1>Unfortunately you have paperwork we're still waiting for. Please hand it in!</h1>
+                    <p class="text-sm">If you've handed in one of these forms but still see it on this list. It may still be in processing</p>
+                    <ul class="ml-4">
+                        {% for paperwork in outstanding_paperwork %}
+                        <li class="list-disc">
+                            {{paperwork.form.form_name}} {% if paperwork.uploaded %}<sub>(We see that this has been uploaded. Just waiting on processing)</sub>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if signup_open %}
+                <a class="" href="{% url 'gig:signup' %}">
+                    <div
+                        class="flex max-w-5xl px-12 py-6 mx-auto text-center text-black transition bg-red-300 rounded-sm hover:bg-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <div style="margin: auto;"> Click here to sign up for this week's work! {% if request.user|has_group:"Cannot Work" %}<br> <span style="font-weight: bold; font-size: .75rem;">(well not for you bc you still haven't handed in all your paperwork)</span>  {% endif %}</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                </a>
+                {% endif %}
+                {% else %}
+                <div class="text-center mx-auto text-xl p-4 rounded bg-[#1F1F1F]" id="no_notifications">Nothing's here.... for now 😳</div>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            {% if next_gig %}
+            <h1 class="text-4xl text-bold"> Next Show</h1>
+                <a href="{% url 'gig:showView' next_gig.pk %}">
+                {% ticket next_gig %}
+                </a>
+            {% endif %}
+        </div>
+        <div>
+            <h1 class="text-4xl text-bold">
+                My shows
+            </h1>
+            <div class="my-4 md:mx-20 break-text">
+                <div class="flex p-4 text-black bg-green-100 rounded-sm">
+                    <div class="p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                    </div>
+                    <div class="w-11/12 mx-auto" tabindex="0">
+                        <div class="flex">
+                            <p class="font-bold">
+                                Did you know you can have your shows automatically added to your Calendar?
+                            </p>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-auto mr-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <div class="h-0 focused-within-parent:h-full overflow-hidden transition-all px-2">
+                            <p>
+                                Follow the steps below to get started. Once added, your calendar will be updated every 24 hours with your latest shifts.
+                            </p>
+                            <ol class="px-4 list-decimal">
+                                <li class="break-words">
+                                    Go to <a class="underline" href="https://calendar.google.com/calendar/r/settings/addbyurl">https://calendar.google.com/calendar/r/settings/addbyurl</a>
+                                </li>
+                                <li class="break-words">
+                                    Enter <b>https://{{request.get_host}}{% url 'utils:employeeFeed' emp_id=request.user.pk %}</b> as the URL
+                                </li>
+                                <li>
+                                    Hit Add Calendar
+                                </li>
+                            </ol>
+                            <p class="text-sm"> If you're looking for instructions for calendars other than Google Calendar, see <a class="underline" href="https://bssl.binghamtonsa.org/employee-resources/" target="_blank">our website</a> for alternate instructions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="my-4 md:mx-20">
+                {% if gigs.count > 0 %}
+                <table style="border-spacing: 1rem 1rem;" class="w-full table-auto">
+                    <thead class="border-b-2 border-white">
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td class="hidden md:inline">
+                                Organization
+                            </td>
+                            <td>
+                                Location
+                            </td>
+                            <td>
+                                When
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gig in gigs %}
+                        <tr tabindex="0" onclick="window.location='{% url 'gig:showView' gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
+                            <td class="pl-2">
+                                {{gig.name}}
+                            </td>
+                            <td class="hidden pl-2 md:table-cell">
+                                {{gig.org}}
+                            </td>
+                            <td class="py-4 pl-2">
+                                {{gig.location}}
+                            </td>
+                            <td class="pl-2">
+                                {{gig.start}}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="bg-[#1F1F1F] p-5 text-center text-xl text-white">
+                    You have no gigs...
+                    <img class="w-24 h-24 mx-auto my-4" src="{% static 'img/index/vibe_check.png' %}"/>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

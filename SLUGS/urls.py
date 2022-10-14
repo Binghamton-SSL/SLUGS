@@ -20,6 +20,8 @@ from SLUGS import views
 from django.contrib.auth import views as auth_views
 from employee.views import FormDownload, FilledFormDownload
 from finance.views import EstimateDownload
+from django.views.generic.base import RedirectView
+
 
 urlpatterns = [
     path("unicorn/", include("django_unicorn.urls")),
@@ -27,6 +29,8 @@ urlpatterns = [
     path("__debug__/", include(debug_toolbar.urls)),
     path("hijack/", include("hijack.urls")),
     path('admin/doc/', include('django.contrib.admindocs.urls')),
+    path('openid/', include('oidc_provider.urls', namespace='oidc_provider')),
+    path('.well-known/openid-configuration', RedirectView.as_view(url='/openid/.well-known/openid-configuration', permanent=False), name='openid-configuration'),
     path("admin/", admin.site.urls),
     path(
         "media/forms/<path:relative_path>", FormDownload.as_view(), name="download_form"

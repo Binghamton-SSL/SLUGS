@@ -10,7 +10,6 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from dateutil.relativedelta import *
-import html
 from dateutil.rrule import rrule, WEEKLY
 import functools
 
