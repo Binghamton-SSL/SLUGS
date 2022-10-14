@@ -209,6 +209,7 @@ class SystemQuantityAddon(BaseQuantity):
 class Vendor(Contact):
     website = models.CharField(max_length=512, null=True, blank=True)
     physical_address = HTMLField(blank=True, null=True)
+    notes = HTMLField(blank=True, null=True)
 
 
 class VendorEquipment(PricingMixin, models.Model):

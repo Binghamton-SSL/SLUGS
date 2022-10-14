@@ -39,7 +39,7 @@
 </head>
 
 <body>
-    {% autosign %}
+    {% autosign has_signatures=True %}
     <table style="border: none;">
         <thead class="bg-white">
             <tr style="border: none;">
@@ -572,7 +572,7 @@
                                 </ul>
                             </div>
                             <div>
-                                <div class="flex mt-10 text-sm dont_break" style="width: 8.75in;">
+                                <div class="flex mt-10 text-sm dont_break signature" style="width: 8.75in;">
                                     <div class="flex mx-auto">
                                         <p class="mr-4">BSSL</p>
                                         <div class="text-center relative">
@@ -644,7 +644,7 @@
                 </td>
             </tr>
         </tbody>
-        <tfoot>
+        <tfoot class="signature">
             <tr style="border: none;">
                 <td style="border: none; padding-top: .25in;">
                     <div class="flex">
@@ -704,6 +704,5 @@
         /* border: none!important; */
     }
 </style>
-{% print_this %}
 
 </html>

@@ -19,10 +19,18 @@
     * Add subcontracted equipment to invoice and estimate
     * Add Subcontracted Equipment Order Form Generation
 * Add auto-sign functionality to contracts for managers
+* Add rich HTML notes to Vendors
+* Add capability to remove signature lines from Estimate
+* Spookify SLUGS
 <br><br>
 BUG FIXES:
     * Saving a fee will now save the associated estimate to update price
     * Saving a payment will now save the associated estimate to update price
+    * On paperwork admin page, only show current employees (to limit loading times)
+    * Only show shift statistics on employee overview page if they've worked a shift
+    * Remove automatic print dialog from pages
+    * Only show one timeline per department, even if multiple load in/out exist per dept.
+    * Fix bug where number of man hours were not present on previous pay period
 
 ### V2.3.0 - 05/18/2022
 * Add Djangoql Admin Search

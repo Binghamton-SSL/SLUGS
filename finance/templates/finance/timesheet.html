@@ -226,7 +226,7 @@
                     <div class="autosign hidden absolute" style="width: 4in; bottom: 0.3in; right: -0.4in">
                         <div class="flex space-x-4">
                             <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
-                            <p class="mt-auto text-right">{{timesheet.signed}}</p>
+                            <p class="mt-auto text-right">{% now "n/j/Y" %}</p>
                         </div>
                     </div>
                     {% endif %}

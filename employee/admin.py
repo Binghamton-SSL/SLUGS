@@ -22,6 +22,17 @@ class PaperworkInline(admin.StackedInline):
     extra = 0
     readonly_fields = ["uploaded", "requested"]
 
+class PaperworkInlineWOOldEmployees(admin.StackedInline):
+    model = PaperworkForm
+    autocomplete_fields = ["form"]
+    exclude = []
+    extra = 0
+    readonly_fields = ["uploaded", "requested"]
+
+    def get_queryset(self, request):
+        qs = super(PaperworkInlineWOOldEmployees, self).get_queryset(request)
+        return qs.filter(employee__is_active=True)
+
 
 
 
@@ -29,7 +40,7 @@ class PaperworkInline(admin.StackedInline):
 class PaperworkAdmin(admin.ModelAdmin):
     search_fields = ["form_name"]
     readonly_fields = ["associated_forms"]
-    inlines = [PaperworkInline]
+    inlines = [PaperworkInlineWOOldEmployees]
     ordering = ["-edited"]
     pass
 

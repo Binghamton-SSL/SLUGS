@@ -34,7 +34,7 @@ def timeline(emp):
         ) and your_load_ins.last().load_out > (
             timezone.now() + timezone.timedelta(hours=-5)
         )
-        your_depts = [d.get_department_display() for d in your_load_ins] + [" "]
+        your_depts = list(set([d.get_department_display() for d in your_load_ins] + [" "]))
         events = [
             {
                 "content": f'{next_gig.name} <br><sub>{timezone.template_localtime(next_gig.start).strftime("%H:%M")}-{timezone.template_localtime(next_gig.end).strftime("%H:%M")}</sub>',

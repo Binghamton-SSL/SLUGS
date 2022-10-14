@@ -69,7 +69,13 @@
                     </div>
                     {% endif %}
                     <div class="mt-auto mb-0">
-                        {% unicorn 'trainingSignup' training_id=training.pk emp_id=request.user.pk %}
+                        {% if training.pk and request.user.pk %}
+                            {% unicorn 'trainingSignup' training_id=training.pk emp_id=request.user.pk %}
+                        {% else %}
+                            <div class="w-full p-2 px-4 mt-4 mb-2 text-center text-white bg-gray-700 rounded">
+                                Something went wrong, try refreshing the page to signup for this training.
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
