@@ -25,6 +25,9 @@
                             <span>{{shift.content_object}}</span>
                             <span class="mt-2">Start: {{shift.time_in}}</span>
                             <span>End: {{shift.time_out}}</span>
+                            {% if shift.description %}
+                            <span>Description: {{shift.description}}</span>
+                            {% endif %}
                         </div>
                         <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
                             <span>Rate: ${{shift.paid_at}}/hr</span>

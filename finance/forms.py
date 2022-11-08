@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import BaseModelFormSet
+from django.forms.models import BaseInlineFormSet
 from finance.models import PayPeriod, Shift
 from gig.models import Job
 from employee.models import OfficeHours
@@ -27,9 +28,10 @@ class BaseShiftForm(forms.ModelForm):
 class BaseShiftFormset(BaseModelFormSet):
     def clean(self):
         super(BaseShiftFormset, self).clean()
-        if self.cleaned_data is None:
+        if not hasattr(self, 'cleaned_data') or self.cleaned_data is None:
             raise ValidationError("Data didn't reach server. Try again.")
-        for shift in self.cleaned_data:
+        for idx, shift in enumerate(self.cleaned_data):
+            if self.forms[idx].has_changed():
                 employee = None
                 # if gig job, use that ref
                 if self.prefix.split('_')[0] == 'job':
@@ -52,7 +54,7 @@ class BaseShiftFormset(BaseModelFormSet):
                             shifts = shifts.filter(~Q(pk=shift["id"].pk))
                         for s in shifts:
                             if s.content_object.employee == employee:
-                                # pass
+                                self.forms[len(self.forms)-2].add_error("time_in", "Overlapping shifts. Please correct and try again")
                                 raise ValidationError(
                                     "Overlapping shifts. Please correct and try again"
                                 )
@@ -85,9 +87,11 @@ class BaseShiftFormset(BaseModelFormSet):
                                 shifts = shifts.filter(~Q(pk=shift["id"].pk))
                             for s in shifts:
                                 if s.content_object.employee == employee:
+                                    self.forms[len(self.forms)-2].add_error("time_in", "Overlapping shifts. Please correct and try again")
                                     raise ValidationError(
                                         "Overlapping shifts. Please correct and try again"
                                     )
+
 
 ShiftFormSet = modelformset_factory(
     Shift,
@@ -130,3 +134,14 @@ class rollOverShiftsForm(forms.Form):
                 css_class="rounded-sm text-white bg-green px-4 py-2",
             ),
         )
+
+
+class PricingChangeForm(BaseInlineFormSet):
+    def clean(self):
+        super(PricingChangeForm, self).clean()
+        for form in self.cleaned_data:
+            if ('base_price' in form) and ('price_per-hour' in form):
+                if (form['base_price'] + form['price_per_hour'] > max([form['base_price'], form['price_per_hour']])):
+                    raise ValidationError(
+                        f"There is more than one pricing scheme for a time period. Pricing's can only be of one type per time period."
+                    )

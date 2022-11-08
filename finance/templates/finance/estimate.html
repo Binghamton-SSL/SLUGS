@@ -299,6 +299,8 @@
                                                 {{pricing.price_per_hour_for_duration_of_gig}}
                                                 {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
                                                 {{pricing.price_per_hour_for_load_in_out_ONLY}}
+                                                {% elif pricing.price_per_hour_for_show_ONLY %}
+                                                {{pricing.price_per_hour_for_show_ONLY}}
                                                 {% else %}
                                                 0.00
                                                 {% endif %}
@@ -358,29 +360,50 @@
                                     </tr>
                                 </thead>
                                 <tbody id="item_table">
-                                    {% for instance, qty, rate, amt in subcontracted_equipment.values %}
-                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
-                                        <td>
-                                            {{instance.equipment.name}}
-                                        </td>
-                                        <td class="text-xs">
-                                            {% if instance.equipment.description %}
-                                            <span class="text-xs">{{instance.equipment.description}}</span><br>
-                                            {% endif %}
-                                            {% if instance.description %}
-                                            <span class="text-xs">{{instance.description}}</span><br>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {{qty}}
-                                        </td>
-                                        <td class="text-center">
-                                            {{rate}}
-                                        </td>
-                                        <td class="text-center">
-                                            ${{amt}}
-                                        </td>
-                                    </tr>
+                                    {% for vendor, equipment in subcontracted_equipment.items %}
+                                        {% for instance, qty, rate, amt in equipment.equipment.values %}
+                                        <tr>
+                                            <td>
+                                                {{instance.equipment.name}}
+                                            </td>
+                                            <td class="text-xs">
+                                                {% if instance.equipment.description %}
+                                                <span class="text-xs">{{instance.equipment.description}}</span><br>
+                                                {% endif %}
+                                                {% if instance.description %}
+                                                <span class="text-xs">{{instance.description}}</span><br>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                {{qty}}
+                                            </td>
+                                            <td class="text-center">
+                                                {{rate}}
+                                            </td>
+                                            <td class="text-center">
+                                                ${{amt}}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% for fee in equipment.fees %}
+                                        <tr style="border-top: black dashed .5px;">
+                                            <td>
+                                                + {{fee.0.name}}
+                                            </td>
+                                            <td class="text-xs">
+                                                {% if fee.0.description %}
+                                                <span class="text-xs">{{fee.0.description}}</span><br>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center bg-[#CCC]">
+                                            </td>
+                                            <td class="text-center bg-[#CCC]">
+                                            </td>
+                                            <td class="text-center">
+                                                ${{fee.1}}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
                                     {% endfor %}
                                     <tr>
                                         <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment

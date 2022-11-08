@@ -10,6 +10,7 @@ from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
+from django.views.decorators.clickjacking import xframe_options_exempt
 import django.utils.timezone as timezone
 import pytz
 import csv
@@ -411,11 +412,19 @@ class RollOverAllShifts(SLUGSMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EstimateDownload(SLUGSMixin, View):
+class EstimateDownload(View):
+
+    @xframe_options_exempt
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated and not (request.COOKIES.get('SLUGSKiosk') and Employee.objects.get(pk=request.COOKIES.get('SLUGSKiosk')).is_staff):
+            return redirect("%s?next=%s" % (reverse("login"), request.path))
+        return super().dispatch(request, *args, **kwargs)
+
+    @xframe_options_exempt
     def get(self, request, relative_path):
         path = f"{relative_path}"
         absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
-        response = FileResponse(open(absolute_path, "rb"), as_attachment=True)
+        response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
         return response
 
 

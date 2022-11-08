@@ -262,6 +262,12 @@
                                         </td>
                                     </tr>
                                     {% endfor %}
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">Subtotal:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{subtotal}}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {% endif %}
@@ -295,22 +301,22 @@
                                     </tr>
                                 </thead>
                                 <tbody id="item_table">
-                                    {% for fee, amt in fees.values %}
+                                    {% for fee in fees %}
                                     <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
                                         <td>
-                                            {{fee.name}}
+                                            {{fee.0.name}}
                                         </td>
                                         <td class="text-xs">
-                                            {% if fee.description %}{{fee.description}}{% endif %}
+                                            {% if fee.0.description %}{{fee.0.description}}{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if fee.percentage %}{{fee.percentage}}{% endif %}
+                                            {% if fee.0.percentage %}{{fee.0.percentage}}{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if fee.amount %}{{fee.amount}}{% endif %}
+                                            {% if fee.0.amount %}{{fee.0.amount}}{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            ${{amt}}
+                                            ${{fee.1}}
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -318,7 +324,7 @@
                                         <td colspan="4" class="text-right" style="border-right:none!important;">Fee
                                             Total:</td>
                                         <td colspan="1" class="text-center" style="border-left:none!important;">
-                                            ${{total_amt}}
+                                            ${{fee_amt}}
                                         </td>
                                     </tr>
                                 </tbody>

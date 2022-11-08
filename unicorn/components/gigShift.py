@@ -6,6 +6,7 @@ from gig.models import Job
 class GigshiftView(UnicornView):
     job = None
     reload = False
+    error = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
@@ -18,8 +19,11 @@ class GigshiftView(UnicornView):
         self.job.save()
 
     def clock_out(self):
-        shift = self.job.shifts.order_by("time_out").first()
-        shift.time_out = timezone.now()
-        shift.save()
-        self.job.save()
-        self.reload = True
+        try:
+            shift = self.job.shifts.order_by("time_out").first()
+            shift.time_out = timezone.now()
+            shift.save()
+            self.job.save()
+            self.reload = True
+        except AttributeError:
+            self.error("Could not clock out. Please reload page and try again.")

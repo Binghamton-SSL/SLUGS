@@ -1,0 +1,54 @@
+{% load static %}
+<div>
+    <p>Last Update: {{last_training_update|date:"h:i A n/j"}}</p>
+    <div class="grid grid-cols-1 gap-2 auto-rows-fr ">
+        {% for training in ongoing_trainings %}
+        <div unicorn:click="toggle_modal({{training.training.pk}})" class="w-full h-full py-4 text-white bg-black border-2 rounded-md">
+            <h3 class="text-xl text-center">{{training.training.get_dept_display}}</h3>
+            <p class="text-center text-md">{{training.training.date}}</p>
+            <div class="text-sm text-center">{{training.training.notes|safe|truncatechars:75}}</div>
+        </div>
+        <!-- Show Modal -->
+        <div id="training{{training.gig.pk}}" class="{% if not training.shown %} hidden {% endif %}">
+            <div class="absolute top-0 left-0 z-40 w-screen h-screen bg-black opacity-75">
+            </div>
+            <div class="absolute top-0 left-0 z-50 flex w-screen h-screen">
+                <div class="w-8/12 max-h-screen p-4 mx-auto my-auto overflow-y-scroll bg-white rounded">
+                    <div class="flex">
+                        <p class="text-5xl">{{training.training.get_dept_display}} - {{training.training.date}}</p>
+                        <div unicorn:click="toggle_modal({{training.training.pk}})" class="p-4 ml-auto mr-0 text-xl font-bold text-white bg-black w-max">
+                            Close
+                        </div>
+                    </div>
+                    <hr class="bg-black border-2 border-black">
+                    <div>
+                        <p class="text-2xl">Clock in:</p>
+                        <p class="text-md">Click on an employee to clock them in/out</p>
+                        <div class="grid gap-4
+                        {% if training.trainees|length == 1 %}
+                            grid-cols-1
+                        {% elif training.trainees|length == 2 %}
+                            grid-cols-2
+                        {% elif training.trainees|length == 3 %}
+                            grid-cols-3
+                        {% else %}
+                            grid-cols-4
+                        {% endif %}">
+                            {% for trainee, clocked_in in training.trainees %}
+                                <div unicorn:click="toggle_clock({{trainee.pk}})" class="p-4 text-2xl mx-auto {% if clocked_in %} bg-green-500 {% else %} bg-gray-300 {% endif %} h-full w-full">{% if trainee.employee.preferred_name %}{{trainee.employee.preferred_name}} {% else %} {{trainee.employee.first_name}} {% endif %} {{trainee.employee.last_name}}
+                                    {% if clocked_in %}<br><span class="text-sm">Clocked in: {{clocked_in.time_in|date:"f A"}}</span>{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        setInterval(() => {
+            Unicorn.call("kioskTraining", "update_training_status")
+        }, 1000*60*10);
+    </script>
+</div>

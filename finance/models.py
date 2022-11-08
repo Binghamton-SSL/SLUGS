@@ -129,7 +129,10 @@ class SystemAddonPricing(BasePricing):
     """
     addon = models.ForeignKey("equipment.SystemAddon", on_delete=models.CASCADE)
     price_per_hour_for_load_in_out_ONLY = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0.00
+        max_digits=8, decimal_places=2, default=0.00, help_text="Price per hour from first dept load in to last dept load out"
+    )
+    price_per_hour_for_show_ONLY = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0.00, help_text="Price per hour from setup by time to end of show"
     )
 
     def clean(self, *args, **kwargs):

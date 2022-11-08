@@ -17,6 +17,7 @@ from employee.models import Employee
 from datetime import datetime
 from django.db.models import F, DateTimeField, ExpressionWrapper
 from django.utils import timezone
+from django.urls import reverse
 
 
 from finance.forms import ShiftFormSet
@@ -50,6 +51,8 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("%s?next=%s" % (reverse("login"), request.path))
         self.form_classes = {
             "show_notes": {
                 "form": engineerNotesForm,
@@ -58,7 +61,7 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         jobs = {}
         self.added_context["helper"] = shiftFormHelper()
         self.added_context["gig"] = Gig.objects.get(pk=kwargs["gig_id"])
-        if not self.added_context["gig"].published or not request.user.is_authenticated:
+        if not self.added_context["gig"].published:
             raise PermissionDenied()
         try:
             self.added_context["my_jobs"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"])

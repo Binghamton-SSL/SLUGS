@@ -22,6 +22,10 @@
 * Add rich HTML notes to Vendors
 * Add capability to remove signature lines from Estimate
 * Spookify SLUGS
+* Add pricing for show duration only on addons
+* Add group support to OIDC authentication
+* Add Self Service Kiosk
+* Mark Timesheet as signed widget now adds a Object Log
 <br><br>
 BUG FIXES:
     * Saving a fee will now save the associated estimate to update price
@@ -31,6 +35,21 @@ BUG FIXES:
     * Remove automatic print dialog from pages
     * Only show one timeline per department, even if multiple load in/out exist per dept.
     * Fix bug where number of man hours were not present on previous pay period
+    * Move office hours input errors to their respective entry
+    * Marking estimates as concluded en masse now updates their respective gigs
+    * Correctly show descriptions for addons (both db and individualized)
+    * Add subcontracted equipment fees to estimates and invoices
+    * Correct baseShiftFormset to correct for errors arising when attempting to DELETE overlapping shifts
+    * Add validation to pricing to make sure there isn't overlapping pricing types for addons, systems, etc.
+    * Allow Estimates to be viewed if not logged in on a Kiosk machine
+    * Add subtotal to Subcontracted Equipment form
+    * Update staffing store to fallback to first date work requested when not staffed (was reporting 0's)
+    * Add line breaks between subcontracted equipment forms
+    * Allow CORS for wiki support
+    * Fix jquery formset to properly delete shifts
+    * Fix error where URL Encode on login next screen dropped all get variables
+    * Add useful errors to gigShift clock in/out
+    * Add description to previous pay period shifts
 
 ### V2.3.0 - 05/18/2022
 * Add Djangoql Admin Search

@@ -251,7 +251,9 @@ BSSL_EMAIL_ADDRESS = env("BSSL_EMAIL_ADDRESS")
 BSSL_FINANCE_EMAIL_ADDRESS = env("BSSL_FINANCE_EMAIL_ADDRESS")
 
 OIDC_USERINFO = 'SLUGS.oidc_provider_settings.userinfo'
+OIDC_EXTRA_SCOPE_CLAIMS = 'SLUGS.oidc_provider_settings.CustomScopeClaims'
+OIDC_IDTOKEN_INCLUDE_CLAIMS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000"
+    "https://wiki.bssl.binghamtonsa.org",
 ]

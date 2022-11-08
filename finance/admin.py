@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from finance.forms import PricingChangeForm
 from finance.models import (
     FeePricing,
     HourlyRate,
@@ -29,21 +30,25 @@ class HourlyRateInline(admin.StackedInline):
 
 
 class SystemPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = SystemPricing
     extra = 0
 
 
 class FeePricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = FeePricing
     extra = 0
 
 
 class SystemAddonPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = SystemAddonPricing
     extra = 0
 
 
 class VendorEquipmentPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = VendorEquipmentPricing
     extra = 0
 
@@ -105,7 +110,11 @@ class PaymentInlineAdmin(admin.StackedInline):
 class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     @admin.action(description="Mark selected estimates as Show Concluded")
     def make_concluded(modeladmin, request, queryset):
-        queryset.update(status="O")
+        for estimate in queryset.all():
+            estimate.status = "O"
+            estimate.gig.archived = True
+            estimate.gig.save()
+            estimate.save()
         messages.add_message(
             request, messages.SUCCESS, "Estimates marked as concluded 👍"
         )

@@ -54,6 +54,7 @@ urlpatterns = [
     path("auth/", include("django.contrib.auth.urls"), name="auth"),
     path("utils/", include("utils.urls")),
     path("", views.index.as_view(), name="index"),
+    path("kiosk/", views.kiosk.as_view(), name="kiosk"),
     path("employee/", include("employee.urls")),
     path("gig/", include("gig.urls")),
     path("equipment/", include("equipment.urls")),

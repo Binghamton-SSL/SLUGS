@@ -52,7 +52,7 @@ class SubcontractedEquipment(models.Model):
 
     def get_printout_link(self):
         return format_html(
-                "<a href='%s?time=%s'>%s</a>"
+                "<a href='%s?time=%s'>%s</a><br>"
                 % (
                     reverse("finance:vendor", args=(self.id,)),
                     datetime.now(),

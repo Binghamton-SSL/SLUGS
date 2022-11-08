@@ -89,15 +89,15 @@
                         // We're dealing with an inline formset.
                         // Rather than remove this form from the DOM, we'll mark it as deleted
                         // and hide it, then let Django handle the deleting:
-                        del.val('on');
+                        del.val('true');
                         row.hide();
                         forms = $('.' + options.formCssClass).not(':hidden');
-                        totalForms.val(forms.length);
+                        totalForms.val(forms.length + ((options.hideLastAddForm) ? 1 : 0));
                     } else {
                         row.remove();
                         // Update the TOTAL_FORMS count:
                         forms = $('.' + options.formCssClass).not('.formset-custom-template');
-                        totalForms.val(forms.length);
+                        totalForms.val(forms.length + ((options.hideLastAddForm) ? 1 : 0));
                     }
                     for (var i=0, formCount=forms.length; i<formCount; i++) {
                         // Apply `extraClasses` to form rows so they're nicely alternating:
@@ -132,7 +132,7 @@
                 if (del.is(':checked')) {
                     // If an inline formset containing deleted forms fails validation, make sure
                     // we keep the forms hidden (thanks for the bug report and suggested fix Mike)
-                    del.before('<input type="hidden" name="' + del.attr('name') +'" id="' + del.attr('id') +'" value="on" />');
+                    del.before('<input type="hidden" name="' + del.attr('name') +'" id="' + del.attr('id') +'" value="true" />');
                     row.hide();
                 } else {
                     del.before('<input type="hidden" name="' + del.attr('name') +'" id="' + del.attr('id') +'" />');

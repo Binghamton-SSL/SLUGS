@@ -41,6 +41,7 @@ def calculateGigCost(estimate):
         )
 
         total_loadin_time = decimal.Decimal(0.00)
+        total_show_time = decimal.Decimal((ret["gig"].end - ret["gig"].setup_by) / timezone.timedelta(minutes=15) / 4)
         for loadin in dept_loadins.order_by("shop_time"):
             total_loadin_time += decimal.Decimal(
                 (
@@ -78,7 +79,7 @@ def calculateGigCost(estimate):
         addons = systeminstance.addoninstance_set.all()
         for addon_set_item in addons:
             addon = addon_set_item.addon
-            addon.addl_description = addon_set_item.description
+            addon.description = f"{(f'{addon.description}') if addon.description else ''} {f' - {addon_set_item.description}' if addon_set_item.description else ''}"
 
             current_price = addon.get_price_at_date(ret["gig"].start)
 
@@ -93,6 +94,11 @@ def calculateGigCost(estimate):
                     current_price.price_per_hour_for_load_in_out_ONLY
                     * addon_set_item.qty
                     * total_loadin_time
+                )
+                + (
+                    current_price.price_per_hour_for_show_ONLY
+                    * addon_set_item.qty
+                    * total_show_time
                 ),
                 2,
             )
@@ -103,7 +109,9 @@ def calculateGigCost(estimate):
                 addon_set_item.qty * total_time_rented
                 if current_price.price_per_hour != 0.00
                 else addon_set_item.qty * total_loadin_time
-                if current_price.price_per_hour_for_load_in_out_ONLY
+                if current_price.price_per_hour_for_load_in_out_ONLY != 0.00
+                else addon_set_item.qty * total_show_time
+                if current_price.price_per_hour_for_show_ONLY != 0.00
                 else addon_set_item.qty,
                 addon_subtotal,
                 True,
@@ -112,6 +120,10 @@ def calculateGigCost(estimate):
         ret["total_amt"] += system_subtotal
 
     for rental in ret["estimate"].gig.subcontractedequipment_set.all():
+        ret["subcontracted_equipment"][rental.vendor] = {
+            "fees": [],
+            "equipment": {},
+        }
         vendor_subtotal = decimal.Decimal(0.00)
         for instance in rental.subcontractedequipmentinstance_set.all():
             subtotal = decimal.Decimal(0.00)
@@ -128,7 +140,7 @@ def calculateGigCost(estimate):
                 ), 2
             )
             vendor_subtotal += subtotal
-            ret["subcontracted_equipment"][instance] = [
+            ret["subcontracted_equipment"][rental.vendor]["equipment"][instance.pk] = [
                 instance,
                 instance.qty * total_time_rented
                 if current_price.price_per_hour != 0.00
@@ -136,6 +148,11 @@ def calculateGigCost(estimate):
                 current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
                 subtotal
             ]
+        for fee in rental.vendorfee_set.all():
+            amount = round(fee.percentage*subtotal+fee.amount, 2);
+            ret["subcontracted_equipment"][rental.vendor]["fees"].append([fee, amount])
+            vendor_subtotal += amount
+
         ret["subcontracted_amount"] += vendor_subtotal
         ret["total_amt"] += vendor_subtotal
 
@@ -160,7 +177,10 @@ def calculateGigCost(estimate):
 def calcuateSubcontractedCost(subcontracted):
     ret = {
         "subcontracted": subcontracted,
+        "subtotal": decimal.Decimal(0.00),
         "total_amt": decimal.Decimal(0.00),
+        "fee_amt": decimal.Decimal(0.00),
+        "fees": [],
         "equipment": {},
     }
     for instance in subcontracted.subcontractedequipmentinstance_set.all():
@@ -186,4 +206,10 @@ def calcuateSubcontractedCost(subcontracted):
             current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
             subtotal
         ]
+        ret["subtotal"] += subtotal
+    for fee in subcontracted.vendorfee_set.all():
+        amount = round(fee.percentage*subtotal+fee.amount, 2);
+        ret["fees"].append([fee, amount])
+        ret["fee_amt"] += amount
+    ret["total_amt"] += ret["fee_amt"]
     return ret

@@ -52,6 +52,7 @@ class EquipmentAddonInline(admin.StackedInline):
 class VendorEquipmentInline(admin.StackedInline):
     model = VendorEquipment
     extra = 0
+    search_fields = ["name"]
 
 
 @admin.register(SystemAddon)

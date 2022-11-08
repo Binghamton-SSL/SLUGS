@@ -1,8 +1,11 @@
 from django.db.models.query_utils import Q
 from django.views.generic.base import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from employee.models import Employee
+from training.models import Training
 from utils.models import Notification, signupStatus
 from gig.models import Gig, Job
 from SLUGS.templatetags.grouping import has_group
@@ -79,4 +82,19 @@ class index(SLUGSMixin, TemplateView):
                     | Q(form__required_for_payroll=True)
                 )
             )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class kiosk(TemplateView):
+    added_context = {}
+    template_name = "SLUGS/kiosk.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.added_context)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if not (request.COOKIES.get('SLUGSKiosk') and Employee.objects.get(pk=request.COOKIES.get('SLUGSKiosk')).is_staff):
+            raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
