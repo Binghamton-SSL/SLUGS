@@ -24,7 +24,7 @@
             </h4>
             <form class="flex flex-col space-y-2 text-black" method="POST"
             {% if next %}
-            action="./?next={{next}}"
+            action="./?next={{next|urlencode}}"
             {% else %}
             action="."
             {% endif %}>

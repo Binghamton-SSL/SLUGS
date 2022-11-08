@@ -114,6 +114,16 @@
             {% endif %}
     </div>
     <div class="module">
+        <a href="#" onclick="javascript:createSLUGSKioskCookie()">Make this computer a SLUGS kiosk</a><br>
+        <sub>Saves a key to this computer indefinitely unlocking SLUGS kiosk access. THIS CANNOT BE UNDONE EASILY</sub>
+        <script>
+            const createSLUGSKioskCookie = () => {
+                var expires = (new Date(Date.now()+ (365*24*60*60)*1000)).toUTCString();
+                document.cookie = "SLUGSKiosk={{request.user.pk}}; expires=" + expires + ";path=/;"
+            }
+        </script>
+    </div>
+    <div class="module">
         <a href="{% url 'utils:restartServer' %}">Restart the server</a><br>
         <sub>Use this when something is acting wonky. SLUGS will go down for 15-30 seconds.</sub>
     </div>

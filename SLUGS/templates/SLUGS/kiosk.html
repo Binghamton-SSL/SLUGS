@@ -1,0 +1,62 @@
+{% extends "theme/base.html" %}
+{% load grouping %}
+{% load static %}
+{% load tz %}
+{% load unicorn %}
+
+{% block nav %} {% endblock %}
+{% block title %}Kiosk{% endblock %}
+{% block headincludes %} {% unicorn_scripts %} {% endblock %}
+{% block content %}
+<div class="flex">
+    <img src="{% static 'img/logo/logo.png' %}" class="h-20 my-auto filter invert" alt="SLUGS logo"/>
+    <h1 class="my-auto text-6xl">
+        <span class="my-auto font-stencil">SLUGS</span> Self Service
+    </h1>
+</div>
+<div class="flex flex-col max-w-5xl mx-auto mt-10 w-max">
+    <div class="p-4 mx-auto text-black bg-white">
+        <h1 class="text-4xl text-center">Current Time:</h1>
+        <h1 id="currtime" class="text-4xl text-center" style="font-family: monospace;"></h1>
+        <script>
+            const currtime = document.querySelector("#currtime")
+            setInterval(() => {
+                currtime.innerHTML = (new Date()).toLocaleString()
+            }, 450);
+        </script>
+        <!-- <h1 class="text-4xl text-center">Scan ID to see personalized options</h1>
+        <div class="flex flex-col my-2">
+            <input class="mx-auto text-white bg-gray-800 rounded-sm w-52" type="text"/>
+            <div class="flex p-2 my-2 bg-blue-300 rounded-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                </svg>
+                <p>
+                    Don't have your ID? Have the Engineer scan theirs or use your phone instead
+                </p>         
+            </div>
+        </div> -->
+    </div>
+</div>
+<div class="flex mt-6 ml-10 mr-6 space-x-4">
+    <div class="w-2/3 p-4 text-black bg-white rounded-sm">
+        <h2 class="text-2xl text-center">Ongoing Shows</h2>
+        {% unicorn 'kioskShow'%}
+        <div class="grid 
+            {% if ongoing_shows|length == 1 %}
+                grid-cols-1
+            {% elif ongoing_shows|length == 2 %}
+                grid-cols-2
+            {% else %}
+                grid-cols-3
+            {% endif %}
+            gap-2 auto-rows-fr ">
+        </div>
+    </div>
+    <div class="w-1/3 p-4 text-black bg-white rounded-sm">
+        <h2 class="text-2xl text-center">Ongoing Trainings</h2>
+        {% unicorn 'kioskTraining'%}
+    </div>
+</div>
+{% endblock %}
+{% block footer %} {% endblock %}

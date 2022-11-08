@@ -12,8 +12,10 @@ from equipment.models import (
     Item,
     SystemQuantity,
     SystemQuantityAddon,
+    Vendor,
+    VendorEquipment,
 )
-from finance.admin import SystemAddonPricingInline, SystemPricingInline
+from finance.admin import SystemAddonPricingInline, SystemPricingInline, VendorEquipmentPricingInline
 
 
 # Register your models here.
@@ -29,6 +31,7 @@ class ItemThroughInline(NestedStackedInline):
     model = Item.children.through
     fk_name = "parent"
     extra = 0
+    autocomplete_fields = ["child"]
 
 
 class ItemInline(NestedStackedInline):
@@ -45,6 +48,11 @@ class EquipmentInline(admin.StackedInline):
 class EquipmentAddonInline(admin.StackedInline):
     model = SystemQuantityAddon
     extra = 0
+
+class VendorEquipmentInline(admin.StackedInline):
+    model = VendorEquipment
+    extra = 0
+    search_fields = ["name"]
 
 
 @admin.register(SystemAddon)
@@ -64,6 +72,7 @@ class BrokenEquipmentReportAdmin(admin.ModelAdmin):
     autocomplete_fields = ["reported_broken_by", "broken_system"]
     list_filter = ["status", "broken_system"]
     readonly_fields = ["date_filed"]
+    ordering = ["date_filed"]
     fieldsets = [
         (None, {"fields": ("status",)}),
         (
@@ -88,9 +97,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceRecord)
 class ServiceRecordAdmin(admin.ModelAdmin):
-    verbose_name = "Service Record / Equipment Note"
-    verbose_name_plural = "Service Records & Equipment Notes"
     search_fields = ["name", "date_created"]
+    autocomplete_fields = ["item"]
 
 
 class ItemResource(resources.ModelResource):
@@ -123,4 +131,14 @@ class ItemAdmin(ImportExportMixin, NestedModelAdmin):
     inlines = [ServiceRecordInline, ItemThroughInline]
     # list_filter = ["equipment__department"]
     exclude = ["children"]
-    search_fields = ["pk", "barcode", "serial_no"]
+    search_fields = ["pk", "barcode", "serial_no", "item_type__name", "item_type__brand", "item_type__model_number"]
+
+@admin.register(Vendor)
+class VendorAdmin(admin.ModelAdmin):
+    search_fields = ["name", "phone_number", "email", "website"]
+
+@admin.register(VendorEquipment)
+class VendorEquipmentAdmin(admin.ModelAdmin):
+    inlines = [VendorEquipmentPricingInline]
+    autocomplete_fields = ["vendor"]
+    search_fields = ["vendor", "name", "description"]

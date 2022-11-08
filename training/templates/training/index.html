@@ -69,7 +69,13 @@
                     </div>
                     {% endif %}
                     <div class="mt-auto mb-0">
-                        {% unicorn 'trainingSignup' training_id=training.pk emp_id=request.user.pk %}
+                        {% if training.pk and request.user.pk %}
+                            {% unicorn 'trainingSignup' training_id=training.pk emp_id=request.user.pk %}
+                        {% else %}
+                            <div class="w-full p-2 px-4 mt-4 mb-2 text-center text-white bg-gray-700 rounded">
+                                Something went wrong, try refreshing the page to signup for this training.
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -133,14 +139,7 @@
                     </div>
                 </div>
             </div>
-            <div class="my-5">
-                <h1 class="text-4xl text-bold">
-                    SLUGS Guides
-                </h1>
-                <div>
-                    <h2>
-                        Want to know more about SLUGS and how to use it? No problem, we set up an entire <a class="underline" href="https://github.com/Binghamton-SSL/SLUGS/wiki">wiki (https://github.com/Binghamton-SSL/SLUGS/wiki)</a> describing it!
-                    </h2>
-                </div>
-            </div>
-            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

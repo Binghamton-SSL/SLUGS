@@ -80,9 +80,12 @@ INSTALLED_APPS = [
     "djangoql",
     "jsignature",
     "adminsortable2",
+    "oidc_provider",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -243,3 +246,14 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 JSIGNATURE_JQUERY = "admin"
 
 ADMINS = [("SLUGS", "bssl.slugs@binghamtonsa.org")]
+
+BSSL_EMAIL_ADDRESS = env("BSSL_EMAIL_ADDRESS")
+BSSL_FINANCE_EMAIL_ADDRESS = env("BSSL_FINANCE_EMAIL_ADDRESS")
+
+OIDC_USERINFO = 'SLUGS.oidc_provider_settings.userinfo'
+OIDC_EXTRA_SCOPE_CLAIMS = 'SLUGS.oidc_provider_settings.CustomScopeClaims'
+OIDC_IDTOKEN_INCLUDE_CLAIMS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://wiki.bssl.binghamtonsa.org",
+]

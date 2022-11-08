@@ -10,7 +10,7 @@ class PreviouspayperiodView(UnicornView):
     sub_pay_period = None
     selected_pp = None
     available_pay_period = None
-    sub_shift_hours = None
+    sub_shifts_hours = None
     sub_shifts_price = None
 
     def __init__(self, *args, **kwargs):
@@ -25,7 +25,7 @@ class PreviouspayperiodView(UnicornView):
                 Q(time_in__gte=self.sub_pay_period.start)
                 & Q(time_out__lte=self.sub_pay_period.end + timezone.timedelta(days=1))
             ).order_by("-time_out")
-            self.sub_shifts_hours = self.sub_shifts.aggregate(Sum("total_time"))
+            self.sub_shifts_hours = str(self.sub_shifts.aggregate(Sum('total_time'))['total_time__sum'])
             self.sub_shifts_price = self.sub_shifts.aggregate(Sum("cost"))
         else:
             self.sub_pay_period = None

@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.urls.base import reverse_lazy
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from employee.forms import signPaperworkForm
-from finance.estimate_data_utils import calculateGigCost
+from finance.estimate_data_utils import calcuateSubcontractedCost, calculateGigCost
 from django.http.response import HttpResponse
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
@@ -10,6 +10,7 @@ from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
+from django.views.decorators.clickjacking import xframe_options_exempt
 import django.utils.timezone as timezone
 import pytz
 import csv
@@ -23,8 +24,9 @@ from django.db.models import Sum
 from django.views.generic.edit import FormView
 from SLUGS.views import SLUGSMixin
 from SLUGS.templatetags.grouping import has_group
-from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet, Wage
+from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet
 from employee.models import Employee
+from gig.models import SubcontractedEquipment
 from utils.generic_email import send_generic_email
 import decimal
 import calendar
@@ -51,6 +53,15 @@ class viewInvoice(SLUGSMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
 
+class viewSubcontractedEquipment(SLUGSMixin, TemplateView):
+    template_name = "finance/subcontracted_equipment.html"
+    added_context = {}
+
+    def dispatch(self, request, *args, **kwargs):
+        self.added_context = calcuateSubcontractedCost(SubcontractedEquipment.objects.get(pk=kwargs["v_id"]))
+        return super().dispatch(request, *args, **kwargs)
+
+
 class viewTimesheet(SLUGSMixin, TemplateView):
     template_name = "finance/printed_timesheet.html"
 
@@ -70,8 +81,10 @@ class viewTimesheet(SLUGSMixin, TemplateView):
             str(barc.render()).replace("\\n", "").replace("b'", "").replace("'", "")
         )
         if request.user.pk is not None:
-            if employee.pk != request.user.pk and (
-                not has_group(request.user, "Manager")
+            if employee.pk != request.user.pk and not (
+                has_group(request.user, "Manager")
+                or
+                has_group(request.user, "SA Employee")
             ):
                 raise PermissionDenied()
         shifts = pay_period.shifts.none()
@@ -236,6 +249,8 @@ class SignTimesheet(SLUGSMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        self.added_context["timesheet"].signed = localtime(now()).date()
+        self.added_context["timesheet"].save()
         LogEntry.objects.log_action(
             user_id=self.added_context["timesheet"].employee.pk,
             content_type_id=ContentType.objects.get_for_model(
@@ -246,8 +261,6 @@ class SignTimesheet(SLUGSMixin, FormView):
             action_flag=CHANGE,
             change_message=f"{self.added_context['timesheet'].employee} signed timesheet electronically.",
         )
-        self.added_context["timesheet"].signed = localtime(now()).date()
-        self.added_context["timesheet"].save()
         send_generic_email(
             request=None,
             title=f"TIMESHEET SIGNED - {self.added_context['timesheet']}",
@@ -399,11 +412,19 @@ class RollOverAllShifts(SLUGSMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class EstimateDownload(SLUGSMixin, View):
+class EstimateDownload(View):
+
+    @xframe_options_exempt
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated and not (request.COOKIES.get('SLUGSKiosk') and Employee.objects.get(pk=request.COOKIES.get('SLUGSKiosk')).is_staff):
+            return redirect("%s?next=%s" % (reverse("login"), request.path))
+        return super().dispatch(request, *args, **kwargs)
+
+    @xframe_options_exempt
     def get(self, request, relative_path):
         path = f"{relative_path}"
         absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
-        response = FileResponse(open(absolute_path, "rb"), as_attachment=True)
+        response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
         return response
 
 

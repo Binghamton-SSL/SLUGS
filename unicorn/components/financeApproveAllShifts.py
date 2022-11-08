@@ -8,8 +8,11 @@ class FinanceapproveallshiftsView(UnicornView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
-        self.shifts = kwargs["shiftset"]
-        self.allAccepted = kwargs["shiftset"].filter(processed=False).count() == 0
+        try:
+            self.shifts = kwargs["shiftset"]
+            self.allAccepted = kwargs["shiftset"].filter(processed=False).count() == 0
+        except KeyError:
+            raise ValidationError({"allAccepted": "There was an error. Please contact the SLUGS administrator"}, code="invalid") 
 
     def acceptAll(self):
         for shift in self.shifts:

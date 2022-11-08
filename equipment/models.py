@@ -1,9 +1,9 @@
-from datetime import datetime
 from django.db import models
 from gig.models import DEPARTMENTS
+from client.models import Contact
 import employee.models as employee
-from django.db.models import Q
 from datetime import date
+from tinymce.models import HTMLField
 
 from utils.models import PricingMixin
 
@@ -169,6 +169,10 @@ class ServiceRecord(models.Model):
     def __str__(self):
         return f"{self.name} on {self.date_created}"
 
+    class Meta:
+        verbose_name = "Service Record / Equipment Note"
+        verbose_name_plural = "Service Records & Equipment Notes"
+
 
 class BaseQuantity(models.Model):
     """Through model linking System and Equipment quantity"""
@@ -200,3 +204,25 @@ class SystemQuantityAddon(BaseQuantity):
 
     def __str__(self):
         return super().__str__() + f"System: {self.system}"
+
+
+class Vendor(Contact):
+    website = models.CharField(max_length=512, null=True, blank=True)
+    physical_address = HTMLField(blank=True, null=True)
+    notes = HTMLField(blank=True, null=True)
+
+
+class VendorEquipment(PricingMixin, models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    name = models.CharField(max_length=512)
+    description = models.CharField(max_length=512, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.get_current_price()} - {self.vendor}"
+
+    def __init__(self, *args, **kwargs):
+        self.pricing_set = self.vendorequipmentpricing_set
+        super().__init__(*args, **kwargs)
+    
+    class Meta:
+        verbose_name_plural = "Vendor Equipment"

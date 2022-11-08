@@ -4,6 +4,7 @@ from django.utils.html import escape
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import Group
+from oidc_provider.models import UserConsent
 
 
 @admin.register(LogEntry)
@@ -60,4 +61,10 @@ class GroupAdmin(admin.ModelAdmin):
     list_display = ["name", "hourly_rate", "description"]
     ordering = ["name"]
     search_fields = ["name", "description"]
+    pass
+
+
+# User Consent for OIDC auth
+@admin.register(UserConsent)
+class UserConsentAdmin(admin.ModelAdmin):
     pass

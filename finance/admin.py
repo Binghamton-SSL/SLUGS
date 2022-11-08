@@ -1,22 +1,25 @@
 from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from finance.forms import PricingChangeForm
 from finance.models import (
     FeePricing,
     HourlyRate,
     Payment,
     SystemAddonPricing,
     SystemPricing,
+    VendorEquipmentPricing,
     TimeSheet,
     Wage,
     Shift,
     Estimate,
     Fee,
+    VendorFee,
     OneTimeFee,
     PayPeriod,
     CannedNote,
 )
-from nested_admin import NestedGenericTabularInline
+from nested_admin import NestedGenericTabularInline, NestedTabularInline
 from djangoql.admin import DjangoQLSearchMixin
 from adminsortable2.admin import SortableInlineAdminMixin
 
@@ -27,19 +30,32 @@ class HourlyRateInline(admin.StackedInline):
 
 
 class SystemPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = SystemPricing
     extra = 0
 
 
 class FeePricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = FeePricing
     extra = 0
 
 
 class SystemAddonPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
     model = SystemAddonPricing
     extra = 0
 
+
+class VendorEquipmentPricingInline(admin.StackedInline):
+    formset = PricingChangeForm
+    model = VendorEquipmentPricing
+    extra = 0
+
+
+class VendorFeeInline(NestedTabularInline):
+    model = VendorFee
+    extra = 0
 
 @admin.register(Wage)
 class WageAdmin(admin.ModelAdmin):
@@ -94,7 +110,11 @@ class PaymentInlineAdmin(admin.StackedInline):
 class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     @admin.action(description="Mark selected estimates as Show Concluded")
     def make_concluded(modeladmin, request, queryset):
-        queryset.update(status="O")
+        for estimate in queryset.all():
+            estimate.status = "O"
+            estimate.gig.archived = True
+            estimate.gig.save()
+            estimate.save()
         messages.add_message(
             request, messages.SUCCESS, "Estimates marked as concluded 👍"
         )
@@ -158,6 +178,15 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     def invoice_number(obj):
         return f"SA7400-I{2500+obj.pk}"
 
+    @staticmethod
+    def vendor_subcontracted_equipment_orders(obj):
+        vendorset = obj.gig.subcontractedequipment_set
+        return "None" if vendorset.count() == 0 else format_html(f"""
+        <div>
+        {" ".join([vendorcontract.get_printout_link() for vendorcontract in vendorset.all()])}
+        </div>
+        """)
+
     actions = [make_concluded, make_awaiting_payment, make_closed, make_abandoned]
     inlines = [OneTimeFeeInline, PaymentInlineAdmin]
     list_display = ("__str__", "gig__start", "get_printout_link")
@@ -183,6 +212,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         "total_amt",
         "outstanding_balance",
         "get_printout_link",
+        "vendor_subcontracted_equipment_orders",
         "gig__notes",
         "gig__day_of_show_notes",
         "gig__manager_notes",
@@ -202,6 +232,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
                     "canned_notes",
                     "notes",
                     "get_printout_link",
+                    "vendor_subcontracted_equipment_orders",
                 ]
             },
         ),

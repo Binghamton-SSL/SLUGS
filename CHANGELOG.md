@@ -1,4 +1,57 @@
-### V2.3.0 - 12/13/2022
+### V2.4.0 - 11/8/2022
+* Added basic employee metrics
+    * Number of jobs worked
+    * Trainings attended
+    * Time with company
+    * Staffing score
+    * Job Interest + placement over time
+    * Types of jobs worked 
+* Added end of employment date field
+* Estimates will show the outstanding balance in their title
+* BSSL Bingo board 
+* Expand/Contract finance portal
+* Add communication model
+* Allow paperwork to be auto-assigned to employees on account creation (send email about paperwork on account activation if outstanding)
+* Add ID barcode field to employee
+* Add 3rd party vendor support
+    * Add vendor equipment 
+    * Add vendor rentals to Gig
+    * Add subcontracted equipment to invoice and estimate
+    * Add Subcontracted Equipment Order Form Generation
+* Add auto-sign functionality to contracts for managers
+* Add rich HTML notes to Vendors
+* Add capability to remove signature lines from Estimate
+* Add pricing for show duration only on addons
+* Add OIDC Authentication strategy
+* Add group support to OIDC authentication
+* Add Self Service Kiosk
+* Mark Timesheet as signed widget now adds a Object Log
+<br><br>
+BUG FIXES:
+    * Saving a fee will now save the associated estimate to update price
+    * Saving a payment will now save the associated estimate to update price
+    * On paperwork admin page, only show current employees (to limit loading times)
+    * Only show shift statistics on employee overview page if they've worked a shift
+    * Remove automatic print dialog from pages
+    * Only show one timeline per department, even if multiple load in/out exist per dept.
+    * Fix bug where number of man hours were not present on previous pay period
+    * Move office hours input errors to their respective entry
+    * Marking estimates as concluded en masse now updates their respective gigs
+    * Correctly show descriptions for addons (both db and individualized)
+    * Add subcontracted equipment fees to estimates and invoices
+    * Correct baseShiftFormset to correct for errors arising when attempting to DELETE overlapping shifts
+    * Add validation to pricing to make sure there isn't overlapping pricing types for addons, systems, etc.
+    * Allow Estimates to be viewed if not logged in on a Kiosk machine
+    * Add subtotal to Subcontracted Equipment form
+    * Update staffing store to fallback to first date work requested when not staffed (was reporting 0's)
+    * Add line breaks between subcontracted equipment forms
+    * Allow CORS for wiki support
+    * Fix jquery formset to properly delete shifts
+    * Fix error where URL Encode on login next screen dropped all get variables
+    * Add useful errors to gigShift clock in/out
+    * Add description to previous pay period shifts
+
+### V2.3.0 - 05/18/2022
 * Add Djangoql Admin Search
 * Add DEBUG banner to admin
 * Add ability to automatically sign forms using user signature
@@ -49,6 +102,8 @@
 * Add gig notes to staffing email
 * Distinguish between graduation year and final year with BSSL (grad students)
 * Add field to store final date of employment
+* Add travel time required for venue (currently unused)
+* Show outstanding balance in title of Estimates that are "Awaiting Payment" `eg. (OB: $100)`
 <br><br>
 BUG FIXES:
     * Fix formatting error in estimate signature box
@@ -77,7 +132,7 @@ BUG FIXES:
     * Fix phantom login bug
     * Fix bug where FinanceShift crashed out (gracefully handled)
     * Sign Timesheet widget now fades background color to provide greater visual clarity
-    * Add travel time required for venue (currently unused)
+    * Fix bug where you had to save Estimate twice
 
 ### V2.2.0 - 12/2/2021
 * Allow managers to see inattentive employees via admin

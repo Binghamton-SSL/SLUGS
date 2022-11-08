@@ -55,7 +55,7 @@ class userSignup(FormView):
             body=email_template,
             from_email="bssl.slugs@binghamtonsa.org",
             to=[form.instance.email],
-            reply_to=["bssl@binghamtonsa.org"],
+            reply_to=[settings.BSSL_EMAIL_ADDRESS],
         )
         email.content_subtype = "html"
         email.send()

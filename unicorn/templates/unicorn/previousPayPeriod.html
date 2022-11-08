@@ -2,7 +2,7 @@
 
 <div class="p-4 text-black bg-white rounded">
     Select Pay Period:
-    <select class="my-4 w-full" unicorn:model="selected_pp">
+    <select class="w-full my-4" unicorn:model="selected_pp">
         <option value="-1"></option>
         {% for option in available_pay_period.all%}
         <option value="{{option.pk}}">{{option}}</option>
@@ -13,7 +13,7 @@
             {{sub_pay_period.start}} - {{sub_pay_period.end}}
         </h2>
         <div>
-            {{sub_shifts.count}} Shifts in period totaling {{sub_shifts_hours.total_time__sum}} man-hours of work and costing ${{sub_shifts_price.cost__sum|floatformat:2}}
+            {{sub_shifts.count}} Shifts in period totaling {{sub_shifts_hours}} man-hours of work and costing ${{sub_shifts_price.cost__sum|floatformat:2}}
         </div>
         <div>
             {% for shift in sub_shifts %}
@@ -25,6 +25,9 @@
                             <span>{{shift.content_object}}</span>
                             <span class="mt-2">Start: {{shift.time_in}}</span>
                             <span>End: {{shift.time_out}}</span>
+                            {% if shift.description %}
+                            <span>Description: {{shift.description}}</span>
+                            {% endif %}
                         </div>
                         <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
                             <span>Rate: ${{shift.paid_at}}/hr</span>

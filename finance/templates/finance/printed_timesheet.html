@@ -1,9 +1,14 @@
 {% extends "finance/timesheet.html" %}
 {% load slugs_components %}
+{% load grouping %}
+{% load finance_components %}
 
+
+{% block autosigninclude %}
+    {% if request.user|has_group:"Manager" %}
+        {% autosign %}
+    {% endif %}
+{% endblock %}
 
 {% block printed %}
-
-    {% print_this %}
-
 {% endblock %}

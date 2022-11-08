@@ -1,0 +1,31 @@
+{% extends "theme/base.html" %}
+{% load static %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<div class="w-full h-full">
+    <div class="flex-col p-5 mx-auto my-auto max-w-prose">
+        <div class="flex-col">
+            <div class="flex my-4">
+                <object class="mx-auto w-52 filter invert" type="image/svg+xml" data="{% static 'img/logo/logo-in.svg' %}">SLUGS logo</object>
+            </div>
+            <h1 class="text-4xl text-center">Login with <span class="font-stencil">S.L.U.G.S</span></h1>
+        </div>
+
+        <div>
+            <p class="text-xl text-center">There appears to have been an error with the service you're attempting to use SLUGS to log into.</p>
+            <p class="text-center py-2">You'll find the error information below. Our advice is to close this page, go back to the login screen you were on, and try again.</p>
+            <p class="bg-red-300 p-4 text-black rounded-md">
+                <b>{{error}}</b><br>
+                {{description}}
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

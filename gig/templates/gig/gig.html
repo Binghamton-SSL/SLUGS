@@ -303,9 +303,5 @@
     </div>   
     </div>
 {% endif %}
-{% if my_job %}
-<div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
-    {% bingo %}
-</div>
-{% endif %}
+{% if my_job %} {% unicorn 'bingoBoard' board_id=bingo_board.pk %} {% endif %}
 {% endblock %}

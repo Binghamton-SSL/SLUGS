@@ -1,10 +1,13 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
+from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import reverse
 from tinymce.models import HTMLField
 from django.contrib.auth.models import Group
+from django.db.models import Q
 
 import client.models as client
 import location.models as location
@@ -17,6 +20,51 @@ DEPARTMENTS = [
     ("O", "Other"),
     ("T", "Staging"),
 ]
+
+DELIVERY_METHODS = [
+    ("H", "Vendor Delivery"),
+    ("S", "Vendor Shipping"),
+    ("P", "BSSL Delivery"),
+    ("B", "BSSL Shipping"),
+    ("O", "Other Arrangements"),
+
+]
+
+
+class SubcontractedEquipmentInstance(models.Model):
+    equipment = models.ForeignKey("equipment.VendorEquipment", on_delete=models.PROTECT)
+    subcontracted_equipment = models.ForeignKey("SubcontractedEquipment", on_delete=models.CASCADE)
+    qty = models.IntegerField(default=1)
+    description = models.CharField(max_length=200, blank=True, null=True)
+
+
+class SubcontractedEquipment(models.Model):
+    equipment = models.ManyToManyField("equipment.VendorEquipment", through="SubcontractedEquipmentInstance")
+    vendor = models.ForeignKey("equipment.Vendor", on_delete=models.PROTECT)
+    arrival = models.DateTimeField()
+    returned = models.DateTimeField()
+    delivery_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
+    return_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
+    purchase_order = models.CharField(max_length=64, null=True, blank=True)
+    notes = HTMLField(blank=True, null=True)
+    gig = models.ForeignKey("Gig", on_delete=models.CASCADE)
+    signed_agreement = models.FileField(upload_to="vendors", null=True, blank=True)
+
+    def get_printout_link(self):
+        return format_html(
+                "<a href='%s?time=%s'>%s</a><br>"
+                % (
+                    reverse("finance:vendor", args=(self.id,)),
+                    datetime.now(),
+                    f"Print Subcontracted Equipment Form - {self.vendor}",
+                )
+            )
+
+    def __str__(self):
+        return f"{self.vendor} - {self.gig}"
+
+    class Meta:
+        verbose_name_plural = "Subcontracted Equipment"
 
 
 class Gig(models.Model):
@@ -46,6 +94,7 @@ class Gig(models.Model):
         help_text="If left blank, this value will be set to 7 days prior to the start date.",
     )
     systems = models.ManyToManyField("equipment.System", through="SystemInstance")
+    subcontracted_equipment = models.ManyToManyField("SubcontractedEquipment", related_name="vendor_equipment")
 
     def get_staff_link(self):
         return format_html(
@@ -63,7 +112,7 @@ class Gig(models.Model):
         return (
             self.name
             + " - "
-            + str(self.org)
+            + str(self.org.name)
             + " - "
             + str(timezone.localtime(self.start).strftime("%m/%d/%Y"))
             + (" [UNPUBLISHED]" if not self.published else "")
@@ -158,3 +207,68 @@ class JobInterest(models.Model):
 
     def __str__(self):
         return f"{self.employee} - {self.job.gig}"
+
+
+class BingoBoard(models.Model):
+    gig = models.ForeignKey(Gig, on_delete=models.CASCADE)
+    available_for_play = models.BooleanField(default=True)
+    tiles = models.ManyToManyField("BingoTile", through="TileOnBoard")
+    bingo_achieved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.gig} Bingo Board ({'open' if self.available_for_play else 'closed'})"
+
+    def choose_random_tile(self, currently_on_board=[]):
+        depts_in_gig = set([d.department for d in self.gig.systems.all()]+["A"])
+        available = BingoTile.objects.filter(Q(department__in=depts_in_gig) & Q(in_pool=True) & ~Q(pk__in=currently_on_board))
+        chosen = available.order_by("?").first()
+        tmp = currently_on_board.append(chosen.pk) if currently_on_board is not None else [chosen.pk]
+        return (chosen, currently_on_board) if chosen is not None else None
+
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            super().save(*args, **kwargs)
+        currently_on_board = [t.pk for t in self.tiles.all()]
+        # If not enough tiles on board, attempts to find unique tiles, if cannot find enough unique it resorts to choosing duplicates
+        while self.tiles.count() < 16:
+            try:
+                tile = self.choose_random_tile(currently_on_board)
+                if tile is not None:
+                    TileOnBoard(tile=tile[0], board=self).save()
+                    currently_on_board = tile[1]
+                else:
+                    raise Exception("No unique tiles left")
+            except Exception:
+                try:
+                    tile = self.choose_random_tile([])
+                    if tile is not None:
+                        TileOnBoard(tile=tile[0], board=self).save()
+                    else:
+                        raise Exception("No unique tiles left")
+                except Exception:
+                    raise ValidationError("Not enough tiles in play to create a board for this show")
+        return super().save(*args, **kwargs)
+
+
+class BingoTile(models.Model):
+    BINGO_DEPARTMENTS = [
+        ("A", "All"),
+        ("L", "Lighting"),
+        ("S", "Sound"),
+        ("M", "Manager"),
+        ("O", "Other"),
+        ("T", "Staging"),
+    ]
+    in_pool = models.BooleanField(default=True)
+    department = models.CharField(choices=BINGO_DEPARTMENTS, max_length=1)
+    action = models.CharField(max_length=61, null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.get_department_display()} - {self.action}{' - RETIRED' if self.in_pool is False else ''}"
+
+
+class TileOnBoard(models.Model):
+    board = models.ForeignKey(BingoBoard, on_delete=models.CASCADE)
+    tile = models.ForeignKey(BingoTile, on_delete=models.PROTECT)
+    checked_by = models.ForeignKey(employee.Employee, null=True, blank=True, on_delete=models.CASCADE)
