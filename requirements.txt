@@ -71,7 +71,7 @@ orjson==3.5.2
 packaging==20.9
 pathspec==0.8.1
 phonenumberslite==8.12.22
-Pillow==8.3.2
+Pillow==9.0.1
 pipdeptree==2.2.1
 pkg_resources==0.0.0
 ply==3.11
