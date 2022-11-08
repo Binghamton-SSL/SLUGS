@@ -1,4 +1,4 @@
-### V2.3.1 - In Progress
+### V2.4.0 - 11/8/2022
 * Added basic employee metrics
     * Number of jobs worked
     * Trainings attended
@@ -21,8 +21,8 @@
 * Add auto-sign functionality to contracts for managers
 * Add rich HTML notes to Vendors
 * Add capability to remove signature lines from Estimate
-* Spookify SLUGS
 * Add pricing for show duration only on addons
+* Add OIDC Authentication strategy
 * Add group support to OIDC authentication
 * Add Self Service Kiosk
 * Mark Timesheet as signed widget now adds a Object Log
