@@ -323,13 +323,18 @@
                                 {% for pk, rental in subcontracted_equipment.items %}
                                 <thead>
                                     <tr>
-                                        <td class="text-white bg-black" colspan="5">
-                                            {% if rental.vendor_visible_to_client %}
-                                                {{rental.vendor.name}}
-                                            {% else %}
-                                                Vendor #{{forloop.counter}}
-                                            {% endif %}
+                                        <td class="text-white bg-black" colspan="3">
+                                            <span>
+                                                {% if rental.vendor_visible_to_client %}
+                                                    {{rental.vendor.name}}
+                                                {% else %}
+                                                    Vendor #{{forloop.counter}}
+                                                {% endif %}
+                                            </span>
                                         </td>
+                                        {% if rental.client_provided %}
+                                            <td colspan="2" class="font-bold text-center text-white bg-black">CLIENT PROVIDED</span>
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                     <tbody>
@@ -349,12 +354,16 @@
                                             <td class="text-center">
                                                 {{qty}}
                                             </td>
-                                            <td class="text-center">
-                                                {{rate}}
-                                            </td>
-                                            <td class="text-center">
-                                                ${{amt}}
-                                            </td>
+                                            {% if rental.client_provided %}
+                                                    <td colspan="2" class="bg-black"></td>
+                                            {% else %}
+                                                    <td class="text-center">
+                                                        {{rate}}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        ${{amt}}
+                                                    </td>
+                                            {% endif %}
                                         </tr>
                                         {% endfor %}
                                         {% for fee in rental.fees %}

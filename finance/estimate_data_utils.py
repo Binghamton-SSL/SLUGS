@@ -126,33 +126,44 @@ def calculateGigCost(estimate):
         ret["subcontracted_equipment"][rental.pk] = {
             "vendor": rental.vendor,
             "vendor_visible_to_client": rental.vendor_visible_to_client,
+            "client_provided": rental.client_provided,
             "fees": [],
             "equipment": {},
         }
         vendor_subtotal = decimal.Decimal(0.00)
         for instance in rental.subcontractedequipmentinstance_set.all():
-            subtotal = decimal.Decimal(0.00)
-            total_time_rented = decimal.Decimal(
-                (rental.returned - rental.arrival) / timezone.timedelta(minutes=15) / 4
-            )
-            current_price = instance.equipment.get_price_at_date(rental.arrival)
-            subtotal += round(
-                current_price.base_price * instance.qty
-                + (
-                    current_price.price_per_hour
-                    * instance.qty
-                    * total_time_rented
-                ), 2
-            )
-            vendor_subtotal += subtotal
-            ret["subcontracted_equipment"][rental.pk]["equipment"][instance.pk] = [
-                instance,
-                instance.qty * total_time_rented
-                if current_price.price_per_hour != 0.00
-                else instance.qty,
-                current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
-                subtotal
-            ]
+            if rental.client_provided:
+                ret["subcontracted_equipment"][rental.pk]["equipment"][instance.pk] = [
+                    instance,
+                    instance.qty * total_time_rented
+                    if current_price.price_per_hour != 0.00
+                    else instance.qty,
+                    0,
+                    0
+                ]
+            else:
+                subtotal = decimal.Decimal(0.00)
+                total_time_rented = decimal.Decimal(
+                    (rental.returned - rental.arrival) / timezone.timedelta(minutes=15) / 4
+                )
+                current_price = instance.equipment.get_price_at_date(rental.arrival)
+                subtotal += round(
+                    current_price.base_price * instance.qty
+                    + (
+                        current_price.price_per_hour
+                        * instance.qty
+                        * total_time_rented
+                    ), 2
+                )
+                vendor_subtotal += subtotal
+                ret["subcontracted_equipment"][rental.pk]["equipment"][instance.pk] = [
+                    instance,
+                    instance.qty * total_time_rented
+                    if current_price.price_per_hour != 0.00
+                    else instance.qty,
+                    current_price.price_per_hour if current_price.price_per_hour != 0.00 else current_price.base_price,
+                    subtotal
+                ]
         for fee in rental.vendorfee_set.all():
             amount = round(fee.percentage*subtotal+fee.amount, 2);
             ret["subcontracted_equipment"][rental.pk]["fees"].append([fee, amount])

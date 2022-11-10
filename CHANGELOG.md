@@ -1,6 +1,8 @@
 #### V2.4.2 - In Progress
 * Identify individual vendors that we subcontract items from on estimate and invoice
     * Show or hide vendor name based on boolean
+* Option to mark subcontracted equipment as "client provided"
+    * Pricing is ignored and hidden from client
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
     * Pass along shift validation errors to Office Hours, fails gracefully
