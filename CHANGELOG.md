@@ -3,6 +3,12 @@
     * Show or hide vendor name based on boolean
 * Option to mark subcontracted equipment as "client provided"
     * Pricing is ignored and hidden from client
+<br><br>
+BUG FIXES:
+    * Adjust size of vendor name to reflect Client Provided status
+    * Fix issue where multiple subtotals appeared for subcontracted equipment
+    * Fix error where Bingo board crashed gig page
+
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
     * Pass along shift validation errors to Office Hours, fails gracefully

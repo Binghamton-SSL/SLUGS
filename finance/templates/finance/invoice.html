@@ -323,7 +323,7 @@
                                 {% for pk, rental in subcontracted_equipment.items %}
                                 <thead>
                                     <tr>
-                                        <td class="text-white bg-black" colspan="3">
+                                        <td class="text-white bg-black" colspan="{% if rental.client_provided %}3{% else %}5{% endif %}">
                                             <span>
                                                 {% if rental.vendor_visible_to_client %}
                                                     {{rental.vendor.name}}
@@ -386,16 +386,16 @@
                                         </tr>
                                         {% endfor %}
                                     </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment
-                                                Total:</td>
-                                            <td colspan="1" class="text-center" style="border-left:none!important;">
-                                                ${{subcontracted_amount}}
-                                            </td>
-                                        </tr>
-                                    </tfoot>
                                 {% endfor %}
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment
+                                            Total:</td>
+                                        <td colspan="1" class="text-center" style="border-left:none!important;">
+                                            ${{subcontracted_amount}}
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
                             {% endif %}
                             {% if estimate.onetimefee_set.all.count > 0 %}
