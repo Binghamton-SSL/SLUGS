@@ -46,6 +46,7 @@ class SubcontractedEquipment(models.Model):
     delivery_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
     return_method = models.CharField(max_length=1, choices=DELIVERY_METHODS)
     purchase_order = models.CharField(max_length=64, null=True, blank=True)
+    vendor_visible_to_client = models.BooleanField(default=False)
     notes = HTMLField(blank=True, null=True)
     gig = models.ForeignKey("Gig", on_delete=models.CASCADE)
     signed_agreement = models.FileField(upload_to="vendors", null=True, blank=True)

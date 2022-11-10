@@ -263,7 +263,7 @@
 
                                         </tr>
                                     </thead>
-                                    <tbody id="item_table">
+                                    <tbody id="equipment_table">
                                         {% for system, qty, total_price, is_addon in systems.values %}
                                         <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
                                             <td>
@@ -340,7 +340,7 @@
                                 </colgroup>
                                 <thead>
                                     <tr class="font-bold bg-[#CCC]">
-                                        <td colspan="5"">
+                                        <td colspan="5">
                                             Subcontracted Equipment
                                         </td>
                                     </tr>
@@ -363,9 +363,20 @@
 
                                     </tr>
                                 </thead>
-                                <tbody id="item_table">
-                                    {% for vendor, equipment in subcontracted_equipment.items %}
-                                        {% for instance, qty, rate, amt in equipment.equipment.values %}
+                                {% for pk, rental in subcontracted_equipment.items %}
+                                <thead>
+                                    <tr>
+                                        <td class="text-white bg-black" colspan="5">
+                                            {% if rental.vendor_visible_to_client %}
+                                                {{rental.vendor.name}}
+                                            {% else %}
+                                                Vendor #{{forloop.counter}}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </thead>
+                                    <tbody>
+                                        {% for instance, qty, rate, amt in rental.equipment.values %}
                                         <tr>
                                             <td>
                                                 {{instance.equipment.name}}
@@ -389,7 +400,7 @@
                                             </td>
                                         </tr>
                                         {% endfor %}
-                                        {% for fee in equipment.fees %}
+                                        {% for fee in rental.fees %}
                                         <tr style="border-top: black dashed .5px;">
                                             <td>
                                                 + {{fee.0.name}}
@@ -408,15 +419,17 @@
                                             </td>
                                         </tr>
                                         {% endfor %}
-                                    {% endfor %}
-                                    <tr>
-                                        <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment
-                                            Total:</td>
-                                        <td colspan="1" class="text-center" style="border-left:none!important;">
-                                            ${{subcontracted_amount}}
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4" class="text-right" style="border-right:none!important;">Subcontracted Equipment
+                                                Total:</td>
+                                            <td colspan="1" class="text-center" style="border-left:none!important;">
+                                                ${{subcontracted_amount}}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                {% endfor %}
                             </table>
                             {% endif %}
                             {% if estimate.onetimefee_set.all.count > 0 %}
@@ -448,7 +461,7 @@
 
                                     </tr>
                                 </thead>
-                                <tbody id="item_table">
+                                <tbody id="fee_table">
                                     {% for fee, amt in fees.values %}
                                     <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
                                         <td>
@@ -725,10 +738,6 @@
         border-left: black solid 1px;
         border-right: black solid 1px;
         padding-left: .5rem;
-    }
-
-    #item_table tr {
-        /* border: none!important; */
     }
 </style>
 

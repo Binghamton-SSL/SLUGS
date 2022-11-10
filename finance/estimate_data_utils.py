@@ -123,7 +123,9 @@ def calculateGigCost(estimate):
             ret["total_amt"] += system_subtotal
 
     for rental in ret["estimate"].gig.subcontractedequipment_set.all():
-        ret["subcontracted_equipment"][rental.vendor] = {
+        ret["subcontracted_equipment"][rental.pk] = {
+            "vendor": rental.vendor,
+            "vendor_visible_to_client": rental.vendor_visible_to_client,
             "fees": [],
             "equipment": {},
         }
@@ -143,7 +145,7 @@ def calculateGigCost(estimate):
                 ), 2
             )
             vendor_subtotal += subtotal
-            ret["subcontracted_equipment"][rental.vendor]["equipment"][instance.pk] = [
+            ret["subcontracted_equipment"][rental.pk]["equipment"][instance.pk] = [
                 instance,
                 instance.qty * total_time_rented
                 if current_price.price_per_hour != 0.00
@@ -153,7 +155,7 @@ def calculateGigCost(estimate):
             ]
         for fee in rental.vendorfee_set.all():
             amount = round(fee.percentage*subtotal+fee.amount, 2);
-            ret["subcontracted_equipment"][rental.vendor]["fees"].append([fee, amount])
+            ret["subcontracted_equipment"][rental.pk]["fees"].append([fee, amount])
             vendor_subtotal += amount
 
         ret["subcontracted_amount"] += vendor_subtotal
