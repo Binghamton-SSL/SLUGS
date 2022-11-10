@@ -22,8 +22,8 @@ class TrainingsignupView(UnicornView):
         pass
 
     def __init__(self, *args, **kwargs):
-        self.training_id = kwargs["training_id"]
-        self.user_id = kwargs["emp_id"]
+        self.training_id = kwargs["training_id"] if 'training_id' in kwargs else None
+        self.user_id = kwargs["emp_id"] if 'emp_id' in kwargs else None
         self.checkIfSignedup()
         return super().__init__(*args, **kwargs)
 

@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.models import Group
 from django.db.models import Sum
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib.admin.models import LogEntry, CHANGE
 from employee.forms import (
     massAssignPaperworkForm,
@@ -138,20 +138,23 @@ class officeHours(SLUGSMixin, MultipleFormView):
         return super().dispatch(request, *args, **kwargs)
 
     def process_forms(self, form_instances):
-        for form in form_instances["forms"]:
-            office_hour_obj = self.added_context["form_meta"][form]["obj"]
-            for shift in form_instances["forms"][form].forms:
-                if (
-                    shift.instance.time_in is not None
-                    and shift.instance.time_out is not None
-                ):
-                    shift.instance.object_id = office_hour_obj.id
-                    shift.instance.content_type_id = ContentType.objects.get(
-                        model="officehours"
-                    ).id
-                    shift.save()
-            form_instances["forms"][form].save()
-        messages.add_message(self.request, messages.SUCCESS, "Office Hours updated")
+        try:
+            for form in form_instances["forms"]:
+                office_hour_obj = self.added_context["form_meta"][form]["obj"]
+                for shift in form_instances["forms"][form].forms:
+                    if (
+                        shift.instance.time_in is not None
+                        and shift.instance.time_out is not None
+                    ):
+                        shift.instance.object_id = office_hour_obj.id
+                        shift.instance.content_type_id = ContentType.objects.get(
+                            model="officehours"
+                        ).id
+                        shift.save()
+                form_instances["forms"][form].save()
+            messages.add_message(self.request, messages.SUCCESS, "Office Hours updated")
+        except ValidationError as err:
+            messages.add_message(self.request, messages.ERROR, err.message)
         return self.render_to_response(self.get_context_data())
 
 

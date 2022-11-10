@@ -14,7 +14,7 @@ class GigshiftView(UnicornView):
 
     def clock_in(self):
         if (type(self.job) == dict):
-            raise TypeError(self.job)
+            raise TypeError("Malformed Clock In:", self.job, type(self.job))
         self.job.shifts.create(time_in=timezone.now())
         self.job.save()
 
@@ -26,4 +26,4 @@ class GigshiftView(UnicornView):
             self.job.save()
             self.reload = True
         except AttributeError:
-            self.error("Could not clock out. Please reload page and try again.")
+            self.error = "Could not clock out. Please reload page and try again."

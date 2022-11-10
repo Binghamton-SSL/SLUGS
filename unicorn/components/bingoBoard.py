@@ -1,5 +1,7 @@
+from types import NoneType
 from django_unicorn.components import UnicornView
 from gig.models import BingoBoard, TileOnBoard
+from django.core.exceptions import ValidationError
 
 
 class BingoboardView(UnicornView):
@@ -12,6 +14,8 @@ class BingoboardView(UnicornView):
         self.board = BingoBoard.objects.filter(pk=self.board_id).first()
 
     def toggle_tile(self, tile_pk, *args, **kwargs):
+        if type(self.request) == NoneType:
+            raise ValidationError("User is none")
         tile = TileOnBoard.objects.get(pk=tile_pk)
         if tile.checked_by is None:
             tile.checked_by = self.request.user

@@ -219,112 +219,116 @@
                                 {% endif %}
                             </div>
                             {% endif %}
-                            <table style="border-bottom: none;" class="w-full text-sm">
-                                <colgroup>
-                                    <col span="1" style="width: 20%;">
-                                    <col span="1" style="width: 50%;">
-                                    <col span="1" style="width: 5%;">
-                                    <col span="1" style="width: 10%;">
-                                    <col span="1" style="width: 15%;">
-                                </colgroup>
-                                <thead>
-                                    <!-- <tr>
-                                    <td colspan="5" style="background-color: white!important; padding: .5rem .25rem">
-                                            <div class="flex font-mono text-xs">
-                                                <span class="my-auto">Initial:</span>
-                                                <div class="flex ml-4"><span class="my-auto">BSSL</span>
-                                                    <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                            {% if no_loadins %}
+                                    <div class="w-full text-center text-white bg-black"> No BSSL equipment rented for this reservation</div>
+                            {% else %}
+                                <table style="border-bottom: none;" class="w-full text-sm">
+                                    <colgroup>
+                                        <col span="1" style="width: 20%;">
+                                        <col span="1" style="width: 50%;">
+                                        <col span="1" style="width: 5%;">
+                                        <col span="1" style="width: 10%;">
+                                        <col span="1" style="width: 15%;">
+                                    </colgroup>
+                                    <thead>
+                                        <!-- <tr>
+                                        <td colspan="5" style="background-color: white!important; padding: .5rem .25rem">
+                                                <div class="flex font-mono text-xs">
+                                                    <span class="my-auto">Initial:</span>
+                                                    <div class="flex ml-4"><span class="my-auto">BSSL</span>
+                                                        <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                                    </div>
+                                                    <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
+                                                        <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
+                                                    </div>
                                                 </div>
-                                                <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
-                                                    <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
-                                                </div>
-                                            </div>
-                                    </td> 
-                                    </tr> -->
-                                    <tr>
-                                        <td>
-                                            Item
-                                        </td>
-                                        <td>
-                                            Description
-                                        </td>
-                                        <td>
-                                            Qty
-                                        </td>
-                                        <td>
-                                            Rate
-                                        </td>
-                                        <td>
-                                            Total
-                                        </td>
+                                        </td> 
+                                        </tr> -->
+                                        <tr>
+                                            <td>
+                                                Item
+                                            </td>
+                                            <td>
+                                                Description
+                                            </td>
+                                            <td>
+                                                Qty
+                                            </td>
+                                            <td>
+                                                Rate
+                                            </td>
+                                            <td>
+                                                Total
+                                            </td>
 
-                                    </tr>
-                                </thead>
-                                <tbody id="item_table">
-                                    {% for system, qty, total_price, is_addon in systems.values %}
-                                    <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
-                                        <td>
-                                            {% if is_addon %}
-                                            + {{system.name}}
-                                            {% else %}
-                                            {{system.name}} {{system.get_department_display}}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if system.description %}
-                                            <span class="text-xs">{{system.description}}</span><br>
-                                            {% endif %}
-                                            {% if system.addl_description %}
-                                            <span class="text-xs">{{system.addl_description}}</span><br>
-                                            {% endif %}
-                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
-                                                {% if pricing.base_price %}
-                                                Flat Rate
-                                                {% endif %}
-                                                {% if pricing.price_per_hour %}
-                                                Hourly Rate
-                                                {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td style="padding: 0;" class="text-center">
-                                            {{qty|floatformat:2}}
-                                        </td>
-                                        <td style="padding: 0;" class="text-center">
-                                            {% with pricing=system|get_price_at_date:estimate.gig.start%}
-                                                {% if pricing.base_price %}
-                                                {{pricing.base_price}}
-                                                {% elif pricing.price_per_hour %}
-                                                {{pricing.price_per_hour}}
-                                                {% elif pricing.price_per_hour_for_duration_of_gig %}
-                                                {{pricing.price_per_hour_for_duration_of_gig}}
-                                                {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
-                                                {{pricing.price_per_hour_for_load_in_out_ONLY}}
-                                                {% elif pricing.price_per_hour_for_show_ONLY %}
-                                                {{pricing.price_per_hour_for_show_ONLY}}
+                                        </tr>
+                                    </thead>
+                                    <tbody id="item_table">
+                                        {% for system, qty, total_price, is_addon in systems.values %}
+                                        <tr style="{% if is_addon %}border-top: black dashed .5px;{% endif %}">
+                                            <td>
+                                                {% if is_addon %}
+                                                + {{system.name}}
                                                 {% else %}
-                                                0.00
+                                                {{system.name}} {{system.get_department_display}}
                                                 {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td style="padding: 0;" class="text-center">
-                                            ${{total_price}}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                    <tr>
-                                        <td colspan="4" class="text-right" style="border-right:none!important;">
-                                            Subtotal:</td>
-                                        <td colspan="1" class="text-center" style="border-left:none!important;">
-                                            ${{estimate.subtotal}}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr style="border: none;">
-                                        <td style="border: none; padding: 1px"></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                            </td>
+                                            <td>
+                                                {% if system.description %}
+                                                <span class="text-xs">{{system.description}}</span><br>
+                                                {% endif %}
+                                                {% if system.addl_description %}
+                                                <span class="text-xs">{{system.addl_description}}</span><br>
+                                                {% endif %}
+                                                {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                    {% if pricing.base_price %}
+                                                    Flat Rate
+                                                    {% endif %}
+                                                    {% if pricing.price_per_hour %}
+                                                    Hourly Rate
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td style="padding: 0;" class="text-center">
+                                                {{qty|floatformat:2}}
+                                            </td>
+                                            <td style="padding: 0;" class="text-center">
+                                                {% with pricing=system|get_price_at_date:estimate.gig.start%}
+                                                    {% if pricing.base_price %}
+                                                    {{pricing.base_price}}
+                                                    {% elif pricing.price_per_hour %}
+                                                    {{pricing.price_per_hour}}
+                                                    {% elif pricing.price_per_hour_for_duration_of_gig %}
+                                                    {{pricing.price_per_hour_for_duration_of_gig}}
+                                                    {% elif pricing.price_per_hour_for_load_in_out_ONLY %}
+                                                    {{pricing.price_per_hour_for_load_in_out_ONLY}}
+                                                    {% elif pricing.price_per_hour_for_show_ONLY %}
+                                                    {{pricing.price_per_hour_for_show_ONLY}}
+                                                    {% else %}
+                                                    0.00
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td style="padding: 0;" class="text-center">
+                                                ${{total_price}}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td colspan="4" class="text-right" style="border-right:none!important;">
+                                                Subtotal:</td>
+                                            <td colspan="1" class="text-center" style="border-left:none!important;">
+                                                ${{estimate.subtotal}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="border: none;">
+                                            <td style="border: none; padding: 1px"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            {% endif %}
                             {% if estimate.gig.subcontractedequipment_set.all.count > 0 %}
                             <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
                                 <colgroup>
@@ -598,10 +602,10 @@
                                 <div class="flex mt-10 text-sm dont_break signature" style="width: 8.75in;">
                                     <div class="flex mx-auto">
                                         <p class="mr-4">BSSL</p>
-                                        <div class="text-center relative">
+                                        <div class="relative text-center">
                                             <p class="mx-auto">_________________________________</p>
                                             {% if request.user.signature %}
-                                                <img src="{{request.user.signature|signature_base64}}" class="autosign hidden absolute" style="width: 2.5in;max-height: 0.75in;top: -0.5in">
+                                                <img src="{{request.user.signature|signature_base64}}" class="absolute hidden autosign" style="width: 2.5in;max-height: 0.75in;top: -0.5in">
                                             {% endif %}
                                             <p class="mx-auto">{{request.user.first_name}} {{request.user.last_name}}
                                             </p>
@@ -672,9 +676,9 @@
                 <td style="border: none; padding-top: .25in;">
                     <div class="flex">
                         <span class="my-auto">Initial:</span>
-                        <div class="flex ml-4 relative"><span class="my-auto">BSSL</span>
+                        <div class="relative flex ml-4"><span class="my-auto">BSSL</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
-                            <div class="absolute autosign hidden" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
+                            <div class="absolute hidden autosign" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
                         </div>
                         <div class="flex ml-4"><span class="my-auto">{{estimate.gig.org}}</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>

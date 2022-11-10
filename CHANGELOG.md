@@ -1,3 +1,11 @@
+#### V2.4.1 - 11/9/2022
+BUG FIXES:
+    * Pass along shift validation errors to Office Hours, fails gracefully
+    * If no load in available then bypass compute cost of systems (Can't compute cost of system without load in)
+        * Remove system table from invoice and estimate if no systems
+    * Add missing redirect in Estimate Downloader
+    * Add better error handling to Unicorn components (when request is malformed)
+
 ### V2.4.0 - 11/8/2022
 * Added basic employee metrics
     * Number of jobs worked
