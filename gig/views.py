@@ -16,7 +16,6 @@ from gig.models import Gig, Job, JobInterest, BingoBoard
 from employee.models import Employee
 from datetime import datetime
 from django.db.models import F, DateTimeField, ExpressionWrapper
-from django.utils import timezone
 from django.urls import reverse
 
 

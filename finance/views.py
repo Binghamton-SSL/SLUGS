@@ -10,6 +10,7 @@ from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import redirect
 from django.views.decorators.clickjacking import xframe_options_exempt
 import django.utils.timezone as timezone
 import pytz
