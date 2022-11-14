@@ -39,7 +39,7 @@ class KiosktrainingView(UnicornView):
         self.update_training_status()
 
     def update_training_status(self):
-        self.ongoing_trainings = [{"training": training, "trainees": [], "shown": True if training.pk in self.training_shown else False} for training in Training.objects.filter(date__lte=(timezone.now() + timezone.timedelta(hours=+29)), date__gte=(timezone.now() + timezone.timedelta(hours=-29)))]
+        self.ongoing_trainings = [{"training": training, "trainees": [], "shown": True if training.pk in self.training_shown else False} for training in Training.objects.filter(date__lte=(timezone.now() + timezone.timedelta(hours=+29)), date__gte=(timezone.now() + timezone.timedelta(hours=-29))).order_by('date')]
         for training in self.ongoing_trainings:
             for trainee in Trainee.objects.filter(training=training["training"].pk):
                 # Are they currently clocked in?

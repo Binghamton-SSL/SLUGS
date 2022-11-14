@@ -8,6 +8,8 @@ BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status
     * Fix issue where multiple subtotals appeared for subcontracted equipment
     * Fix error where Bingo board crashed gig page
+    * Move kiosk clock in/out state handling to front end to improve responsiveness
+    * Change kiosk GUI to better improve user flow
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
