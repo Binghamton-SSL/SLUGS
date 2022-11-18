@@ -1,4 +1,6 @@
 import re
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.urls import reverse
 import django.utils.timezone as timezone
@@ -71,19 +73,19 @@ class ShowFeed(ICalFeed):
     def item_description(self, item):
         nl = "\n"
         return f"""
-{"[TENTATIVE] " if not item.published else ""}{item.name}
+            {"[TENTATIVE] " if not item.published else ""}{item.name}
 
-Location: {item.location}
-Organization: {item.org}
-Contact: {item.contact.name}
+            Location: {item.location}
+            Organization: {item.org}
+            Contact: {item.contact.name}
 
-Systems:
-{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
-Load in/out:
-{''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
-Staff:
-{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
-        """  # noqa
+            Systems:
+            {''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
+            Load in/out:
+            {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.all()])}
+            Staff:
+            {''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.all().order_by('department')])}
+                    """  # noqa
 
     def item_link(self, item):
         return reverse("gig:showView", args=[item.pk])
@@ -150,19 +152,19 @@ class DeptFeed(ICalFeed):
     def item_description(self, item):
         nl = "\n"
         return f"""
-{"[TENTATIVE] " if not item.published else ""}{item.name}
+            {"[TENTATIVE] " if not item.published else ""}{item.name}
 
-Location: {item.location}
-Organization: {item.org}
-Contact: {item.contact.name}
+            Location: {item.location}
+            Organization: {item.org}
+            Contact: {item.contact.name}
 
-Systems:
-{''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
-Load in/out:
-{''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
-Staff:
-{''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
-        """  # noqa
+            Systems:
+            {''.join([f"{systeminstance.system.name} - {systeminstance.system.get_department_display()}{' + '+(' + '.join([addon.name for addon in systeminstance.addons.all()])) if len(systeminstance.addons.all()) else ''}{nl}" for systeminstance in item.systeminstance_set.all()])}
+            Load in/out:
+            {''.join([f"{loadin.get_department_display()}:{nl}⇊ {(loadin.shop_time-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}>> {(loadin.load_in-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}<< {(loadin.load_out-timezone.timedelta(hours=4)).strftime('%m/%d/%Y, %H:%M:%S')}{nl}{nl}" for loadin in item.loadin_set.filter(department=self.department[0])])}
+            Staff:
+            {''.join([f"{staff.department} - {staff.position}: {(staff.employee.preferred_name if staff.employee.preferred_name else staff.employee.first_name) if staff.employee is not None else 'TBA'} {staff.employee.last_name if staff.employee is not None else ''}{nl}" for staff in item.job_set.filter(department=self.department[0]).order_by('department')])}
+                    """  # noqa
 
     def item_link(self, item):
         return reverse("gig:showView", args=[item.pk])
@@ -319,3 +321,18 @@ class PricingMixin:
             Q(date_active__lte=date)
             & (Q(date_inactive__gte=date) | Q(date_inactive=None))
         )
+
+
+class Attachment(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=512, null=True, blank=True)
+    file = models.FileField(upload_to="attachments/")
+    available_to_managers = models.BooleanField(default=True)
+    available_to_engineers = models.BooleanField(default=False)
+    available_to_all_employees = models.BooleanField(default=False)
+
+
+    # Generic relation
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")

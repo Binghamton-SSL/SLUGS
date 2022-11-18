@@ -3,6 +3,8 @@
     * Show or hide vendor name based on boolean
 * Option to mark subcontracted equipment as "client provided"
     * Pricing is ignored and hidden from client
+* Add attachments to gig
+* Add Gig Outflow report to Estimate (shows the amount of money spent by BSSL on a show)
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status

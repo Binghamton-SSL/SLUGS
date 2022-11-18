@@ -8,6 +8,7 @@ from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance
 from .views import staffShow, SendStaffingEmail
 from finance.admin import ShiftInlineAdmin, VendorFeeInline
 from djangoql.admin import DjangoQLSearchMixin
+from utils.admin import AttachmentInlineAdmin
 
 
 class JobSubInline(NestedTabularInline):
@@ -68,7 +69,7 @@ class SubcontractedEquipmentInline(NestedStackedInline):
 class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
     djangoql_completion_enabled_by_default = False
     search_fields = ["name", "org__name", "contact__name", "location__name"]
-    inlines = (LoadInInline, SystemInline, SubcontractedEquipmentInline)
+    inlines = (LoadInInline, SystemInline, SubcontractedEquipmentInline, AttachmentInlineAdmin)
     autocomplete_fields = ["org", "contact", "location"]
     list_display = (
         "__str__",
@@ -100,6 +101,7 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
         SystemInline,
         SubcontractedEquipmentInline,
         ("Day of Show Info", {"fields": ("day_of_show_notes",)}),
+        AttachmentInlineAdmin,
         (
             None,
             {
@@ -114,21 +116,11 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
     ]
 
     def save_formset(self, request, form, formset, change):
-        for form in formset.forms:
-            form.save()
-            if hasattr(form, "nested_formsets"):
-                for job_form in form.nested_formsets:
-                    for job in job_form:
-                        job.instance.gig = form.instance.gig
-                        job.save()
-                        if hasattr(job, "nested_formsets"):
-                            for shift_form in job.nested_formsets:
-                                for shift in shift_form:
-                                    shift.instance.object_id = job.instance.id
-                                    shift.instance.content_type_id = (
-                                        ContentType.objects.get(model="job").id
-                                    )
-                                    shift.save()
+        if change:
+            for form in formset.forms:
+                if form.Meta.model == Job:
+                    form.instance.gig_id = formset.instance.gig_id
+                    form.save()
         super(GigAdmin, self).save_formset(request, form, formset, change)
 
     def get_urls(self):

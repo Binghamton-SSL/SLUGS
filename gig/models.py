@@ -1,4 +1,5 @@
 from datetime import datetime
+import decimal
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 from django.forms import ValidationError
@@ -7,7 +8,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from tinymce.models import HTMLField
 from django.contrib.auth.models import Group
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 import client.models as client
 import location.models as location
@@ -97,6 +98,14 @@ class Gig(models.Model):
     )
     systems = models.ManyToManyField("equipment.System", through="SystemInstance")
     subcontracted_equipment = models.ManyToManyField("SubcontractedEquipment", related_name="vendor_equipment")
+    attachments = GenericRelation("utils.Attachment")
+
+    def calculate_outflow(self):
+        outflow = decimal.Decimal(0.00)
+        for job in self.job_set.all():
+            job_outflow = job.shifts.all().aggregate(Sum("cost"))['cost__sum']
+            outflow += job_outflow if job_outflow is not None else decimal.Decimal(0.00)
+        return round(outflow, 2)
 
     def get_staff_link(self):
         return format_html(

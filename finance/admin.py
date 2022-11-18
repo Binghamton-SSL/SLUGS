@@ -167,6 +167,10 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         return obj.gig.day_of_show_notes
 
     @staticmethod
+    def gig__outflow(obj):
+        return obj.gig.calculate_outflow()
+
+    @staticmethod
     def estimate_id(obj):
         return 2500 + int(obj.pk)
 
@@ -216,6 +220,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         "gig__notes",
         "gig__day_of_show_notes",
         "gig__manager_notes",
+        "gig__outflow",
     ]
     exclude = ["estimate_id"]
     fieldsets = (
@@ -249,7 +254,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
         ),
         (
             "Bill",
-            {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance"]},
+            {"fields": ["subtotal", "fees_amt", "total_amt", "outstanding_balance", "gig__outflow"]},
         ),
     )
     djangoql_completion_enabled_by_default = False

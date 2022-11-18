@@ -48,6 +48,48 @@
         }
     </style>
 </div>
+{% if gig.attachments.count > 0 and my_job or gig.attachments.count > 0 and request.user|has_group:"Manager" %}
+    <div class="mx-4 my-10 sm:mx-auto max-w-prose">
+        <h2 class="p-1 text-black bg-white w-max">
+            Attachments:
+        </h2>
+        {% for attachment in gig.attachments.all %}
+            {% if attachment.available_to_all_employees or attachment.available_to_engineers and my_job|isEngineer or attachment.available_to_managers and request.user|has_group:"Manager" %}
+                <a href="{{attachment.file.url}}">
+                    <div class="px-2 py-1 mt-1 text-black bg-white flex">
+                        <div>
+                            <p class="underline">{{attachment.name}}</p>
+                            {% if attachment.description %}<p class="text-sm">{{attachment.description}}</p>{% endif %}
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ml-auto mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>                      
+                    </div>
+                </a>
+            {% elif attachment.available_to_engineers %}
+                <div class="px-2 py-1 mt-1 text-black bg-red-300 flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                    </svg>  
+                    <div>
+                        <p>This attachment is only for Engineers.</p>
+                        <p class="text-xs">Don't worry! This means this attachment isn't important for your job. We'll always share all info you'll need to do your job!</p>
+                    </div>                    
+                </div>
+            {% else %}
+                <div class="px-2 py-1 mt-1 text-black bg-red-300 flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                    </svg>  
+                    <div>
+                        <p>This attachment is only available to Managers.</p>
+                        <p class="text-xs">Don't worry! This means this attachment isn't important to running the gig. We'll always share all info you'll need to do your job!</p>
+                    </div>                    
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
 <div class="flex flex-col max-w-5xl mx-auto space-y-4 xl:space-y-0 xl:space-x-4 xl:flex-row">
     <div class="max-w-[100vw] flex flex-col mx-auto xl:ml-0 sm:max-w-lg">
         <h1 class="mx-4 text-3xl">
