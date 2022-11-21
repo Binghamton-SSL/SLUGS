@@ -12,6 +12,8 @@ BUG FIXES:
     * Fix error where Bingo board crashed gig page
     * Move kiosk clock in/out state handling to front end to improve responsiveness
     * Change kiosk GUI to better improve user flow
+    * Only show clock in/out for staffed Job slots
+    * Do not show Subcontracted equipment forms for client provided equipment on estimate page
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

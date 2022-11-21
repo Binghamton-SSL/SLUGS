@@ -42,19 +42,20 @@ class KioskshowView(UnicornView):
         for show in self.ongoing_shows:
             gig = show["gig"]
             for job in Job.objects.filter(gig=gig.pk):
-                # Are they currently clocked in?
-                employee_shifts = Shift.objects.filter(
-                    object_id=job.id,
-                    content_type_id=self.job_content_type,
-                    time_out=None
-                )
-                clocked_in = employee_shifts.order_by('time_in').last() if employee_shifts.count() > 0 else None
+                if job.employee is not None:
+                    # Are they currently clocked in?
+                    employee_shifts = Shift.objects.filter(
+                        object_id=job.id,
+                        content_type_id=self.job_content_type,
+                        time_out=None
+                    )
+                    clocked_in = employee_shifts.order_by('time_in').last() if employee_shifts.count() > 0 else None
 
-                if job.get_department_display() not in show['jobs']:
-                    show['jobs'][job.get_department_display()] = {}
-                if job.position.name not in show['jobs'][job.get_department_display()]:
-                    show['jobs'][job.get_department_display()][job.position.name] = []
-                show['jobs'][job.get_department_display()][job.position.name].append([job, clocked_in])
+                    if job.get_department_display() not in show['jobs']:
+                        show['jobs'][job.get_department_display()] = {}
+                    if job.position.name not in show['jobs'][job.get_department_display()]:
+                        show['jobs'][job.get_department_display()][job.position.name] = []
+                    show['jobs'][job.get_department_display()][job.position.name].append([job, clocked_in])
         self.last_show_update = timezone.now()
 
     def __init__(self, **kwargs):

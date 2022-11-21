@@ -63,9 +63,9 @@
                                         space-y-4
                                     {% endif %}">
                                         {% for job, clocked_in in jobs %}
-                                        <div onclick="javascript:showonclockinout(this)" id="{{job.pk}}" class="p-4 text-2xl {% if clocked_in %} bg-green-500 {% else %} bg-gray-300 {% endif %} w-max"><span>{% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}}</span>
-                                            {% if clocked_in %}<br><span class="text-sm">Clocked in: {{clocked_in.time_in|date:"f A"}}</span>{% endif %}
-                                        </div>
+                                            <div onclick="javascript:showonclockinout(this)" id="{{job.pk}}" class="p-4 text-2xl {% if clocked_in %} bg-green-500 {% else %} bg-gray-300 {% endif %} w-max"><span>{% if job.employee.preferred_name %}{{job.employee.preferred_name}} {% else %} {{job.employee.first_name}} {% endif %} {{job.employee.last_name}}</span>
+                                                {% if clocked_in %}<br><span class="text-sm">Clocked in: {{clocked_in.time_in|date:"f A"}}</span>{% endif %}
+                                            </div>
                                         {% endfor %}
                                     </div>
                                 </div>

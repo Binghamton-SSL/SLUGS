@@ -184,7 +184,7 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
     @staticmethod
     def vendor_subcontracted_equipment_orders(obj):
-        vendorset = obj.gig.subcontractedequipment_set
+        vendorset = obj.gig.subcontractedequipment_set.filter(client_provided=False)
         return "None" if vendorset.count() == 0 else format_html(f"""
         <div>
         {" ".join([vendorcontract.get_printout_link() for vendorcontract in vendorset.all()])}
