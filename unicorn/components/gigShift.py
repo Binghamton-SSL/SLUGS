@@ -13,8 +13,9 @@ class GigshiftView(UnicornView):
         self.job = Job.objects.get(pk=kwargs["job"].pk) if ('job' in kwargs and kwargs["job"].pk is not None) else None
 
     def clock_in(self):
+        # Common error where Job will unassign itself as a Job object and return a dictionary. TODO
         if (type(self.job) == dict):
-            raise TypeError("Malformed Clock In:", self.job, type(self.job))
+            self.job = Job.objects.get(pk=self.job['pk'])
         self.job.shifts.create(time_in=timezone.now())
         self.job.save()
 

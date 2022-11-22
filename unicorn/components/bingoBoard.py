@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 class BingoboardView(UnicornView):
     board_id = None
     board = None
+    bingoBoardError = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
@@ -14,6 +15,7 @@ class BingoboardView(UnicornView):
 
     def toggle_tile(self, tile_pk, *args, **kwargs):
         if self.request == None:
+            self.bingoBoardError = "Connection has been lost to the server. The bingo board is no longer updating in real time. Please refresh!"
             raise ValidationError("User is none")
         tile = TileOnBoard.objects.get(pk=tile_pk)
         if tile.checked_by is None:

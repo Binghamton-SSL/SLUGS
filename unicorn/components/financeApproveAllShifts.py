@@ -1,5 +1,6 @@
 from django_unicorn.components import UnicornView
 from finance.models import Shift
+from django.core.exceptions import ValidationError
 
 
 class FinanceapproveallshiftsView(UnicornView):

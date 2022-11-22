@@ -14,6 +14,10 @@ BUG FIXES:
     * Change kiosk GUI to better improve user flow
     * Only show clock in/out for staffed Job slots
     * Do not show Subcontracted equipment forms for client provided equipment on estimate page
+    * Missing imports
+    * Bingo board will display error when connection is lost to server
+    * Attempt to recover malformed clock in/out via gigShift
+    * Previous pay period logic differed from regular pay period
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

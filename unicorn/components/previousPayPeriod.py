@@ -23,7 +23,7 @@ class PreviouspayperiodView(UnicornView):
             self.sub_pay_period = PayPeriod.objects.get(pk=self.selected_pp)
             self.sub_shifts = Shift.objects.filter(
                 Q(time_in__gte=self.sub_pay_period.start)
-                & Q(time_out__lte=self.sub_pay_period.end + timezone.timedelta(days=1))
+                & Q(time_in__lte=self.sub_pay_period.end + timezone.timedelta(days=1))
             ).order_by("-time_out")
             self.sub_shifts_hours = str(self.sub_shifts.aggregate(Sum('total_time'))['total_time__sum'])
             self.sub_shifts_price = self.sub_shifts.aggregate(Sum("cost"))
