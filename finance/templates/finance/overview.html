@@ -47,8 +47,8 @@
                     Please have these employees come in and sign ASAP!
                 </div>
             </div>
-            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
-                <button onclick="javascript:toggleUnsignedTimesheets(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+            <div class="flex flex-col flex-1 ml-0 mr-0 sm:ml-auto">
+                <button onclick="javascript:toggleUnsignedTimesheets(this)" class="px-4 py-2 my-2 ml-auto mr-0 text-black bg-white border-2 border-black rounded-sm w-52">
                     Expand
                 </button>
                 <!-- <div class="UnsignedTimesheetsHidden">
@@ -67,7 +67,7 @@
                     </div>
                     <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
                         <a href="{{timesheet.get_admin_url}}">
-                            <button class="w-52 ml-auto mr-auto text-white bg-black px-4 py-2 my-2 border-2 border-black rounded-sm">
+                            <button class="px-4 py-2 my-2 ml-auto mr-auto text-white bg-black border-2 border-black rounded-sm w-52">
                                 Edit Details
                             </button>
                         </a>
@@ -89,8 +89,8 @@
                     Please add these time sheets to the next pay period to be sent out to payroll. 
                 </div>
             </div>
-            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
-                <button onclick="javascript:toggleUnprocessedTimesheets(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+            <div class="flex flex-col flex-1 ml-0 mr-0 sm:ml-auto">
+                <button onclick="javascript:toggleUnprocessedTimesheets(this)" class="px-4 py-2 my-2 ml-auto mr-0 text-black bg-white border-2 border-black rounded-sm w-52">
                     Expand
                 </button>
             </div>
@@ -107,7 +107,7 @@
                     </div>
                     <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
                         <a href="{{timesheet.get_admin_url}}">
-                            <button class="w-52 ml-auto mr-auto text-white bg-black px-4 py-2 my-2 border-2 border-black rounded-sm">
+                            <button class="px-4 py-2 my-2 ml-auto mr-auto text-white bg-black border-2 border-black rounded-sm w-52">
                                 Edit Details
                             </button>
                         </a>
@@ -129,8 +129,8 @@
                     {{shifts.count}} Shifts in period totaling {{shifts_hours.total_time__sum}} man-hours of work and costing ${{shifts_price.cost__sum|floatformat:2}}
                 </div>
             </div>
-            <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
-                <button onclick="javascript:toggleRecentPayPeriod(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
+            <div class="flex flex-col flex-1 ml-0 mr-0 sm:ml-auto">
+                <button onclick="javascript:toggleRecentPayPeriod(this)" class="px-4 py-2 my-2 ml-auto mr-0 text-black bg-white border-2 border-black rounded-sm w-52">
                     Expand
                 </button>
                 <div class="RecentPayPeriodHidden">
@@ -146,6 +146,8 @@
     </div>
     <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>
     {% unicorn 'previousPayPeriod' %}
+    <h2 class="mt-5 text-2xl">Paychex Flex Utility</h2>
+    {% unicorn 'paychexAPIRefresh' %}
 </div>
 <script>
     const states = {

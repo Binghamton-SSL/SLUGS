@@ -5,6 +5,8 @@
     * Pricing is ignored and hidden from client
 * Add attachments to gig
 * Add Gig Outflow report to Estimate (shows the amount of money spent by BSSL on a show)
+* Paychex Flex CSV Exporter
+* Paychex Flex API Integration for WorkerID scraping
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status
@@ -18,6 +20,7 @@ BUG FIXES:
     * Bingo board will display error when connection is lost to server
     * Attempt to recover malformed clock in/out via gigShift
     * Previous pay period logic differed from regular pay period
+    * Move payroll summary behind admin wall
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

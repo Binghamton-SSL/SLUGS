@@ -189,6 +189,7 @@ def prepareSummaryData(pp_id):
     ):
         employees[employee.bnum] = {
             "bnum": employee.bnum,
+            "paychex_flex_workerID": employee.paychex_flex_workerID,
             "name": f"{employee.first_name} {employee.last_name}{' (Outstanding Paperwork)' if employee.groups.filter(name='Awaiting Paperwork').count() > 0 else ''}",
             "shifts": [],
             "rates": deepcopy(rates),

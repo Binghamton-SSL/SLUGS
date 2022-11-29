@@ -23,6 +23,7 @@ urlpatterns = [
     ),
     path("summary/<pp_id>/", views.viewSummary.as_view(), name="summary"),
     path("summary_csv/<pp_id>/", views.exportSummaryCSV.as_view(), name="summary_csv"),
+    path("summary_paychex_csv/<pp_id>/", views.exportSummaryPayChexCSV.as_view(), name="summary_paychex_csv"),
     path(
         "summary/sa_billing/<month>/<year>/",
         views.saBillingSummary.as_view(),

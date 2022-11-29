@@ -277,7 +277,7 @@ class TimeSheetInline(admin.StackedInline):
 
 @admin.register(PayPeriod)
 class PayPeriodAdmin(admin.ModelAdmin):
-    readonly_fields = ["get_summary", "timesheets_for_this_pay_period", "associated_shifts"]
+    readonly_fields = ["get_summary", "get_paychex_summary", "timesheets_for_this_pay_period", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
     inlines = [TimeSheetInline]

@@ -203,6 +203,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         "last_name",
                         "phone_number",
                         "bnum",
+                        "paychex_flex_workerID",
                         "id_barcode",
                         "graduation_year",
                         "is_grad_student",

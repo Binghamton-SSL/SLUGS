@@ -23,7 +23,7 @@ from django.conf import settings
 from django.http import FileResponse
 from django.db.models import Sum
 from django.views.generic.edit import FormView
-from SLUGS.views import SLUGSMixin
+from SLUGS.views import SLUGSMixin, isAdminMixin
 from SLUGS.templatetags.grouping import has_group
 from finance.models import Estimate, HourlyRate, PayPeriod, Shift, TimeSheet
 from employee.models import Employee
@@ -286,7 +286,7 @@ class SignTimesheet(SLUGSMixin, FormView):
         return super().form_valid(form)
 
 
-class viewSummary(SLUGSMixin, TemplateView):
+class viewSummary(SLUGSMixin, isAdminMixin, TemplateView):
     template_name = "finance/summary.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -301,7 +301,7 @@ class viewSummary(SLUGSMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class exportSummaryCSV(SLUGSMixin, View):
+class exportSummaryCSV(SLUGSMixin, isAdminMixin, View):
     def dispatch(self, request, *args, **kwargs):
         sumData = prepareSummaryData(kwargs["pp_id"])
         response = HttpResponse(
@@ -355,6 +355,40 @@ class exportSummaryCSV(SLUGSMixin, View):
         return response
 
 
+class exportSummaryPayChexCSV(SLUGSMixin, isAdminMixin, View):
+    def dispatch(self, request, *args, **kwargs):
+        sumData = prepareSummaryData(kwargs["pp_id"])
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={
+                "Content-Disposition": f'attachment; filename="Payroll_Summary_{sumData["pay_period"].start}--{sumData["pay_period"].end}_PAYCHEX.csv"'
+            },
+        )
+
+        writer = csv.writer(response)
+        columns = ["Company ID", "Worker ID", "Org", "Job Number", "Job Name", "Pay Component", "Rate", "Hours", "Date", "Check Seq Number"]
+        writer.writerow(columns)
+        for emp in sumData["employees"]:
+            emp = sumData["employees"][emp]
+            for rate in sumData["rates"]:
+                if rate in emp["rates"] and emp["rates"][rate][1] != 0:
+                    writer.writerow(
+                        [
+                            settings.PAYCHEX_COMPANY_ID,  # Company ID
+                            emp['paychex_flex_workerID'],  # Worker ID
+                            settings.PAYCHEX_ORG,  # Org
+                            f'BSSL{rate.hourly_rate}',  # Job Number
+                            rate.wage.name,  # Job Name
+                            "Hourly",  # Pay Component
+                            rate.hourly_rate,  # Rate
+                            emp["rates"][rate][1],  # Hours
+                            sumData["pay_period"].payday,  # Date
+                            ""  # Check Seq Number
+                        ]
+                    )
+        return response
+
+
 class saBillingSummary(SLUGSMixin, TemplateView):
     template_name = "finance/sa_billing_summary.html"
 
@@ -363,18 +397,18 @@ class saBillingSummary(SLUGSMixin, TemplateView):
         year = kwargs["year"]
         estimates = Estimate.objects.filter(
             Q(
-            gig__start__month=month,
-            gig__start__year=year,
-            billing_contact__organization__SA_account_num__isnull=False,
-            gig__published=True,
-            payment_due=None
+                gig__start__month=month,
+                gig__start__year=year,
+                billing_contact__organization__SA_account_num__isnull=False,
+                gig__published=True,
+                payment_due=None
             )
             |
             Q(
-            payment_due__month=month,
-            payment_due__year=year,
-            billing_contact__organization__SA_account_num__isnull=False,
-            gig__published=True,
+                payment_due__month=month,
+                payment_due__year=year,
+                billing_contact__organization__SA_account_num__isnull=False,
+                gig__published=True,
             )
         ).order_by("billing_contact__organization")
         groups = {}

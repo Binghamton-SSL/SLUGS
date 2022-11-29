@@ -511,6 +511,19 @@ class PayPeriod(models.Model):
             f"<div style='margin: .25rem 0 .25rem 0'><a href='{reverse('finance:summary', args=[self.pk])}?time={datetime.now()}'>Print Summary</a><br><a href='{reverse('finance:summary_csv', args=[self.pk])}?time={datetime.now()}'>Summary CSV File</a></div><br>"
         )  # noqa
 
+    def get_paychex_summary(self):
+        tms = TimeSheet.objects.filter(paid_during=self.pk, employee__paychex_flex_workerID=None).order_by('employee__last_name')
+        return format_html(
+            f'''
+                <div style='margin: .25rem 0 .25rem 0'>
+                    {"".join([f'{tm.employee} Does <b><u>NOT</u></b> have a PayChex Employee ID<br>' for tm in tms])}
+                    {"<b>THIS EXPORT WILL NOT BE ABLE TO IMPORT INTO PAYCHEX PROPERLY UNTIL YOU REMOVE THE ROWS MISSING WORKER IDs</b><br>" if tms.count() > 0 else ""}
+                    <br>
+                    <a href='{reverse('finance:summary_paychex_csv', args=[self.pk])}?time={datetime.now()}'>Download Paychex Flex Payroll Export</a>
+                </div>
+            '''
+        )
+
     def associated_shifts(self):
         ret = ""
         for shift in self.shifts.all().order_by("processed"):
@@ -547,7 +560,7 @@ class PayPeriod(models.Model):
         super().save()
         emps = []
         for shift in self.shifts.all():
-            if shift.content_object.employee not in emps:
+            if shift.content_object.employee not in emps and shift.content_object.employee is not None:
                 emps.append(shift.content_object.employee)
         for emp in emps:
             timesheet, created = TimeSheet.objects.get_or_create(
