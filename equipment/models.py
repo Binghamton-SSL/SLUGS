@@ -218,7 +218,7 @@ class VendorEquipment(PricingMixin, models.Model):
     description = models.CharField(max_length=512, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name} - {self.get_current_price()} - {self.vendor}"
+        return f"{self.name} - {self.vendor}"
 
     def __init__(self, *args, **kwargs):
         self.pricing_set = self.vendorequipmentpricing_set

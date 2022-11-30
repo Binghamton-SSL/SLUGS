@@ -14,13 +14,17 @@ BUG FIXES:
     * Fix error where Bingo board crashed gig page
     * Move kiosk clock in/out state handling to front end to improve responsiveness
     * Change kiosk GUI to better improve user flow
-    * Only show clock in/out for staffed Job slots
+    * Only show clock in/out for staffed Job slots on kiosk
     * Do not show Subcontracted equipment forms for client provided equipment on estimate page
     * Missing imports
     * Bingo board will display error when connection is lost to server
     * Attempt to recover malformed clock in/out via gigShift
     * Previous pay period logic differed from regular pay period
     * Move payroll summary behind admin wall
+    * Remove "Expand" buttons when no items available on financial overview
+    * Show gigs on signup page in chronological order
+    * Fix bug where assigning paperwork from employee page causes crash
+    * Fix issue where autocomplete on vendor equipment caused 500
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

@@ -141,4 +141,4 @@ class VendorAdmin(admin.ModelAdmin):
 class VendorEquipmentAdmin(admin.ModelAdmin):
     inlines = [VendorEquipmentPricingInline]
     autocomplete_fields = ["vendor"]
-    search_fields = ["vendor", "name", "description"]
+    search_fields = ["vendor__name", "name", "description"]

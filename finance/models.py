@@ -603,3 +603,6 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.payment_date} - ${self.amount}"
+
+    class Meta:
+        verbose_name = "Incoming Payment"

@@ -469,7 +469,6 @@ class FinancialOverview(SLUGSMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if not has_group(request.user, "Financial Director/GM"):
             raise PermissionDenied
-        # most_recent_pay_period = PayPeriod.objects.all().order_by("-end").first()
         most_recent_pay_period = PayPeriod.objects.filter(end__lte=datetime.now()).order_by("end").last()
         shifts = Shift.objects.filter(
             Q(time_in__gte=most_recent_pay_period.start)

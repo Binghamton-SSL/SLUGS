@@ -125,17 +125,13 @@ class workSignup(SLUGSMixin, TemplateView):
             request.user, "Cannot Work"
         ):
             raise PermissionDenied()
-        self.added_context["gigs"] = list(
-            set(
-                Gig.objects.filter(
-                    start__gte=timezone.now(),
-                    available_for_signup__lte=timezone.now(),
-                    job__employee=None,
-                    published=True,
-                    archived=False,
-                ).order_by("-start")
-            )
-        )
+        self.added_context["gigs"] = Gig.objects.filter(
+                start__gte=timezone.now(),
+                available_for_signup__lte=timezone.now(),
+                job__employee=None,
+                published=True,
+                archived=False,
+            ).order_by("start").distinct()
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -264,9 +260,14 @@ class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.added_context["outstanding_bookings"] = (
-            Estimate.objects.filter(
-                gig__start__gte=datetime.now(), status__in=["E", "L"]
+            (
+                Estimate.objects.filter(status__in="L")
+                |
+                Estimate.objects.filter(
+                    gig__start__gte=datetime.now(), status__in="E"
+                )
             )
+            .distinct()
             .order_by("gig__start")
             .annotate(
                 three_weeks_prior=ExpressionWrapper(

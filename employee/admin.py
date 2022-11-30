@@ -140,7 +140,7 @@ We're sorry to see ya go. One of our managers has deactivated your account. If y
                         subject=f"[ACTION REQUIRED] Fill out '{form.instance.form.form_name}' on SLUGS",
                         title=f"Paperwork needed: {form.instance.form.form_name}",
                         included_html=email_template,
-                        included_text=f"How's it going {(form.instance.preferred_name if form.instance.preferred_name else form.instance.first_name)}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
+                        included_text=f"How's it going {(form.instance.employee.preferred_name if form.instance.employee.preferred_name else form.instance.employee.first_name)}, <br><br> Attached (and on SLUGS) you'll find a new form we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and click on the appropriate document.<br><br>Thanks!<br>",  # noqa
                         to=[form.instance.employee.email],
                         attachments=attachments,
                     )
