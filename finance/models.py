@@ -512,7 +512,7 @@ class PayPeriod(models.Model):
         )  # noqa
 
     def get_paychex_summary(self):
-        tms = TimeSheet.objects.filter(paid_during=self.pk, employee__paychex_flex_workerID=None).order_by('employee__last_name')
+        tms = TimeSheet.objects.filter(paid_during=self.pk, employee__paychex_flex_workerID=None).exclude(signed=None).order_by('employee__last_name')
         return format_html(
             f'''
                 <div style='margin: .25rem 0 .25rem 0'>

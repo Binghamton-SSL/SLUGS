@@ -1,6 +1,6 @@
 <div class="p-4 text-black bg-white rounded">
     <button unicorn:loading.remove unicorn:click="update_from_API" class="px-4 py-2 my-2 ml-auto mr-0 text-black bg-white border-2 border-black rounded-sm hover:bg-red-200">Fetch WorkerIDs from PayChex API</button>
-    <h4 class="text-xl font-bold">Update Status:</h4>
+    {% if statusMessages|length > 0 %}<h4 class="text-xl font-bold">Update Status:</h4>{% endif %}
     <div class="flex flex-col space-y-2">
         <div unicorn:loading class="flex p-4 bg-blue-300 w-max">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-4">

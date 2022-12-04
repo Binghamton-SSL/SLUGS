@@ -366,7 +366,7 @@ class exportSummaryPayChexCSV(SLUGSMixin, isAdminMixin, View):
         )
 
         writer = csv.writer(response)
-        columns = ["Company ID", "Worker ID", "Org", "Job Number", "Job Name", "Pay Component", "Rate", "Hours", "Date", "Check Seq Number"]
+        columns = ["Company ID", "Worker ID", "Org", "Pay Component", "Rate", "Hours", "Date", "Check Seq Number"]
         writer.writerow(columns)
         for emp in sumData["employees"]:
             emp = sumData["employees"][emp]
@@ -374,15 +374,13 @@ class exportSummaryPayChexCSV(SLUGSMixin, isAdminMixin, View):
                 if rate in emp["rates"] and emp["rates"][rate][1] != 0:
                     writer.writerow(
                         [
-                            settings.PAYCHEX_COMPANY_ID,  # Company ID
+                            settings.PAYCHEX_COMPANY_ID_HUMAN,  # Company ID
                             emp['paychex_flex_workerID'],  # Worker ID
-                            settings.PAYCHEX_ORG,  # Org
-                            f'BSSL{rate.hourly_rate}',  # Job Number
-                            rate.wage.name,  # Job Name
+                            settings.PAYCHEX_ORG_HUMAN,  # Org
                             "Hourly",  # Pay Component
                             rate.hourly_rate,  # Rate
                             emp["rates"][rate][1],  # Hours
-                            sumData["pay_period"].payday,  # Date
+                            sumData["pay_period"].payday.strftime("%m/%d/%Y"),  # Date
                             ""  # Check Seq Number
                         ]
                     )

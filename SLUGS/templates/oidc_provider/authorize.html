@@ -19,7 +19,7 @@
         </div>
 
         <div>
-            <p class="text-xl text-center">Hey, {{user.preferred_name}}, <strong>{{ client.name }}</strong> is asking to use your BSSL's SLUGS account to log in. When creating your account with {{client.name}} we'll also pass along the following info</p>
+            <p class="text-xl text-center">Hey {% if user.preferred_name %}{{user.preferred_name}}{% else %}{{user.first_name}}{% endif %}, <strong>{{ client.name }}</strong> is asking to use your BSSL's SLUGS account to log in. When creating your account with {{client.name}} we'll also pass along the following info</p>
             <p class="text-center">Please review this carefully. Only authorize websites you trust</p>
             <form method="post" action="{% url 'oidc_provider:authorize' %}">
             

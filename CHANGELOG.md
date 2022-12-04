@@ -25,6 +25,10 @@ BUG FIXES:
     * Show gigs on signup page in chronological order
     * Fix bug where assigning paperwork from employee page causes crash
     * Fix issue where autocomplete on vendor equipment caused 500
+    * Paychex warnings only show for employees who have signed their timesheets
+    * Update PayChex export to reflect incorrect documentation
+    * OIDC Authorization page previously required preferred name
+    * Provide more inclusive logging for PayChex API sync
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
