@@ -1,6 +1,6 @@
 {% extends "theme/base.html" %}
 {% load unicorn %}
-{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
+{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %} {% load i18n %}
 {% block title %} - Training{% endblock %}
 
 {% block headincludes %}{% unicorn_scripts %}{% endblock %}
@@ -83,8 +83,7 @@
         </div>
         {% else %}
         <div class="p-4 m-2 text-xl text-center text-black bg-white rounded-sm">
-            Sorry king, there are no trainings scheduled 🥺<br>
-            Go request one!
+            {% translate "Sorry king, there are no trainings scheduled 🥺<br>Go request one!" %}
         </div>
         {% endif %}
     </div>
@@ -130,14 +129,14 @@
                 </h1>
                 <div>
                     <h2 class="text-lg">
-                        Want to learn at your own pace? We got you, BSSL has an entire site dedicated to documentation we call <a class="underline font-bold" href="https://wiki.bssl.binghamtonsa.org/login">SNAIL</a>!
+                        {% translate "Want to learn at your own pace? We got you, BSSL has an entire site dedicated to documentation we call <a class='font-bold underline' href='https://wiki.bssl.binghamtonsa.org/login'>SNAIL</a>!" %}
                     </h2>
-                    <div class="flex p-2 my-2 bg-blue-300 text-black rounded-sm">
+                    <div class="flex p-2 my-2 text-black bg-blue-300 rounded-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                             <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
                         </svg>
                         <p>
-                            SNAIL uses SLUGS for authentication, so be sure to log in to see all the documentation applicable for your role at the company.
+                            {% translate "SNAIL uses SLUGS for authentication, so be sure to log in to see all the documentation applicable for your role at the company." %}
                         </p>         
                     </div>
                 </div>

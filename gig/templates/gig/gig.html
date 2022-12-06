@@ -1,31 +1,31 @@
 {% extends "theme/base.html" %}
 {% load unicorn %}
-{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %}
+{% load grouping %} {% load crispy_forms_tags %} {% load gig_components %} {% load static %} {% load i18n %}
 {% block title %} - {{gig.name}}{% endblock %}
 
 {% block headincludes %}{% unicorn_scripts %}{% endblock %}
 {% block content %}
 {% if gig.archived %}
-<div class="my-2 mx-4 flex-1">
-    <div class="my-auto p-2 text-center mx-auto font-bold text-black bg-gray-300 text-mono">This show has been archived. Either it is over or was cancelled.</div>
+<div class="flex-1 mx-4 my-2">
+    <div class="p-2 mx-auto my-auto font-bold text-center text-black bg-gray-300 text-mono">This show has been archived. Either it is over or was cancelled.</div>
 </div>
 {% endif %}
 <div class="m-5 mt-10">
     {% ticket gig %}
 </div>
-<div class="flex max-w-prose mx-auto flex-col space-y-2 sm:space-y-0 sm:flex-row">
-    <div class="my-auto m-2 flex-1">
-        <div class="my-auto p-2 text-center mx-auto font-bold text-black bg-red-300 text-mono">Setup by: {{gig.setup_by|date:"H:i"}}</div>
+<div class="flex flex-col mx-auto space-y-2 max-w-prose sm:space-y-0 sm:flex-row">
+    <div class="flex-1 m-2 my-auto">
+        <div class="p-2 mx-auto my-auto font-bold text-center text-black bg-red-300 text-mono">Setup by: {{gig.setup_by|date:"H:i"}}</div>
     </div>
     {% if my_job or request.user|has_group:"Manager" %}
-        <div class="p-1 flex-1 mx-auto">
+        <div class="flex-1 p-1 mx-auto">
             <p>Event Contact:</p>
             <p>{{gig.contact.name}}</p>
             <p class="underline"><a href="mailto:{{gig.contact.email}}">{{gig.contact.email}}</a></p>
             <p class="underline"><a href="tel:{{gig.contact.phone_number}}">{{gig.contact.phone_number}}</a></p>
         </div>
         {% if gig.estimate_set.first.signed_estimate %}
-        <div class="flex my-4 p-1 flex-1">
+        <div class="flex flex-1 p-1 my-4">
             <a class="mx-auto" href="{% url 'download_estimate' gig.estimate_set.first.signed_estimate %}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>
         </div>
         {% endif %}
@@ -56,7 +56,7 @@
         {% for attachment in gig.attachments.all %}
             {% if attachment.available_to_all_employees or attachment.available_to_engineers and my_job|isEngineer or attachment.available_to_managers and request.user|has_group:"Manager" %}
                 <a href="{{attachment.file.url}}">
-                    <div class="px-2 py-1 mt-1 text-black bg-white flex">
+                    <div class="flex px-2 py-1 mt-1 text-black bg-white">
                         <div>
                             <p class="underline">{{attachment.name}}</p>
                             {% if attachment.description %}<p class="text-sm">{{attachment.description}}</p>{% endif %}
@@ -67,7 +67,7 @@
                     </div>
                 </a>
             {% elif attachment.available_to_engineers %}
-                <div class="px-2 py-1 mt-1 text-black bg-red-300 flex">
+                <div class="flex px-2 py-1 mt-1 text-black bg-red-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
                     </svg>  
@@ -77,7 +77,7 @@
                     </div>                    
                 </div>
             {% else %}
-                <div class="px-2 py-1 mt-1 text-black bg-red-300 flex">
+                <div class="flex px-2 py-1 mt-1 text-black bg-red-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
                     </svg>  
@@ -180,8 +180,8 @@
             <div class="my-2">
                 <div class="p-4 my-4 vibg-gray-700">
                     <h2 class="text-xl">Engineer's Notes</h2>
-                    <p>Anything out of the ordinary? Notes about the show?</p>
-                    <code class="text-xs">IF OVERTIME WAS REQUIRED FOR THIS SHOW: PLEASE NOTE IT HERE.</code>
+                    <p>{% translate "Anything out of the ordinary? Notes about the show?" %}</p>
+                    <code class="text-xs">{% translate "IF OVERTIME WAS REQUIRED FOR THIS SHOW: PLEASE NOTE IT HERE." %}</code>
                     <div class="flex p-2 my-2 space-x-4 bg-red-700 rounded-sm">
                         <div class="w-6 h-6 my-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
@@ -191,8 +191,7 @@
                         </svg>
                         </div>
                         <p>
-                            Broken equipment should always be reported, but this is not the place! Hit the "Report issue" link
-                            under the broken system in question.
+                            {% translate "Broken equipment should always be reported, but this is not the place! Hit the \"Report issue\" link under the broken system in question." %}
                         </p>
                     </div>
                     {% crispy forms.show_notes %}
@@ -251,14 +250,14 @@
             <button class="m-2 bg-[#009961] py-4 px-2" type="submit">Update day of show</button>
         </form>
         <div>
-            <div class="flex flex-col p-4 bg-red-300 text-black">
-                <p class="font-bold text-lg">
+            <div class="flex flex-col p-4 text-black bg-red-300">
+                <p class="text-lg font-bold">
                     Ready to go home?
                 </p>
                 <p class="text-md">
                     Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
                 </p>
-                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
             </div>
         </div>
     </div>
@@ -301,14 +300,14 @@
         {% endfor %}
         {% if not gig.archived %}
             <div class="m-4">
-                <div class="flex flex-col p-4 bg-red-300 text-black">
-                    <p class="font-bold text-lg">
+                <div class="flex flex-col p-4 text-black bg-red-300">
+                    <p class="text-lg font-bold">
                         Ready to go home?
                     </p>
                     <p class="text-md">
                         Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
                     </p>
-                    <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 bg-black text-white">Post Event Check-In form</button></a>
+                    <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
                 </div>
             </div>
         {% endif %}
@@ -323,7 +322,7 @@
             </div>
         {% endif %}
         {% for a_job in my_jobs %}
-        <h3 class="text-center pt-4 text-xl">{{a_job.position}}</h3>
+        <h3 class="pt-4 text-xl text-center">{{a_job.position}}</h3>
         {% for shift in a_job.shifts.all %}
         <div class="flex m-4 border-2 border-black rounded">
             <div class="flex flex-col ml-4 mr-auto">

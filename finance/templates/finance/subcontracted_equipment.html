@@ -3,6 +3,7 @@
 {% load finance_components %}
 {% load static %}
 {% load jsignature_filters %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,19 +53,21 @@
                     <div id="page-content">
                         <div class="flex">
                             <div class="flex flex-col" style="width: 2.5in">
-                                <h1 class="text-8xl font-stencil">BSSL</h1>
+                                <h1 class="text-8xl font-stencil">{% translate "BSSL" %}</h1>
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
-                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
-                                    <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
-                                    <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
-                                    <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+                                    <span class="text-xs text-center">{% translate "Binghamton Sound Staging and Lighting" %}</span><br>
+                                    <a href="tel:{% translate "6077774144" %}">{% translate "(607) 777-4144" %}</a><br>
+                                    <a href="mailto:{% translate "bssl@binghamtonsa.org" %}">{% translate "bssl@binghamtonsa.org" %}</a><br>
+                                    <a href="https://{% translate "bssl.binghamtonsa.org" %}">{% translate "bssl.binghamtonsa.org" %}</a>
                                 </h1>
                                 <p class="mt-4 text-xs">
-                                    Student Assoc. of SUNY Binghamton, Inc.<br>
+                                    {% translate "Student Assoc. of SUNY Binghamton, Inc." %}<br>
+                                    {% blocktranslate %}
                                     UU B19 - BSSL<br>
                                     4400 Vestal Parkway, East<br>
                                     Binghamton, NY 13902-6000<br>
+                                    {% endblocktranslate %}
                                 </p>
                             </div>
                             <div class="flex-col space-y-4" style="width:6in">
@@ -164,9 +167,11 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                BSSL<br/>
+                                                {% translate "BSSL" %}<br/>
+                                                {% blocktranslate %}
                                                 4440 Vestal Parkway East<br/>
                                                 Binghamton, NY 13902<br/>
+                                                {% endblocktranslate %}
                                                 Location:
                                                 {{subcontracted.gig.location}}
                                             </td>
@@ -359,6 +364,7 @@
                         </div>
                         <div class="dont_break">
                             <div>
+                                {% blocktranslate %}
                                 <ul class="mt-4 text-[.8rem] list-disc list-inside">
                                     <li>
                                        Signing of this form acknowledges either receipt or delivery (as marked by the appropriate section) of the agreed upon items in correct quantity and condition, in a timely manner.
@@ -381,9 +387,10 @@
                                         present during the rental period prior approval from BSSL. 
                                     </li>
                                 </ul>
+                                {% endblocktranslate %}
                             </div>
                             <div>
-                                <table class="mt-4 mx-auto"> 
+                                <table class="mx-auto mt-4"> 
                                     <thead class="text-center">
                                         <tr>
                                             <td colspan="4">Agreed to</td>
@@ -391,10 +398,10 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="pt-2 border-r-0">{{request.user.first_name}} {{request.user.last_name}} (BSSL):</td>
-                                            <td class="pb-2 pr-2 border-l-0 relative">
+                                            <td class="pt-2 border-r-0">{{request.user.first_name}} {{request.user.last_name}} ({% translate "BSSL" %}):</td>
+                                            <td class="relative pb-2 pr-2 border-l-0">
                                                 {% if request.user.signature %}
-                                                <img src="{{request.user.signature|signature_base64}}" class="autosign hidden absolute" style="width: 2.0in;max-height: 0.6in;top: -0.3in">
+                                                <img src="{{request.user.signature|signature_base64}}" class="absolute hidden autosign" style="width: 2.0in;max-height: 0.6in;top: -0.3in">
                                                 {% endif %}
                                                 _________________________
                                             </td>
@@ -412,11 +419,11 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="pt-2 border-r-0">BSSL Representative:</td>
+                                                <td class="pt-2 border-r-0">{% translate "BSSL" %} Representative:</td>
                                                 <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
-                                                <td class="pt-2 border-r-0">BSSL Signature:</td>
+                                                <td class="pt-2 border-r-0">{% translate "BSSL" %} Signature:</td>
                                                 <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
@@ -437,11 +444,11 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="pt-2 border-r-0">BSSL Representative:</td>
+                                                <td class="pt-2 border-r-0">{% translate "BSSL" %} Representative:</td>
                                                 <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
-                                                <td class="pt-2 border-r-0">BSSL Signature:</td>
+                                                <td class="pt-2 border-r-0">{% translate "BSSL" %} Signature:</td>
                                                 <td class="pb-2 pr-2 border-l-0">_________________________</td>
                                             </tr>
                                             <tr>
@@ -466,9 +473,9 @@
                 <td style="border: none; padding-top: .25in;">
                     <div class="flex">
                         <span class="my-auto">Initial:</span>
-                        <div class="flex ml-4 relative"><span class="my-auto">BSSL</span>
+                        <div class="relative flex ml-4"><span class="my-auto">{% translate "BSSL" %}</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>
-                            <div class="absolute autosign hidden" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
+                            <div class="absolute hidden autosign" style="left: 0.53in">{{request.user.first_name|slice:1}} {{request.user.last_name|slice:1}}</div>
                         </div>
                         <div class="flex ml-4"><span class="my-auto">{{subcontracted.vendor.name}}</span>
                             <div class="w-10 h-5 my-auto ml-1 border-2 border-black"></div>

@@ -2,6 +2,8 @@
 {% load slugs_components %}
 {% load static %}
 {% load finance_tags %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,19 +52,21 @@
                     <div id="page-content">
                         <div class="flex">
                             <div class="flex flex-col" style="width: 2.5in">
-                                <h1 class="text-8xl font-stencil">BSSL</h1>
+                                <h1 class="text-8xl font-stencil">{% translate "BSSL" %}</h1>
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
-                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
-                                    <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
-                                    <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
-                                    <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+                                    <span class="text-xs text-center">{% translate "Binghamton Sound Staging and Lighting" %}</span><br>
+                                    <a href="tel:{% translate "6077774144" %}">{% translate "(607) 777-4144" %}</a><br>
+                                    <a href="mailto:{% translate "bssl@binghamtonsa.org" %}">{% translate "bssl@binghamtonsa.org" %}</a><br>
+                                    <a href="https://{% translate "bssl.binghamtonsa.org" %}">{% translate "bssl.binghamtonsa.org" %}</a>
                                 </h1>
                                 <p class="mt-4 text-xs">
-                                    Student Assoc. of SUNY Binghamton, Inc.<br>
+                                    {% translate "Student Assoc. of SUNY Binghamton, Inc." %}<br>
+                                    {% blocktranslate %}
                                     UU B19 - BSSL<br>
                                     4400 Vestal Parkway, East<br>
                                     Binghamton, NY 13902-6000<br>
+                                    {% endblocktranslate %}
                                 </p>
                             </div>
                             <div class="flex-col space-y-4" style="width:6in">
@@ -540,21 +544,23 @@
                         <div class="dont_break">
                             <div class="mt-10 text-sm text-center">
                                 <p>
-                                    Payment due upon receipt of Invoice by way of Check of SA inter-organization transfer.
+                                    {% translate "Payment due upon receipt of Invoice by way of Check of SA inter-organization transfer." %}
                                 </p>
                                 <p>
-                                    Make checks payable to: <br>Binghamton University Student Association inc. <br>Memo: <code>BSSL Invoice #SA7400-I{{estimate.pk|add:2500}}</code>
+                                    {% blocktranslate with estimateId=estimate.pk|add:2500 %}
+                                    Make checks payable to: <br>Binghamton University Student Association inc. <br>Memo: <code>BSSL Invoice #SA7400-I{{estimateId}}</code>
+                                    {% endblocktranslate %}
                                 </p>
                                 <p>
-                                    Invoices unpaid after two weeks will be subject to late fee.
+                                    {% translate "Invoices unpaid after two weeks will be subject to late fee." %}
                                 </p>
                             </div>
                             <div class="mt-10 text-sm text-center"><i>
                                 <p>
-                                    Thank you for your business.
+                                    {% translate "Thank you for your business." %}
                                 </p>
                                 <p>
-                                    If you have any questions or comments, please feel free to contact us.
+                                    {% translate "If you have any questions or comments, please feel free to contact us." %)
                                 </p>
                             </i></div>
                         </div>

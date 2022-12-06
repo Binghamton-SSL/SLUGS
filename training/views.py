@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 
 # Create your views here.
@@ -24,11 +25,11 @@ class index(SLUGSMixin, FormView):
     def form_valid(self, form):
         form.instance.employee = self.request.user
         form.save()
+        greeting = _("Ayo Managers,")
         send_generic_email(
             request=None,
             title=f"New Training Request - {form.instance.systems.all()[0].get_department_display()}",
-            included_text=f"""
-                Ayo Managers,
+            included_text=greeting+f"""
                 <br><br>
                 {(form.instance.employee.preferred_name if form.instance.employee.preferred_name else form.instance.employee.first_name)} {form.instance.employee.last_name} has submitted a training request.
                 <br>

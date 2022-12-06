@@ -4,6 +4,8 @@
 {% load finance_tags %}
 {% load finance_components %}
 {% load jsignature_filters %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -53,23 +55,25 @@
                     <div id="page-content">
                         <div class="flex">
                             <div class="flex flex-col" style="width: 2.5in">
-                                <h1 class="text-8xl font-stencil">BSSL</h1>
+                                <h1 class="text-8xl font-stencil">{% translate "BSSL" %}</h1>
                                 <!-- <img src="{% static 'finance/img/bssl.png' %}" alt="BSSL Logo" style="width: 2.5in;"> -->
                                 <h1 class="font-brand">
-                                    <span class="text-xs text-center">Binghamton Sound Staging and Lighting</span><br>
-                                    <!-- <a href="tel:6077774144">(607) 777-4144</a><br> -->
-                                    <a href="mailto:bssl@binghamtonsa.org">bssl@binghamtonsa.org</a><br>
-                                    <a href="https://bssl.binghamtonsa.org">bssl.binghamtonsa.org</a>
+                                    <span class="text-xs text-center">{% translate "Binghamton Sound Staging and Lighting" %}</span><br>
+                                    <a href="tel:{% translate "6077774144" %}">{% translate "(607) 777-4144" %}</a><br>
+                                    <a href="mailto:{% translate "bssl@binghamtonsa.org" %}">{% translate "bssl@binghamtonsa.org" %}</a><br>
+                                    <a href="https://{% translate "bssl.binghamtonsa.org" %}">{% translate "bssl.binghamtonsa.org" %}</a>
                                 </h1>
                                 <p class="mt-4 text-xs">
-                                    Student Assoc. of SUNY Binghamton, Inc.<br>
+                                    {% translate "Student Assoc. of SUNY Binghamton, Inc." %}<br>
+                                    {% blocktranslate %}
                                     UU B19 - BSSL<br>
                                     4400 Vestal Parkway, East<br>
                                     Binghamton, NY 13902-6000<br>
+                                    {% endblocktranslate %}
                                 </p>
                             </div>
                             <div class="flex-col space-y-4" style="width:6in">
-                                <h1 class="ml-auto mr-4 text-4xl font-bold text-right">Reservation Form</h1>
+                                <h1 class="ml-auto mr-4 text-4xl font-bold text-right">{% translate "Reservation Form" %}</h1>
                                 <table class="w-full ml-6">
                                     <thead>
                                         <tr>
@@ -537,6 +541,7 @@
                         </div>
                         <div class="dont_break">
                             <div>
+                                {% blocktranslate %}
                                 <ul class="mt-4 text-[.6rem] list-disc list-inside">
                                     <li>
                                         The Event Coordinator will have the location reserved, and be present at the
@@ -619,6 +624,7 @@
                                         100% fee of the accessory price.
                                     </li>
                                 </ul>
+                                {% endblocktranslate %}
                             </div>
                             <div>
                                 <div class="flex mt-10 text-sm dont_break signature" style="width: 8.75in;">

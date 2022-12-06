@@ -7,6 +7,7 @@
 * Add Gig Outflow report to Estimate (shows the amount of money spent by BSSL on a show)
 * Paychex Flex CSV Exporter
 * Paychex Flex API Integration for WorkerID scraping
+* Add basic internationalization support (Allows for text to change in future)
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status

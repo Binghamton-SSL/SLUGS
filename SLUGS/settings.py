@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "adminsortable2",
     "oidc_provider",
     "corsheaders",
+    "translation_manager",
 ]
 
 MIDDLEWARE = [
@@ -99,6 +100,18 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "SLUGS.urls"
+
+LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
+
+TRANSLATIONS_BASE_DIR = os.path.join(BASE_DIR, "locale")
+
+TRANSLATIONS_PROJECT_BASE_DIR = BASE_DIR
+
+LANGUAGES = [
+    ('en', "English"),
+]
+
+TRANSLATIONS_ALLOW_NO_OCCURRENCES = True
 
 TEMPLATE_DIRS = [
     os.path.join("SLUGS", "templates"),

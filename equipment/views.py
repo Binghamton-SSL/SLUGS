@@ -5,6 +5,7 @@ from equipment.forms import reportSystemBrokenForm
 from django.urls import reverse_lazy
 from SLUGS.views import SLUGSMixin
 from utils.generic_email import send_generic_email
+from django.utils.translation import gettext_lazy as _
 
 
 # Create your views here.
@@ -15,22 +16,24 @@ class reportBroken(SLUGSMixin, FormView):
 
     def form_valid(self, form):
         form.save()
-        send_generic_email(
-            request=None,
-            title=f"EQUIPMENT BROKEN - {form.instance.broken_system.get_department_display()} - {form.instance.broken_system.name}",
-            included_text=f"""
-                Ayo Shop Techs,
-                <br><br>
-                {(form.instance.reported_broken_by.preferred_name if form.instance.reported_broken_by.preferred_name else form.instance.reported_broken_by.first_name)} {form.instance.reported_broken_by.last_name} said that {form.instance.broken_system} is broken.
+        greeting = _("Ayo Shop Techs,")
+        email_body = _("""
+                %(fullName)s said that %(brokenSystemName)s is broken.
                 <br>
                 Here are the details:
                 <br><br>
-                Notes: <br> <code>{form.instance.notes}</code>
+                Notes: <br> <code>%(brokenSystemNotes)s</code>
                 <br><br>
                 <b>
                 Go to SLUGS to start the investigation.
                 </b>
-                """,  # noqa
+        """) % {"fullName": f"{(form.instance.reported_broken_by.preferred_name if form.instance.reported_broken_by.preferred_name else form.instance.reported_broken_by.first_name)} {form.instance.reported_broken_by.last_name}",
+                "brokenSystemName": form.instance.broken_system,
+                "brokenSystemNotes": form.instance.notes}
+        send_generic_email(
+            request=None,
+            title=f"EQUIPMENT BROKEN - {form.instance.broken_system.get_department_display()} - {form.instance.broken_system.name}",
+            included_text=(greeting + "<br><br>" + email_body),
             subject=f"[SLUGS] EQUIPMENT BROKEN - {form.instance.broken_system.get_department_display()} - {form.instance.broken_system.name}",
             to=["bssl@binghamtonsa.org"],
         )

@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load static %}
 {% load finance_tags %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BSSL Timesheet Summary - {{pay_period}}</title>
+    <title>{% translate "BSSL" %} Timesheet Summary - {{pay_period}}</title>
 
     {% tailwind_css %}
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -42,7 +43,7 @@
         <div style="width: 6.75in" class="flex flex-col my-auto">
             <div class="flex">
                 <img src="{% static 'finance/img/SAlogo.png' %}" class="mt-5" alt="SA Logo" style="width: 1in;" />
-                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">BSSL</h1>
+                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">{% translate "BSSL" %}</h1>
                 <h1 class="mx-2 my-auto mb-0 text-3xl font-medium text-right text-gray-400 font-brand">Pay Period Summary</h1>
 
             </div>
@@ -138,7 +139,7 @@
     </div>
     <div class="mt-auto mb-2 dont_break">
         <div class="mt-4 text-sm">
-            I Certify to the best of my knowledge the hours and wages listed above are correct.
+            {% translate "I Certify to the best of my knowledge the hours and wages listed above are correct." %}
         </div>
         <div class="flex mt-10" style="width: 11in;">
             <div style="width: 8.0in;" class="flex mx-auto ml-auto space-x-8">

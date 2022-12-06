@@ -151,7 +151,7 @@ class userChangeForm(ModelForm):
             Div(
                 HTML("""
                 <div class="flex-1">
-                    <label for="id_userChangeForm-bnum" class="block text-gray-700 text-sm font-bold mb-2">
+                    <label for="id_userChangeForm-bnum" class="block mb-2 text-sm font-bold text-gray-700">
                     B-Number</label>
                     <p class="my-2 text-gray-700">{{request.user.bnum}}</p>
                     <small id="hint_id_userChangeForm-bnum" class="text-gray-600">Your B-Number will not change throughout your time here at Binghamton. If for any reason you need to change the value displayed, please speak to a manager.</small>
@@ -269,12 +269,14 @@ class massAssignPaperworkForm(Form):
                 attachments.append(pform.form.form_pdf.file.name)
             template = get_template("employee/components/general_forms.html")
             email_template = template.render({"request": request})
+            greeting = _("How's it going %(firstName)s,") % { "firstName": emp.preferred_name if emp.preferred_name else emp.first_name}
+            email_body = _("Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>")
             send_generic_email(
                 request=request,
                 subject="[ACTION REQUIRED] New forms to fill out on SLUGS",
                 title=f"Paperwork needed: {', '.join([f.form.form_name for f in forms])}",
                 included_html=email_template,
-                included_text=f"How's it going {(emp.preferred_name if emp.preferred_name else emp.first_name)}, <br><br> Attached (and on SLUGS) you'll find a/some new form(s) we need you to fill out. You can upload it to SLUGS by clicking the button above or by going to the 'You' tab in SLUGS and clicking on the appropriate document under the 'Paperwork' section.<br><br>Thanks!<br>",  # noqa
+                included_text=(greeting + "<br><br>" + email_body),
                 to=[emp.email],
                 attachments=attachments,
             )

@@ -1,19 +1,20 @@
 {% extends "theme/base.html" %}
-{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %} {% load i18n %}
 {% block title %} - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}} - Auto-sign form{% endblock %}
 {% block content %}
 <div class="flex flex-col max-w-5xl mx-auto mt-10">
-    <h1 class="text-3xl">Automatically Sign {{paperwork.form}}</h1>
+    <h1 class="text-3xl">{% blocktranslate with formName=paperwork.form %} Automatically Sign {{formName}} {% endblocktranslate %}</h1>
     <div class="p-5 m-4 text-black bg-red-300 rounded-sm"> 
         <h2>
             By signing this form electronically using your signature, you agree to the following:
         </h2>
+        {% blocktranslate with formName=paperwork.form formUrl=paperwork.form.form_pdf.url %} 
         <ul class="list-disc">
             <li class="text-black">
                 Your signature will be binding and held to the same standard as a physical signature
             </li>
             <li class="text-black">
-                Clicking "Sign using Signature on File" shows your clear intent to sign <a class="underline" href="/media/{{paperwork.form.form_pdf}}">{{paperwork.form}}</a>
+                Clicking "Sign using Signature on File" shows your clear intent to sign <a class="underline" href="{{formUrl}}">{{formName}}</a>
             </li>
             <li class="text-black">
                 You've been given the option to sign and submit this form manually (just use the upload functionality instead if you wish)
@@ -22,6 +23,7 @@
                 You'll wait patiently for a few seconds (up to a minute) after hitting sign. Gary is a snail and it takes him a second to pull up your info and fill it out.
             </li>
         </ul>
+        {% endblocktranslate %}
     </div>
     <div class="mt-5">
         {% crispy form %}
@@ -30,9 +32,6 @@
 <style>
     label {
         color: white!important;
-    }
-    ul {
-        color: rgb(228, 225, 225)!important;
     }
     .clearablefileinput {
         color:rgb(228, 225, 225);

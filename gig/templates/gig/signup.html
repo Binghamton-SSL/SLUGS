@@ -1,6 +1,6 @@
 {% extends "theme/base.html" %}
 {% load unicorn %}
-{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %} {% load i18n %}
 {% block title %} - Signup for work{% endblock %}
 
 {% block headincludes %}{% unicorn_scripts %}{% endblock %}
@@ -12,7 +12,7 @@
     <h3 class="text-lg">
         Your updates are saved automagically. Just click.
     </h3>
-    <h4 class="mb-5">As always, remember that expressing interest in a job does <b>NOT</b> mean you have been staffed. We will reach out to you when/if you're staffed for the position. You're also welcome to sign up for multiple positions on a show.</h4>
+    <h4 class="mb-5">{% translate "As always, remember that expressing interest in a job does <b>NOT</b> mean you have been staffed. We will reach out to you when/if you're staffed for the position. You're also welcome to sign up for multiple positions on a show." %}</h4>
     {% if gigs|length > 0 %}
     {% else %}
     <div class="flex flex-col p-4 pb-0 pl-0 text-xl text-center text-black bg-white rounded-sm">

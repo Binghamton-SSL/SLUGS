@@ -1,5 +1,5 @@
 {% extends "theme/base.html" %}
-{% load grouping %} {% load crispy_forms_tags %} {% load static %}
+{% load grouping %} {% load crispy_forms_tags %} {% load static %} {% load i18n %}
 {% block title %} - {% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}} - Sign Timesheet{% endblock %}
 {% block content %}
 <div class="flex flex-col max-w-5xl mx-auto mt-10">
@@ -11,12 +11,13 @@
         <h2>
             By signing this form electronically using your signature, you agree to the following:
         </h2>
+        {% blocktranslate with timesheetPayPeriod=timesheet.pay_period %}
         <ul class="list-disc">
             <li class="text-black">
                 Your signature will be binding and held to the same standard as a physical signature
             </li>
             <li class="text-black">
-                Clicking "Sign using Signature on File" shows your clear intent to sign <b>Timesheet {{timesheet.pay_period}}</b>
+                Clicking "Sign using Signature on File" shows your clear intent to sign <b>Timesheet {{timesheetPayPeriod}}</b>
             </li>
             <li class="text-black">
                 You've been given the option to sign and submit this form manually and are opting out
@@ -25,6 +26,7 @@
                 You would like us to swing💰you🤑that💸bag
             </li>
         </ul>
+        {% endblocktranslate %}
     </div>
     <div class="mt-5">
         {% crispy form %}

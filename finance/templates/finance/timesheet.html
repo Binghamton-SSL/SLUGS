@@ -4,6 +4,7 @@
 {% load tz %}
 {% load grouping %}
 {% load jsignature_filters %}
+{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BSSL Timesheet - {{employee.first_name}} {% if employee.preferred_name %}({{employee.preferred_name}}){% endif %} {{employee.last_name}} - {{pay_period}}</title>
+    <title>{% translate "BSSL" %} Timesheet - {{employee.first_name}} {% if employee.preferred_name %}({{employee.preferred_name}}){% endif %} {{employee.last_name}} - {{pay_period}}</title>
 
     {% tailwind_css %}
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -69,7 +70,7 @@
                         {{barcode|safe}}
                     </div>
                 </div>
-                <p>BSSL Time Sheet ID: {{timesheet.pk}}</p>
+                <p>{% translate "BSSL" %} Time Sheet ID: {{timesheet.pk}}</p>
             </div>
             <div class="flex mt-24">
                 <div class="ml-auto mr-10">
@@ -210,10 +211,10 @@
     {% if request.user|has_group:"Manager" %}
         <div class="mt-auto mb-2 dont_break">
             <div class="mt-4 text-sm">
-                I Certify to the best of my knowledge the hours and wages listed above are correct.
+                {% translate "I Certify to the best of my knowledge the hours and wages listed above are correct." %}
             </div>
             <div class="flex mt-10" style="width: 8.5in;">
-                <div style="width: 8.0in;" class="flex relative mx-auto ml-auto space-x-8">
+                <div style="width: 8.0in;" class="relative flex mx-auto ml-auto space-x-8">
                     {% if timesheet.signed and timesheet.available_to_auto_sign and employee.signature %}
                     <div class="absolute" style="width: 4in; bottom: 0.3in; left: 0.4in">
                         <div class="flex space-x-4">
@@ -223,7 +224,7 @@
                     </div>
                     {% endif %}
                     {% if request.user.signature %}
-                    <div class="autosign hidden absolute" style="width: 4in; bottom: 0.3in; right: -0.4in">
+                    <div class="absolute hidden autosign" style="width: 4in; bottom: 0.3in; right: -0.4in">
                         <div class="flex space-x-4">
                             <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
                             <p class="mt-auto text-right">{% now "n/j/Y" %}</p>
