@@ -101,17 +101,19 @@ class gigIndex(SLUGSMixin, MultipleFormView):
                     if "DELETE" in shift.changed_data:
                         shift.save()
                         continue
-                    if (
-                        shift.instance.time_in is not None
-                        and shift.instance.time_out is not None
-                    ):
-                        shift.instance.object_id = self.added_context["job_forms"][
-                            form
-                        ].id
-                        shift.instance.content_type_id = ContentType.objects.get(
-                            model="job"
-                        ).id
-                        shift.save()
+                    elif shift.changed_data is not []:
+                        if (shift.instance.time_out is None and 'time_out' in shift.changed_data):
+                            shift.instance.time_in = shift.initial['time_in']
+                            shift.instance.time_out = shift.initial['time_out']
+                            continue
+                        elif (shift.instance.time_in is not None):
+                            shift.instance.object_id = self.added_context["job_forms"][
+                                form
+                            ].id
+                            shift.instance.content_type_id = ContentType.objects.get(
+                                model="job"
+                            ).id
+                            shift.save()
                 form_instances["forms"][form].save()
         messages.add_message(self.request, messages.SUCCESS, "Day of Show updated")
         return self.render_to_response(self.get_context_data())

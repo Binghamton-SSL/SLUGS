@@ -46,7 +46,7 @@
         <div style="width: 4.25in" class="flex flex-col">
             <div class="flex">
                 <img src="{% static 'finance/img/SAlogo.png' %}" class="mt-5" alt="SA Logo" style="width: 2in;" />
-                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">BSSL</h1>
+                <h1 class="mt-auto mb-0 ml-5 text-5xl font-stencil">{% translate "BSSL" %}</h1>
             </div>
             <div class="flex mt-10">
                 <div class="mr-10">
@@ -57,7 +57,7 @@
                 <div>
                     <div class="mt-3 text-sm border-b-2 border-black w-52">{{employee.last_name}},
                         {{employee.first_name}}</div>
-                    <div class="mt-3 text-sm border-b-2 border-black w-52">BSSL</div>
+                    <div class="mt-3 text-sm border-b-2 border-black w-52">{% translate "BSSL" %}</div>
                     <div class="mt-5 text-sm">{% if employee.is_grad_student %} Yes {% else %} No {% endif %}</div>
                 </div>
             </div>
@@ -227,7 +227,7 @@
                     <div class="absolute hidden autosign" style="width: 4in; bottom: 0.3in; right: -0.4in">
                         <div class="flex space-x-4">
                             <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
-                            <p class="mt-auto text-right">{% now "n/j/Y" %}</p>
+                            <p class="mt-auto text-right">{% now "N t, Y" %}</p>
                         </div>
                     </div>
                     {% endif %}

@@ -31,7 +31,7 @@ from utils.models import onboardingStatus
 from finance.utils import getShiftsForEmployee
 from finance.forms import OfficeHoursShiftFormSet
 from finance.models import Shift, TimeSheet
-from employee.models import OfficeHours, PaperworkForm
+from employee.models import OfficeHours, PaperworkForm, Employee
 
 
 # Create your views here.
@@ -218,7 +218,7 @@ class automaticallySignForm(SLUGSMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        processAutoSignForm(self.added_context["paperwork"], self.request.user)
+        processAutoSignForm(self.added_context["paperwork"], self.request.user, Employee.objects.all())
         LogEntry.objects.log_action(
             user_id=self.request.user.pk,
             content_type_id=ContentType.objects.get_for_model(
@@ -241,7 +241,7 @@ class FormDownload(SLUGSMixin, View):
     def get(self, request, relative_path):
         path = f"forms/{relative_path}"
         absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
-        response = FileResponse(open(absolute_path, "rb"), as_attachment=True)
+        response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
         return response
 
 
@@ -251,7 +251,7 @@ class FilledFormDownload(SLUGSMixin, View):
         document = get_object_or_404(PaperworkForm, pdf=path)
         if request.user.is_staff or document.employee.pk == request.user.pk:
             absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
-            response = FileResponse(open(absolute_path, "rb"), as_attachment=True)
+            response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
             return response
         else:
             raise PermissionDenied()

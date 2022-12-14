@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 
 
-def processAutoSignForm(paperworkForm, user):
+def processAutoSignForm(paperworkForm, user, allEmps):
     c = canvas.Canvas(f"signed_copy-{user.pk}.pdf")
     pages = ast.literal_eval(paperworkForm.form.auto_sign_layout)
     for page in pages:
@@ -22,7 +22,11 @@ def processAutoSignForm(paperworkForm, user):
                     eval(element["text"]),
                 )
             elif element["type"] == "Signature":
-                sig_image = ImageReader(draw_signature(user.signature))
+                if 'emp_id' in element:
+                    emp_sig = allEmps.get(pk=element['emp_id']).signature
+                else:
+                    emp_sig = user.signature
+                sig_image = ImageReader(draw_signature(emp_sig))
                 (sig_width, sig_height) = sig_image.getSize()
                 # Go back through this and make better
                 img_height = (element["width"] / (sig_width / sig_height)) * inch

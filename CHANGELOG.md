@@ -8,6 +8,7 @@
 * Paychex Flex CSV Exporter
 * Paychex Flex API Integration for WorkerID scraping
 * Add basic internationalization support (Allows for text to change in future)
+* Add ability to add other employee signature to E-Sign paperwork
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status
@@ -30,6 +31,9 @@ BUG FIXES:
     * Update PayChex export to reflect incorrect documentation
     * OIDC Authorization page previously required preferred name
     * Provide more inclusive logging for PayChex API sync
+    * Downloads are now served by server, not browser
+    * Match formatting of date between employee and manager on timesheet
+    * Make sure that finished shifts are not overwritten by Engineer Day of Show
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
