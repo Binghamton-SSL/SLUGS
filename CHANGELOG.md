@@ -9,6 +9,7 @@
 * Paychex Flex API Integration for WorkerID scraping
 * Add basic internationalization support (Allows for text to change in future)
 * Add ability to add other employee signature to E-Sign paperwork
+* Reformat You page for readability as amount of information grows
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status

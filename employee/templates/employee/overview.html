@@ -23,89 +23,202 @@
     </div>
     {% if request.user.paperworkform_set.all.count > 0 %}
     <h2 id="paperwork" class="text-2xl">Paperwork</h2>
-    <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
-        {% for form in request.user.paperworkform_set.all %}
-            <div class="p-4 text-black {% if form.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
-                <a href="/media/{{form.form.form_pdf}}"><h5 class="text-xl underline">{{form.form.form_name}}</h5></a>
-                {% if form.processed %}<p class="text-xs font-bold text-center">This form has been processed</p>{% endif %}
-                <div class="flex flex-col">
-                    {% if form.form.handed_in %}
-                        <div class="flex p-2 space-x-2 bg-gray-300 rounded-sm">
-                            <div class="my-auto mr-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                                </svg>
+    {% if unprocessed_paperwork.count > 0 %}
+        <p class="p-4 text-md">Unprocessed Paperwork</p> 
+        <div class="flex p-2 m-4 text-white bg-red-600 rounded-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 my-auto mr-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>   
+              <p>Make sure to fill out and upload (or hand in) all unprocessed paperwork.<br><span class="text-sm">Paperwork will move from here once processed by our office or the SA. This process may take a few days</span></p>           
+        </div>
+        <div class="grid grid-cols-1 gap-2 p-4 mb-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
+            {% for form in unprocessed_paperwork %}
+                <div class="p-4 text-black {% if form.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
+                    <a href="/media/{{form.form.form_pdf}}"><h5 class="text-xl underline">{{form.form.form_name}}</h5></a>
+                    {% if form.processed %}<p class="text-xs font-bold text-center">This form has been processed</p>{% endif %}
+                    <div class="flex flex-col">
+                        {% if form.form.handed_in %}
+                            <div class="flex p-2 space-x-2 bg-gray-300 rounded-sm">
+                                <div class="my-auto mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                    </svg>
+                                </div>
+                                <p>{{form.form.handed_in}}</p>
                             </div>
-                            <p>{{form.form.handed_in}}</p>
-                        </div>
-                    {% else %}
-                        {% if form.pdf %}
-                        <div class="flex space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 my-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                            <p>{{form.uploaded}}</p>
-                        </div>
-                            {% if form.processed %}
-                                <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
-                            {% else %}
-                                <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="bg-yellow-300 text-black mt-2 px-4 py-2 rounded">Change</button></a>
-                                <a class="mx-auto" href="/media/{{form.pdf}}?time={% now "h-i-A" %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
-                            {% endif %}
                         {% else %}
-                        <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
-                            {% if form.form.can_auto_sign %}
-                                {% if user.signature %}
-                                    <a class="mx-auto" href="{% url 'employee:sign_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Automatically Sign Form</button></a>
+                            {% if form.pdf %}
+                            <div class="flex space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 my-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                <p>{{form.uploaded}}</p>
+                            </div>
+                                {% if form.processed %}
+                                    <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
                                 {% else %}
-                                    <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically fill out this form by putting your signature on file. Check out your user information above.</p>
+                                    <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-black bg-yellow-300 rounded">Change</button></a>
+                                    <a class="mx-auto" href="/media/{{form.pdf}}?time={% now "h-i-A" %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
+                                {% endif %}
+                            {% else %}
+                            <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
+                                {% if form.form.can_auto_sign %}
+                                    {% if user.signature %}
+                                        <a class="mx-auto" href="{% url 'employee:sign_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Automatically Sign Form</button></a>
+                                    {% else %}
+                                        <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically fill out this form by putting your signature on file. Check out your user information above.</p>
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
                         {% endif %}
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="p-4 mx-2 mb-2 text-black bg-white" tabindex="0">
+        <p class="inline text-md">Processed Paperwork</p>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="relative inline w-6 h-6 my-auto focused-within-parent:rotate-180 -top-0.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" />
+        </svg>   
+        <div class="grid h-0 grid-cols-1 gap-2 overflow-hidden transition-all focused-within-parent:my-4 focused-within-parent:p-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr focused-within-parent:h-full">
+            {% for form in paperwork %}
+                <div class="p-4 text-black {% if form.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
+                    <a href="/media/{{form.form.form_pdf}}"><h5 class="text-xl underline">{{form.form.form_name}}</h5></a>
+                    {% if form.processed %}<p class="text-xs font-bold text-center">This form has been processed</p>{% endif %}
+                    <div class="flex flex-col">
+                        {% if form.form.handed_in %}
+                            <div class="flex space-x-2 bg-gray-300 rounded-sm focused-within-parent:p-2">
+                                <div class="my-auto mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                    </svg>
+                                </div>
+                                <p>{{form.form.handed_in}}</p>
+                            </div>
+                        {% else %}
+                            {% if form.pdf %}
+                            <div class="flex space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 my-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                <p>{{form.uploaded}}</p>
+                            </div>
+                                {% if form.processed %}
+                                    <a class="mx-auto" href="/media/{{form.pdf}}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
+                                {% else %}
+                                    <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-black bg-yellow-300 rounded">Change</button></a>
+                                    <a class="mx-auto" href="/media/{{form.pdf}}?time={% now "h-i-A" %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Uploaded Form</button></a>
+                                {% endif %}
+                            {% else %}
+                            <a class="mx-auto" href="{% url 'employee:upload_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-red-500 rounded">Upload</button></a>
+                                {% if form.form.can_auto_sign %}
+                                    {% if user.signature %}
+                                        <a class="mx-auto" href="{% url 'employee:sign_form' form.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Automatically Sign Form</button></a>
+                                    {% else %}
+                                        <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically fill out this form by putting your signature on file. Check out your user information above.</p>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
     {% if timesheets.count > 0 %}
-    <h2 id="timesheets" class="text-2xl">Time Sheets</h2>
-    <div class="grid grid-cols-1 gap-2 p-4 my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
-        {% for timesheet in timesheets|dictsortreversed:"pay_period.end" %}
-            <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
-                <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>
-                {% if timesheet.processed %}<p class="text-xs font-bold text-center">This timesheet has been submitted to payroll</p>{% endif %}
-                <div class="flex flex-col">
-                    {% if timesheet.signed %}
-                        <div class="flex p-2 space-x-2 bg-gray-300 rounded-sm">
-                            <div class="my-auto mr-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
+        <h2 id="timesheets" class="text-2xl">Time Sheets</h2>
+        {% if unsigned_tms.count > 0 %}
+            <div class="">
+                <div class="flex p-2 m-4 text-white bg-red-600 rounded-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 my-auto mr-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>   
+                    <p>The following timesheets are unsigned!<br><span class="text-sm">Be sure to get your money up not your funny up</span></p>           
+                </div>
+                <div class="grid grid-cols-1 gap-2 pt-4 my-4 ml-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
+                    {% for timesheet in unsigned_tms %}
+                        <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
+                            <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>
+                            {% if timesheet.processed %}<p class="text-xs font-bold text-center">This timesheet has been submitted to payroll</p>{% endif %}
+                            <div class="flex flex-col">
+                                {% if timesheet.signed %}
+                                    <div class="flex p-2 space-x-2 bg-white rounded-sm">
+                                        <div class="my-auto mr-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </div>
+                                        <p>{{timesheet.signed}}</p>
+                                    </div>
+                                    <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
+                                {% else %}
+                                    {% if timesheet.available_to_auto_sign %}
+                                        {% if user.signature %}
+                                            <a class="mx-auto" href="{% url 'finance:sign_timesheet' timesheet.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Sign Time Sheet</button></a>
+                                        {% else %}
+                                            <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically sign this timesheet by putting your signature on file. Check out your user information above.</p>
+                                        {% endif %}
+                                    {% else %}
+                                    <div class="flex p-2 bg-yellow-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <p class="pl-2 text-sm">Please visit the office to sign this time sheet.</p>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
                             </div>
-                            <p>{{timesheet.signed}}</p>
                         </div>
-                        <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
-                    {% else %}
-                        {% if timesheet.available_to_auto_sign %}
-                            {% if user.signature %}
-                                <a class="mx-auto" href="{% url 'finance:sign_timesheet' timesheet.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Sign Time Sheet</button></a>
-                            {% else %}
-                                <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically sign this timesheet by putting your signature on file. Check out your user information above.</p>
-                            {% endif %}
-                        {% else %}
-                        <div class="flex p-2 bg-yellow-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                              </svg>
-                            <p class="pl-2 text-sm">This timesheet needs to be signed. Please visit the office to do so</p>
-                        </div>
-                        {% endif %}
-                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
+        {% endif %}
+        {% for year, tms in tms_by_year.items %}
+        <div tabindex="0" class="p-1 m-2 text-black bg-white rounded-sm group">
+            <p class="inline text-2xl font-bold">{{year}}</p>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="relative inline w-6 h-6 my-auto focused-within-parent:rotate-180 -top-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" />
+            </svg>           
+            <div class="grid h-0 grid-cols-1 gap-2 overflow-hidden transition-all focused-within-parent:pt-4 focused-within-parent:my-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr focused-within-parent:h-full">
+                {% for timesheet in tms %}
+                    <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-gray-300 {% endif %} rounded-sm">
+                        <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>
+                        {% if timesheet.processed %}<p class="text-xs font-bold text-center">This timesheet has been submitted to payroll</p>{% endif %}
+                        <div class="flex flex-col">
+                            {% if timesheet.signed %}
+                                <div class="flex p-2 space-x-2 bg-white rounded-sm">
+                                    <div class="my-auto mr-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    <p>{{timesheet.signed}}</p>
+                                </div>
+                                <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
+                            {% else %}
+                                {% if timesheet.available_to_auto_sign %}
+                                    {% if user.signature %}
+                                        <a class="mx-auto" href="{% url 'finance:sign_timesheet' timesheet.pk%}"><button class="px-4 py-2 mt-2 text-white bg-green-500 rounded">Sign Time Sheet</button></a>
+                                    {% else %}
+                                        <p class="p-2 m-4 text-white bg-black rounded-sm"><b>Did you know!</b><br> You can automatically sign this timesheet by putting your signature on file. Check out your user information above.</p>
+                                    {% endif %}
+                                {% else %}
+                                <div class="flex p-2 bg-yellow-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                      </svg>
+                                    <p class="pl-2 text-sm">This timesheet needs to be signed. Please visit the office to do so</p>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
         {% endfor %}
-    </div>
     {% endif %}
     <h2 class="text-2xl">Shifts worked</h2>
     <div class="p-4 my-4 text-black bg-white">
@@ -128,9 +241,9 @@
                 care of these.</p>
         </div>
         {% endif %}
-        <div class="mx-auto md:w-max">
+        <div class="grid gap-2 mx-auto md:w-max md:grid-cols-2">
             {% for shift in contested_shifts %}
-            <div class="flex-col p-4 m-2 text-black bg-red-100 rounded-sm">
+            <div class="flex-col w-full p-2 text-black bg-red-100 rounded-sm">
                 <div class="flex p-2 m-2 mx-auto space-x-2 bg-red-300 rounded-sm w-max">
                     <div class="my-auto">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-200" fill="none" viewBox="0 0 24 24"
@@ -143,7 +256,7 @@
                         Contested Shift
                     </p>
                 </div>
-                <div class="flex flex-col space-x-4 md:flex-row">
+                <div class="flex flex-col md:flex-row">
                     <div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
@@ -151,16 +264,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                            <p class="ml-2 md:mr-0">{{shift.time_in}}</p>
                         </div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                               </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                            <p class="ml-2 md:mr-0">{{shift.time_out}}</p>
                         </div>
                     </div>
-                    <div class="my-2 text-center md:my-auto">
+                    <div class="my-2 text-center md:w-52 md:my-auto">
                         {{shift.content_object}}
                     </div>
                 </div>
@@ -176,8 +289,8 @@
             </div>
             {% endfor %}
             {% for shift in unprocessed_shifts %}
-            <div class="flex-col p-4 m-2 text-black bg-gray-300 rounded-sm">
-                <div class="flex flex-col space-x-4 md:flex-row">
+            <div class="flex-col w-full p-2 text-black bg-gray-300 rounded-sm">
+                <div class="flex flex-col md:flex-row">
                     <div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
@@ -185,16 +298,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                            <p class="ml-2">{{shift.time_in}}</p>
                         </div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                               </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                            <p class="ml-2">{{shift.time_out}}</p>
                         </div>
                     </div>
-                    <div class="my-2 text-center md:my-auto">
+                    <div class="my-2 text-center md:w-52 md:my-auto">
                         {{shift.content_object}}
                     </div>
                 </div>
@@ -210,8 +323,8 @@
             </div>
             {% endfor %}
             {% for shift in processed_shifts %}
-            <div class="flex-col p-4 m-2 text-black bg-green-100 rounded-sm">
-                <div class="flex flex-col space-x-4 md:flex-row">
+            <div class="flex-col w-full p-2 text-black bg-green-100 rounded-sm">
+                <div class="flex flex-col md:flex-row">
                     <div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24"
@@ -219,16 +332,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_in}}</p>
+                            <p class="ml-2">{{shift.time_in}}</p>
                         </div>
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                               </svg>
-                            <p class="ml-2 md:ml-auto md:mr-0">{{shift.time_out}}</p>
+                            <p class="ml-2">{{shift.time_out}}</p>
                         </div>
                     </div>
-                    <div class="my-2 text-center md:my-auto">
+                    <div class="my-2 text-center md:w-52 md:my-auto">
                         {{shift.content_object}}
                     </div>
                 </div>

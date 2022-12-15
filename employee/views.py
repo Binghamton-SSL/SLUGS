@@ -84,8 +84,19 @@ class userOverview(SLUGSMixin, MultipleFormView):
         self.form_classes["userChangeForm"]["instance"] = request.user
         self.added_context["timesheets"] = TimeSheet.objects.filter(
             employee=request.user
-        )
+        ).order_by('-paid_during__start')
+        self.added_context["unsigned_tms"] = self.added_context["timesheets"].filter(signed=None)
+        self.added_context["tms_by_year"] = {}
+        for year in reversed(range(self.added_context["timesheets"].last().paid_during.start.year, self.added_context["timesheets"].first().paid_during.start.year+1)):
+            self.added_context["tms_by_year"][year] = self.added_context["timesheets"].filter(paid_during__start__year=year).exclude(signed=None)
         self.added_context["shifts"] = getShiftsForEmployee(request.user)
+
+        self.added_context["paperwork"] = PaperworkForm.objects.filter(
+            employee=request.user
+        ).order_by('requested')
+        self.added_context["unprocessed_paperwork"] = self.added_context["paperwork"].filter(processed=False)
+        self.added_context["paperwork"] = self.added_context["paperwork"].filter(processed=True)
+
         self.added_context["timeworked"] = self.added_context["shifts"].aggregate(
             Sum("total_time")
         )
