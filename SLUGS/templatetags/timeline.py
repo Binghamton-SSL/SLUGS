@@ -9,7 +9,7 @@ register = template.Library()
 def timeline(emp):
     next_job = (
         Job.objects.filter(employee=emp)
-        .filter(gig__end__gte=(timezone.now() + timezone.timedelta(hours=-5)))
+        .filter(gig__end__gte=(timezone.now() + timezone.timedelta(hours=-5)), gig__published=True)
         .order_by("gig__end")
     )
     if len(next_job) > 0:

@@ -71,6 +71,7 @@ class SystemAdmin(admin.ModelAdmin):
 class BrokenEquipmentReportAdmin(admin.ModelAdmin):
     autocomplete_fields = ["reported_broken_by", "broken_system"]
     list_filter = ["status", "broken_system"]
+    list_display = ("__str__", "date_filed")
     readonly_fields = ["date_filed"]
     ordering = ["date_filed"]
     fieldsets = [

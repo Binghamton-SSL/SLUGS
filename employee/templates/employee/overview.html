@@ -137,7 +137,7 @@
                     </svg>   
                     <p>The following timesheets are unsigned!<br><span class="text-sm">Be sure to get your money up not your funny up</span></p>           
                 </div>
-                <div class="grid grid-cols-1 gap-2 pt-4 my-4 ml-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
+                <div class="grid grid-cols-1 gap-2 pt-4 my-4 sm:ml-4 sm:grid-cols-2 md:grid-cols-3 gird auto-rows-fr">
                     {% for timesheet in unsigned_tms %}
                         <div class="p-4 text-black {% if timesheet.processed %} bg-green-100 {% else %} bg-white {% endif %} rounded-sm">
                             <h5 class="">{{timesheet.pay_period.start}}-{{timesheet.pay_period.end}}<br>(Paid: {{timesheet.pay_period.payday}})</h5></a>

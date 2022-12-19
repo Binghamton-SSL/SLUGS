@@ -35,6 +35,10 @@ BUG FIXES:
     * Downloads are now served by server, not browser
     * Match formatting of date between employee and manager on timesheet
     * Make sure that finished shifts are not overwritten by Engineer Day of Show
+    * Add date filed to Broken Equipment Report admin
+    * Don't add URLs to gigs that are not published on the index
+    * Only show timeline for published gigs
+    * Swap out Booking calendar
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

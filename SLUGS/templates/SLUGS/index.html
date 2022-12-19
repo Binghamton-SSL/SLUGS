@@ -67,9 +67,13 @@
         <div>
             {% if next_gig %}
             <h1 class="text-4xl text-bold"> Next Show</h1>
-                <a href="{% url 'gig:showView' next_gig.pk %}">
-                {% ticket next_gig %}
-                </a>
+                {% if next_gig.published %}
+                    <a href="{% url 'gig:showView' next_gig.pk %}">
+                    {% ticket next_gig %}
+                    </a>
+                {% else %}
+                    {% ticket next_gig %}
+                {% endif %}
             {% endif %}
         </div>
         <div>
@@ -133,7 +137,7 @@
                     </thead>
                     <tbody>
                         {% for gig in gigs %}
-                        <tr tabindex="0" onclick="window.location='{% url 'gig:showView' gig.id %}'" class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
+                        <tr tabindex="0" {% if gig.published %} onclick="window.location='{% url 'gig:showView' gig.id %}'"{% endif %} class="cursor-pointer even:bg-[#1F1F1F] odd:bg-[#333333] hover:bg-gray-700">
                             <td class="pl-2">
                                 {{gig.name}}
                             </td>
