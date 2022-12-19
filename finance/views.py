@@ -455,7 +455,7 @@ class EstimateDownload(View):
 
     @xframe_options_exempt
     def get(self, request, relative_path):
-        path = f"{relative_path}"
+        path = f"estimates/{relative_path}"
         absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
         response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
         return response

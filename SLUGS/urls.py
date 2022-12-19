@@ -41,7 +41,7 @@ urlpatterns = [
         name="download_form",
     ),
     path(
-        "media/<path:relative_path>",
+        "media/estimates/<path:relative_path>",
         EstimateDownload.as_view(),
         name="download_estimate",
     ),

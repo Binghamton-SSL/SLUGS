@@ -39,6 +39,7 @@ BUG FIXES:
     * Don't add URLs to gigs that are not published on the index
     * Only show timeline for published gigs
     * Swap out Booking calendar
+    * Lock down media file access (estimates)
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:

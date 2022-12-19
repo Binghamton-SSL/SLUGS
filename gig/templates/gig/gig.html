@@ -26,7 +26,7 @@
         </div>
         {% if gig.estimate_set.first.signed_estimate %}
         <div class="flex flex-1 p-1 my-4">
-            <a class="mx-auto" href="{% url 'download_estimate' gig.estimate_set.first.signed_estimate %}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>
+            <a class="mx-auto" href="{{gig.estimate_set.first.signed_estimate.url }}"><button class="px-2 py-2 m-2 text-black bg-white">View Signed Reservation</button></a>
         </div>
         {% endif %}
     {% endif %}
