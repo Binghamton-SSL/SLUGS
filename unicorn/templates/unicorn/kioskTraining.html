@@ -47,6 +47,17 @@
                             {% endfor %}
                         </div>
                     </div>
+                    <div>
+                        {% if training.unpaid_trainees.count > 0 %}
+                        <p class="text-2xl">Attendees:</p>
+                        <p class="text-md">Employees attending this training that aren't being paid</p>
+                        <ul>
+                            {% for trainee in training.unpaid_trainees %}
+                            <li>{{trainee.employee}}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

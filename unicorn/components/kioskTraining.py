@@ -39,9 +39,17 @@ class KiosktrainingView(UnicornView):
         self.update_training_status()
 
     def update_training_status(self):
-        self.ongoing_trainings = [{"training": training, "trainees": [], "shown": True if training.pk in self.training_shown else False} for training in Training.objects.filter(date__lte=(timezone.now() + timezone.timedelta(hours=+29)), date__gte=(timezone.now() + timezone.timedelta(hours=-29))).order_by('date')]
+        self.ongoing_trainings = [{"training": training, "trainees": [], "unpaid_trainees": None, "shown": True if training.pk in self.training_shown else False} for training in Training.objects.filter(date__lte=(timezone.now() + timezone.timedelta(hours=+29)), date__gte=(timezone.now() + timezone.timedelta(hours=-29))).order_by('date')]
         for training in self.ongoing_trainings:
-            for trainee in Trainee.objects.filter(training=training["training"].pk):
+            trainee_set = (
+                Trainee.objects.filter(training=training["training"].pk) if training['training'].paid
+                else Trainee.objects.filter(training=training["training"].pk, override_allow_paid=True)
+            )
+            training['unpaid_trainees'] = (
+                Trainee.objects.filter(training=training["training"].pk, override_allow_paid=False) if not training['training'].paid
+                else None
+            )
+            for trainee in trainee_set:
                 # Are they currently clocked in?
                 employee_shifts = Shift.objects.filter(
                     object_id=trainee.id,

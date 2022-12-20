@@ -10,6 +10,8 @@
 * Add basic internationalization support (Allows for text to change in future)
 * Add ability to add other employee signature to E-Sign paperwork
 * Reformat You page for readability as amount of information grows
+* Automatically add trainers as participants in trainings
+* Mark trainings as paid or upaid (with the option of overriding for an individual employee)
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status
