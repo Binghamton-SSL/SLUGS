@@ -4,6 +4,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from employee.forms import signPaperworkForm
 from finance.estimate_data_utils import calcuateSubcontractedCost, calculateGigCost
 from django.http.response import HttpResponse
+from finance.timsheet_utils import cost_of_shifts
 from finance.utils import prepareSummaryData
 from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
@@ -202,29 +203,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
             sorted(rates.items(), key=lambda item: item[0].hourly_rate)
         )
         self.added_context["t_total"] = t_total
-        self.added_context["t_amt"] = round(
-            float(
-                reduce(
-                    lambda sum, shift: (
-                        sum
-                        + float(
-                            HourlyRate.objects.get(
-                                Q(wage=shift.content_object.position.hourly_rate)
-                                & Q(date_active__lte=shift.time_in)
-                                & (
-                                    Q(date_inactive__gt=shift.time_in)
-                                    | Q(date_inactive=None)
-                                )
-                            ).hourly_rate
-                        )
-                        * (round(shift.total_time / timezone.timedelta(minutes=15)) / 4)
-                    ),
-                    shifts,
-                    0,
-                )
-            ),
-            2,
-        )
+        self.added_context["t_amt"] = cost_of_shifts(shifts)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -478,6 +457,7 @@ class FinancialOverview(SLUGSMixin, TemplateView):
         shifts_price = shifts.aggregate(Sum("cost"))
 
         unsigned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=True)
+        unsigned_abandoned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=False)
         unprocessed_tms = TimeSheet.objects.filter(~Q(signed=None) & Q(processed=None))
 
         self.added_context["most_recent_pay_period"] = most_recent_pay_period
@@ -485,6 +465,7 @@ class FinancialOverview(SLUGSMixin, TemplateView):
         self.added_context["shifts_hours"] = shifts_hours
         self.added_context["shifts_price"] = shifts_price
         self.added_context["unsigned_tms"] = unsigned_tms
+        self.added_context["unsigned_abandoned_tms"] = unsigned_abandoned_tms
         self.added_context["unprocessed_tms"] = unprocessed_tms
 
         return super().dispatch(request, *args, **kwargs)

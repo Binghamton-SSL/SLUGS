@@ -24,7 +24,7 @@
 
     <div>
         <h2 class="mt-5 text-2xl">Outstanding Bookings</h2>
-        <h6 class="text-sm">These are all bookings that have not been finalized and are after today's date.</h6>
+        <h6 class="text-sm">These are all bookings that have not been finalized and are after today's date. Bookings that have been postponed or are in limbo are found at the bottom of the list.</h6>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {% now "Y-m-d" as today_date %}
             {% for estimate in outstanding_bookings %}

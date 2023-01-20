@@ -3,6 +3,8 @@
 {% load humanize %}
 {% load static %}
 {% load finance_tags %}
+{% load finance_components %}
+{% load jsignature_filters %}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +41,7 @@
 </head>
 
 <body class="relative flex flex-col">
+    {% autosign %}
     <div class="flex">
         <div style="width: 6.75in" class="flex flex-col my-auto">
             <div class="flex">
@@ -160,6 +163,14 @@
                     </div>
                 </div>
             </div>
+            {% if request.user.signature %}
+            <div class="relative hidden autosign">
+                <div class="flex space-x-4 absolute" style="width: 4in; bottom: 0.3in; left: -9.3in">
+                    <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
+                    <p class="mt-auto text-right">{% now "N t, Y" %}</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </body>

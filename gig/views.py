@@ -270,7 +270,7 @@ class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
                 )
             )
             .distinct()
-            .order_by("gig__start")
+            .order_by("status", "gig__start")
             .annotate(
                 three_weeks_prior=ExpressionWrapper(
                     F("gig__start") - timezone.timedelta(weeks=3),

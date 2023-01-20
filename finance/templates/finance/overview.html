@@ -47,7 +47,7 @@
                     Please have these employees come in and sign ASAP!
                 </div>
             </div>
-            {% if unsigned_tms.count > 0 %}
+            {% if unsigned_tms.count > 0 or unsigned_abandoned_tms.count > 0 %}
                 <div class="ml-0 sm:ml-auto mr-0 flex flex-col flex-1">
                     <button onclick="javascript:toggleUnsignedTimesheets(this)" class="w-52 ml-auto mr-0 text-black bg-white px-4 py-2 my-2 border-2 border-black rounded-sm">
                         Expand
@@ -61,6 +61,24 @@
                 <div class="flex flex-col md:flex-row">
                     <div class="flex flex-col">
                         <span>{{timesheet.employee}}</span>
+                        <span class="mt-2">Start: {{timesheet.pay_period.start}}</span>
+                        <span>End: {{timesheet.pay_period.end}}</span>
+                    </div>
+                    <div class="flex flex-col mt-5 md:ml-auto md:mr-4 md:mt-0">
+                        <a href="{{timesheet.get_admin_url}}">
+                            <button class="px-4 py-2 my-2 ml-auto mr-auto text-white bg-black border-2 border-black rounded-sm w-52">
+                                Edit Details
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% for timesheet in unsigned_abandoned_tms %}
+            <div class="p-4 my-4 border-2 border-black rounded-sm">
+                <div class="flex flex-col md:flex-row">
+                    <div class="flex flex-col">
+                        <span>{{timesheet.employee}} <div class="p-2 bg-red-500 font-mono w-max inline text-white">FORMER EMPLOYEE</div></span>
                         <span class="mt-2">Start: {{timesheet.pay_period.start}}</span>
                         <span>End: {{timesheet.pay_period.end}}</span>
                     </div>

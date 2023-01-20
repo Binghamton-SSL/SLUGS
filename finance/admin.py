@@ -280,6 +280,7 @@ class PayPeriodAdmin(admin.ModelAdmin):
     readonly_fields = ["get_summary", "get_paychex_summary", "timesheets_for_this_pay_period", "associated_shifts"]
     exclude = ["shifts"]
     search_fields = ["start", "end", "payday"]
+    list_display = ["payday", "start", "end", "cost", "submitted"]
     inlines = [TimeSheetInline]
 
     def get_form(self, request, obj=None, **kwargs):

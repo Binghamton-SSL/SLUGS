@@ -12,6 +12,10 @@
 * Reformat You page for readability as amount of information grows
 * Automatically add trainers as participants in trainings
 * Mark trainings as paid or upaid (with the option of overriding for an individual employee)
+* Provide more information at a glance for pay periods
+* Show timesheets from former employees on financial overview page (with tag)
+* Add autosign capabilities to payroll summary
+* Move postponed bookings to the bottom of the booking page
 <br><br>
 BUG FIXES:
     * Adjust size of vendor name to reflect Client Provided status

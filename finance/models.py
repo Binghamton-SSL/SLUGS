@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group
 from tinymce.models import HTMLField
 import decimal
 from django.core.validators import ValidationError
+from django.db.models import Sum
 
 from utils.models import PricingMixin
 
@@ -505,6 +506,9 @@ class PayPeriod(models.Model):
         help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.",
     )
     shifts = models.ManyToManyField("finance.Shift")
+
+    def cost(self):
+        return round(self.shifts.aggregate(Sum("cost"))['cost__sum'], 2) if self.shifts.aggregate(Sum("cost"))['cost__sum'] else None
 
     def get_summary(self):
         return format_html(
