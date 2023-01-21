@@ -28,6 +28,7 @@ class TrainingAdmin(nested_admin.NestedModelAdmin):
     autocomplete_fields = ["location"]
 
     def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
         if 'trainers' in form.changed_data:
             for trainer in form.cleaned_data['trainers']:
                 Trainee.objects.get_or_create(
@@ -36,7 +37,6 @@ class TrainingAdmin(nested_admin.NestedModelAdmin):
                     position=Group.objects.get(name="Manager"),
                     override_allow_paid=True
                 )
-        super().save_model(request, obj, form, change)
 
 
 @admin.register(Trainee)

@@ -1,4 +1,4 @@
-#### V2.4.2 - In Progress
+#### V2.4.2 - 01/21/23
 * Identify individual vendors that we subcontract items from on estimate and invoice
     * Show or hide vendor name based on boolean
 * Option to mark subcontracted equipment as "client provided"
@@ -47,6 +47,7 @@ BUG FIXES:
     * Swap out Booking calendar
     * Lock down media file access (estimates)
     * Improper save logic on gig would not save Jobs until gig was saved first
+    * Unable to save trainings due to trainer/training race condition created by recent pay logic
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
