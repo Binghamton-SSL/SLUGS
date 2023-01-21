@@ -115,13 +115,15 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
         ),
     ]
 
-    def save_formset(self, request, form, formset, change):
-        if change:
-            for form in formset.forms:
-                if form.Meta.model == Job:
-                    form.instance.gig_id = formset.instance.gig_id
-                    form.save()
-        super(GigAdmin, self).save_formset(request, form, formset, change)
+    def save_related(self, request, form, formset, change):
+        for fset in formset:
+            if fset.form.Meta.model == Job:
+                for job in fset.forms:
+                    job.instance.gig_id = form.instance.pk
+                    job.instance.save()
+            else:
+                fset.save()
+        super(GigAdmin, self).save_related(request, form, formset, change)
 
     def get_urls(self):
         urls = super().get_urls()

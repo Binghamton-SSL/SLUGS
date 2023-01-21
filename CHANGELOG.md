@@ -46,6 +46,7 @@ BUG FIXES:
     * Only show timeline for published gigs
     * Swap out Booking calendar
     * Lock down media file access (estimates)
+    * Improper save logic on gig would not save Jobs until gig was saved first
 
 #### V2.4.1 - 11/9/2022
 BUG FIXES:
