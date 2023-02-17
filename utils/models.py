@@ -88,7 +88,7 @@ class ShowFeed(ICalFeed):
                     """  # noqa
 
     def item_link(self, item):
-        return reverse("gig:showView", args=[item.pk])
+        return reverse("gig:showView", args=[item.pk]) if item.published else ""
 
     def item_location(self, item):
         return item.location

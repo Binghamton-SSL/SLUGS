@@ -12,7 +12,7 @@ from crispy_forms.helper import FormHelper
 from django.forms import ModelForm
 from employee.models import Employee, Paperwork, PaperworkForm
 from crispy_forms.layout import Layout, Div, Field, HTML, Submit
-
+from django.utils.translation import gettext as _
 
 class UserCreationForm(forms.ModelForm):
     """
@@ -244,7 +244,7 @@ class signPaperworkForm(Form):
         self.helper.layout = Layout(
             Submit(
                 "submit",
-                "Sign using Signature on File",
+                _("Sign using Signature on File"),
                 css_class="bg-white text-black rounded-sm py-2 mt-2 px-4",
             ),
         )

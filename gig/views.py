@@ -1,3 +1,4 @@
+import csv
 from SLUGS.templatetags.grouping import has_group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
@@ -11,11 +12,14 @@ from django.utils import timezone
 from dev_utils.views import MultipleFormView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.views import View
+from django.http.response import HttpResponse
 from SLUGS.views import SLUGSMixin, isAdminMixin
 from gig.models import Gig, Job, JobInterest, BingoBoard
 from employee.models import Employee
 from datetime import datetime
-from django.db.models import F, DateTimeField, ExpressionWrapper
+from django.db.models import F, DateTimeField, ExpressionWrapper, TextField, Min
+from django.db.models.functions import Concat
 from django.urls import reverse
 
 
@@ -63,7 +67,7 @@ class gigIndex(SLUGSMixin, MultipleFormView):
         if not self.added_context["gig"].published:
             raise PermissionDenied()
         try:
-            self.added_context["my_jobs"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"])
+            self.added_context["my_jobs"] = Job.objects.filter(employee=request.user, gig=self.added_context["gig"]).order_by("pk")
             if len(self.added_context["my_jobs"]) > 1:
                 for job in self.added_context["my_jobs"]:
                     self.added_context["my_job"] = job if "engineer" in str(job.position).lower() else None
@@ -282,3 +286,19 @@ class BookingOverview(SLUGSMixin, isAdminMixin, TemplateView):
             estimate=None, start__gte=datetime.now()
         )
         return super().dispatch(request, *args, **kwargs)
+
+
+class DistinctGigJobsList(View):
+    def dispatch(self, request, *args, **kwargs):
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="JobList.csv"'
+            },
+        )
+
+        writer = csv.writer(response)
+        writer.writerow(["Job_PK", "Employee_PK"])
+        for job in Job.objects.annotate(gig_start=ExpressionWrapper(F("gig__start"), output_field=DateTimeField())).exclude(employee=None).exclude(gig_start__gte=(timezone.now())).annotate(distinct_name=Concat('gig', 'employee', output_field=TextField())).values('distinct_name').annotate(pk=Min('pk'), emp_id=Min("employee_id")).order_by('pk'):
+            writer.writerow([job['pk'], job['emp_id']])
+        return response

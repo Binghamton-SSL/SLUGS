@@ -78,7 +78,7 @@
             <div class="p-4 my-4 border-2 border-black rounded-sm">
                 <div class="flex flex-col md:flex-row">
                     <div class="flex flex-col">
-                        <span>{{timesheet.employee}} <div class="p-2 bg-red-500 font-mono w-max inline text-white">FORMER EMPLOYEE</div></span>
+                        <span>{{timesheet.employee}} <div class="p-2 bg-red-500 font-mono w-max inline text-white whitespace-nowrap">FORMER EMPLOYEE</div></span>
                         <span class="mt-2">Start: {{timesheet.pay_period.start}}</span>
                         <span>End: {{timesheet.pay_period.end}}</span>
                     </div>
@@ -165,8 +165,12 @@
     </div>
     <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>
     {% unicorn 'previousPayPeriod' %}
-    <h2 class="mt-5 text-2xl">Paychex Flex Utility</h2>
-    {% unicorn 'paychexAPIRefresh' %}
+    <div class="flex flex-col md:flex-row md:space-x-8">
+        <div class="flex-1">
+            <h2 class="mt-5 text-2xl">Paychex Flex Utility</h2>
+            {% unicorn 'paychexAPIRefresh' %}
+        </div>
+    </div>
 </div>
 <script>
     const states = {

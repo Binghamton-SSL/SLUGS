@@ -257,7 +257,10 @@
                 <p class="text-md">
                     Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
                 </p>
-                <a class="mx-auto" target="_blank" href="https://bssl.binghamtonsa.org/peci"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
+                <div class="bg-red-200 m-auto md:w-max p-2 rounded-sm">
+                    <p>If the SLUGS job ID doesn't automatically populate you can insert the number <code class="bg-black px-2 py-1 text-white">{{my_jobs.first.pk}}</code> manually into the field.</p>
+                </div>
+                <a class="mx-auto" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSdCZ2A5rhJu7qROSR34dgCzoEmYcCUfLyU0wTuU0Uvo8QfuPg/viewform?usp=pp_url&entry.300479387={% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}}&entry.40959942={{gig.name}}&entry.883382838={{gig.start|date:"Y-m-d"}}{% if my_job %}&entry.1894312857={{my_jobs.first.pk}}{% endif %}"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
             </div>
         </div>
     </div>
@@ -288,6 +291,17 @@
     }
 </style>
 {% elif my_job %}
+<div class="mx-auto max-w-5xl">
+    <div class="flex flex-col p-4 text-black bg-red-300">
+        <p class="text-lg font-bold">
+            Ready to go home?
+        </p>
+        <p class="text-md">
+            Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
+        </p>
+        <a class="mx-auto" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSdCZ2A5rhJu7qROSR34dgCzoEmYcCUfLyU0wTuU0Uvo8QfuPg/viewform?usp=pp_url&entry.300479387={% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}}&entry.40959942={{gig.name}}&entry.883382838={{gig.start|date:"Y-m-d"}}{% if my_job %}&entry.1894312857={{my_jobs.first.pk}}{% endif %}"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
+    </div>
+</div>
 <div class="max-w-5xl mx-2 mt-10 lg:mx-auto">
     <h1 class="mx-4 text-3xl">My shifts:</h1>
     <div class="flex flex-col p-4 my-4 text-black bg-white">

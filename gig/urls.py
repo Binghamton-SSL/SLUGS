@@ -5,6 +5,7 @@ app_name = "gig"
 urlpatterns = [
     path("signup/", views.workSignup.as_view(), name="signup"),
     path("list/", views.gigList.as_view(), name="list"),
+    path("joblist/", views.DistinctGigJobsList.as_view(), name="joblist"),
     path("booking/", views.BookingOverview.as_view(), name="booking_overview"),
     path("<gig_id>/", views.gigIndex.as_view(), name="showView"),
     path(

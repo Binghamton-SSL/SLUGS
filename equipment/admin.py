@@ -64,6 +64,7 @@ class SystemAddonAdmin(admin.ModelAdmin):
 @admin.register(System)
 class SystemAdmin(admin.ModelAdmin):
     inlines = [SystemPricingInline, EquipmentInline]
+    ordering = ["department", "name"]
     search_fields = ["name"]
 
 

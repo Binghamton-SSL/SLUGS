@@ -40,12 +40,6 @@
 
 <body>
     <table style="border: none;">
-        <thead class="bg-white">
-            <tr style="border: none;">
-                <td>
-                </td>
-            </tr>
-        </thead>
         <tbody class="relative">
             <tr style="border: none;">
                 <td style="border: none;">
@@ -544,7 +538,9 @@
                         <div class="dont_break">
                             <div class="mt-10 text-sm text-center">
                                 <p>
-                                    {% translate "Payment due upon receipt of Invoice by way of Check or SA inter-organization transfer." %}
+                                    {% translate "Payment due" %}
+                                    <code class="bg-gray-300" style="font-size: .75rem; word-spacing: -0.1rem;">{% if estimate.payment_due %}{{estimate.payment_due|date:"n/j/Y"}}{% else %}upon receipt of invoice{% endif %}</code>
+                                    {% translate "by way of Check or SA inter-organization transfer." %}
                                 </p>
                                 <p>
                                     {% blocktranslate with estimateId=estimate.pk|add:2500 %}

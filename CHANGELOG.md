@@ -1,3 +1,12 @@
+### V2.4.3 - 02/16/23
+* Add `JobList` view that returns all jobs as CSV for API use in PECI form
+* Autopopulate fields in PECI when possible from gig
+<br><br>
+BUG FIXES:
+    * Fix formatting errors on estimate, invoice, and SEOF templates resulting in black boxes in corner of screen
+    * Fix logical error on invoice where text showed "due upon receipt" in payment instructions regardless of actual payment date 
+    * Shows that appear on the homepage but are not published are no longer highlighted on hover
+
 #### V2.4.2 - 01/21/23
 * Identify individual vendors that we subcontract items from on estimate and invoice
     * Show or hide vendor name based on boolean
