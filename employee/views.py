@@ -161,6 +161,7 @@ class officeHours(SLUGSMixin, MultipleFormView):
                         shift.instance.content_type_id = ContentType.objects.get(
                             model="officehours"
                         ).id
+                        shift.clean()
                         shift.save()
                 form_instances["forms"][form].save()
             messages.add_message(self.request, messages.SUCCESS, "Office Hours updated")

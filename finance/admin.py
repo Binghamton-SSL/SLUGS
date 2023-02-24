@@ -1,8 +1,10 @@
-from datetime import datetime
 from django.contrib import admin, messages
 from django.utils.html import format_html
-from finance.forms import PricingChangeForm
+import django.utils.timezone as timezone
+from SLUGS.templatetags.grouping import has_group
+from finance.forms import PricingChangeForm, ShiftChangeForm, HourlyRateChangeForm
 from finance.models import (
+    EmployeePayment,
     FeePricing,
     HourlyRate,
     Payment,
@@ -26,6 +28,7 @@ from adminsortable2.admin import SortableInlineAdminMixin
 
 class HourlyRateInline(admin.StackedInline):
     model = HourlyRate
+    formset = HourlyRateChangeForm
     extra = 0
 
 
@@ -65,17 +68,66 @@ class WageAdmin(admin.ModelAdmin):
 @admin.register(Shift)
 class ShiftAdmin(admin.ModelAdmin):
     autocomplete_fields = ["override_pay_period"]
-    readonly_fields = ["total_time", "cost"]
+    readonly_fields = ["total_time", "cost", "paid_at"]
     exclude = ["content_type", "content_object", "object_id"]
     list_filter = ("processed", "contested")
-    pass
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if obj:
+            return not obj.processed
+
+    def get_fieldsets(self, request, obj=None):
+        base_fieldsets = [
+            ("Shift Details",
+                {
+                    "fields": [
+                        "time_in",
+                        "time_out",
+                        "description",
+                    ] + (["total_time"] if obj else [])
+                })
+        ] + ([
+            ("Financial Details",
+                {
+                    "fields": [
+                        "processed",
+                        "contested",
+                        "reason_contested",
+                        "override_pay_period",
+                    ] + (["paid_at", "cost"] if obj else [])
+                })
+        ] if (has_group(request.user, "Financial Director/GM") or request.user.is_superuser) else ["cost"])
+        return base_fieldsets
 
 
 class ShiftInlineAdmin(NestedGenericTabularInline):
-    readonly_fields = ["total_time", "cost"]
-    exclude = ["paid_at"]
+    readonly_fields = ["total_time", "cost", "paid_at"]
     model = Shift
     extra = 0
+
+    formset = ShiftChangeForm
+
+    def get_fieldsets(self, request, obj=None):
+        base_fieldsets = [
+            ("Shift Details",
+                {
+                    "fields": ([
+                        "time_in",
+                        "time_out",
+                        "description",
+                    ] + (["total_time"] if obj else [])) +
+                    (([
+                        "processed",
+                        "contested",
+                        "reason_contested",
+                        "override_pay_period",
+                    ] + (["paid_at", "cost"] if obj else [])) if (has_group(request.user, "Financial Director/GM") or request.user.is_superuser) else ["cost"])
+                })
+        ]
+        return base_fieldsets
 
 
 class OneTimeFeeInline(SortableInlineAdminMixin, admin.StackedInline):
@@ -262,29 +314,95 @@ class EstimateAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
 
 @admin.register(TimeSheet)
 class TimeSheetAdmin(admin.ModelAdmin):
-    readonly_fields = ["printout_link"]
+    exclude = ["shifts"]
+    readonly_fields = ["pay_period", "printout_link", "links_to_shifts", "links_to_payments", "employee"]
     search_fields = ["employee__first_name", "employee__last_name"]
-    pass
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def links_to_shifts(self, obj):
+        ret = ""
+        for shift in obj.shifts.all().order_by("time_in"):
+            ret += f"<a href='{shift.get_admin_url()}'>{timezone.template_localtime(shift.time_in).strftime('%m/%d/%y %H:%M:%S')} - {timezone.template_localtime(shift.time_out).strftime('%m/%d/%y %H:%M:%S')} <b>{shift.content_object}</b> ({shift.total_time} - ${shift.cost}) </a><br>"
+        return format_html(ret)
+    
+    def links_to_payments(self, obj):
+        ret = ""
+        for payment in obj.payments.all().order_by("date"):
+            ret += f"<a href='{payment.get_admin_url()}'>{payment}</a><br>"
+        return format_html(ret)
+
+    def get_fieldsets(self, request, obj=None):
+        return [
+            (None, {
+                "fields": [
+                    "employee",
+                    "pay_period",
+                    "paid_during",
+                    "signed",
+                    "processed",
+                    "available_to_auto_sign",
+                    "pdf",
+                    "printout_link",
+                    "links_to_shifts",
+                    "links_to_payments",
+                ]
+            })
+        ]
 
 
 class TimeSheetInline(admin.StackedInline):
     model = TimeSheet
-    readonly_fields = ["printout_link"]
+    readonly_fields = ["printout_link", "links_to_shifts", "links_to_payments", "employee"]
+    exclude = ["shifts"]
     fk_name = "pay_period"
     extra = 0
     ordering = ("processed",)
 
+    def has_add_permission(self, request, obj=None):
+        return False
+    
+    def links_to_shifts(self, obj):
+        ret = ""
+        for shift in obj.shifts.all().order_by("time_in"):
+            ret += f"<a href='{shift.get_admin_url()}'>{timezone.template_localtime(shift.time_in).strftime('%m/%d/%y %H:%M:%S')} - {timezone.template_localtime(shift.time_out).strftime('%m/%d/%y %H:%M:%S')} <b>{shift.content_object}</b> ({shift.total_time} - ${shift.cost}) </a><br>"
+        return format_html(ret)
+    
+    def links_to_payments(self, obj):
+        ret = ""
+        for payment in obj.payments.all().order_by("date"):
+            ret += f"<a href='{payment.get_admin_url()}'>{payment}</a><br>"
+        return format_html(ret)
+    
+    def get_fieldsets(self, request, obj=None):
+        return [
+            (None, {
+                "fields": [
+                    "employee",
+                    "pay_period",
+                    "paid_during",
+                    "signed",
+                    "processed",
+                    "available_to_auto_sign",
+                    "pdf",
+                    "printout_link",
+                    "links_to_shifts",
+                ]
+            })
+        ]
+
 
 @admin.register(PayPeriod)
 class PayPeriodAdmin(admin.ModelAdmin):
-    readonly_fields = ["get_summary", "get_paychex_summary", "timesheets_for_this_pay_period", "associated_shifts"]
-    exclude = ["shifts"]
+    readonly_fields = ["get_summary", "get_paychex_summary", "timesheets_for_this_pay_period"]
+    exclude = ["timesheets", "timesheets_paid_out"]
     search_fields = ["start", "end", "payday"]
-    list_display = ["payday", "start", "end", "cost", "submitted"]
+    list_display = ["payday", "start", "end", "cost", "outflow", "submitted"]
     inlines = [TimeSheetInline]
 
     def get_form(self, request, obj=None, **kwargs):
-        help_texts = {'timesheets_for_this_pay_period': 'All timesheets that are being PAID during this pay period. This includes timesheets not listed below since they were created during another pay period. Timesheets from another pay period will be post-marked with the timeframe of their original pay period'}
+        help_texts = {'timesheets_for_this_pay_period': 'All timesheets that are due to be PAID during this pay period. This includes timesheets not listed below since they were created during another pay period. Timesheets from another pay period will be post-marked with the timeframe of their original pay period'}
         kwargs.update({'help_texts': help_texts})
         return super(PayPeriodAdmin, self).get_form(request, obj, **kwargs)
 
@@ -293,3 +411,11 @@ class PayPeriodAdmin(admin.ModelAdmin):
 class CannedNoteAdmin(admin.ModelAdmin):
     ordering = ["ordering"]
     search_fields = ["name", "note"]
+
+
+@admin.register(EmployeePayment)
+class EmployeePaymentAdmin(admin.ModelAdmin):
+    exclude = ["outbound"]
+    search_fields = ["employee", "amount", "description"]
+    autocomplete_fields = ["employee", "override_pay_period"]
+    fields = ["employee", "date", "amount", "description", "override_pay_period"]

@@ -3,12 +3,12 @@ from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import BaseModelFormSet
 from django.forms.models import BaseInlineFormSet
-from finance.models import PayPeriod, Shift
+from finance.models import Shift
 from gig.models import Job
 from employee.models import OfficeHours
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit
 from django.db.models import Q
+from nested_admin.formsets import NestedBaseGenericInlineFormSet
+import django.utils.timezone as timezone
 
 
 class BaseShiftForm(forms.ModelForm):
@@ -30,6 +30,7 @@ class BaseShiftFormset(BaseModelFormSet):
         super(BaseShiftFormset, self).clean()
         if not hasattr(self, 'cleaned_data') or self.cleaned_data is None:
             raise ValidationError("Data didn't reach server. Try again.")
+        # Must live here and not in model since emp is not set on new shifts
         for idx, shift in enumerate(self.cleaned_data):
             if self.forms[idx].has_changed():
                 employee = None
@@ -43,19 +44,24 @@ class BaseShiftFormset(BaseModelFormSet):
                 else:
                     employee = shift["id"].content_object.employee
                 if shift:
+                    other_emp_shifts = Shift.objects.exclude(pk=shift["id"].pk).filter(
+                        (
+                            Q(office_hours__employee=employee)
+                            |
+                            Q(job__employee=employee)
+                            |
+                            Q(trainee__employee=employee)
+                        )
+                    )
                     if "time_out" not in shift:
-                        shifts = Shift.objects.filter(
+                        if(other_emp_shifts.filter(
                             (
                                 Q(time_in__lt=shift["time_in"])
                                 & Q(time_out__gt=shift["time_in"])
                             )  # Ends during this shift
-                        )
-                        if "id" in shift and shift["id"] is not None:
-                            shifts = shifts.filter(~Q(pk=shift["id"].pk))
-                        for s in shifts:
-                            if s.content_object.employee == employee:
-                                self.forms[len(self.forms)-2].add_error("time_in", "Overlapping shifts. Please correct and try again")
-                                raise ValidationError(
+                        ).count() > 0):
+                            self.forms[idx].add_error("__all__", "Overlapping shifts. Please correct and try again")
+                            raise ValidationError(
                                     "Overlapping shifts. Please correct and try again"
                                 )
                     else:
@@ -63,7 +69,7 @@ class BaseShiftFormset(BaseModelFormSet):
                             shift["time_in"] is not None
                             and shift["time_out"] is not None
                         ):
-                            shifts = Shift.objects.filter(
+                            if(other_emp_shifts.filter(
                                 (
                                     (
                                         Q(time_in__lt=shift["time_in"])
@@ -82,15 +88,11 @@ class BaseShiftFormset(BaseModelFormSet):
                                         & Q(time_out__gt=shift["time_out"])
                                     )  # Starts during this shift
                                 )
-                            )
-                            if "id" in shift and shift["id"] is not None:
-                                shifts = shifts.filter(~Q(pk=shift["id"].pk))
-                            for s in shifts:
-                                if s.content_object.employee == employee:
-                                    self.forms[len(self.forms)-2].add_error("time_in", "Overlapping shifts. Please correct and try again")
-                                    raise ValidationError(
-                                        "Overlapping shifts. Please correct and try again"
-                                    )
+                            ).count() > 0):
+                                self.forms[idx].add_error("__all__", "Overlapping shifts. Please correct and try again")
+                                raise ValidationError(
+                                    "Overlapping shifts. Please correct and try again"
+                                )
 
 
 ShiftFormSet = modelformset_factory(
@@ -112,30 +114,6 @@ OfficeHoursShiftFormSet = modelformset_factory(
 )
 
 
-class rollOverShiftsForm(forms.Form):
-    pay_period = forms.ModelChoiceField(
-        queryset=PayPeriod.objects.all(), label="Pay Period to move shifts to"
-    )
-    shifts = forms.ModelMultipleChoiceField(
-        queryset=Shift.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label="Shifts you want to rollover",
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            "pay_period",
-            "shifts",
-            Submit(
-                "submit",
-                "Roll Over Shifts",
-                css_class="rounded-sm text-white bg-green px-4 py-2",
-            ),
-        )
-
-
 class PricingChangeForm(BaseInlineFormSet):
     def clean(self):
         super(PricingChangeForm, self).clean()
@@ -145,3 +123,48 @@ class PricingChangeForm(BaseInlineFormSet):
                     raise ValidationError(
                         f"There is more than one pricing scheme for a time period. Pricing's can only be of one type per time period."
                     )
+                
+
+class ShiftChangeForm(NestedBaseGenericInlineFormSet):
+    def clean(self):
+        super().clean()
+        if self.is_valid():
+            for form in self.cleaned_data:
+                # Validation: Make sure shift isn't processed
+                if form['id'] is not None:
+                    if form['id'].processed and form["DELETE"]:
+                        raise ValidationError(
+                            f"Processed shift from {timezone.template_localtime(form['id'].time_in).strftime('%m/%d/%y %H:%M:%S')} to {timezone.template_localtime(form['id'].time_out).strftime('%m/%d/%y %H:%M:%S')} cannot be deleted once processed. Please contact the Financial Director"
+                        )
+
+
+class HourlyRateChangeForm(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        if self.is_valid():
+            for form in self.cleaned_data:
+                # Validation: Make sure hourly rate isn't used
+                if form['id'] is not None:
+                    shifts_used = Shift.objects.filter(
+                        Q(office_hours__position__hourly_rate=form['id'].wage.pk)
+                        |
+                        Q(job__position__hourly_rate=form['id'].wage.pk)
+                        |
+                        Q(trainee__position__hourly_rate=form['id'].wage.pk)
+                    )
+                    if form['id'].date_inactive:
+                        shifts_used = shifts_used.filter(
+                            (
+                                Q(time_in__gte=form['id'].date_active)
+                                &
+                                Q(time_in__lte=form['id'].date_inactive)
+                            )
+                        )
+                    else:
+                        shifts_used = shifts_used.filter(
+                            Q(time_in__gte=form['id'].date_active)
+                        )
+                    if shifts_used.count() > 0 and form["DELETE"]:
+                        raise ValidationError(
+                            f"Hourly rate {form['id']} is used in the following shifts: {', '.join([str(shift.pk) for shift in shifts_used])} and cannot be deleted. Please contact the Financial Director"
+                        )

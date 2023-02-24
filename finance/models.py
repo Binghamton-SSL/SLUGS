@@ -3,7 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.html import format_html
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Count, Sum
 import django.utils.timezone as timezone
 from datetime import timedelta, datetime, date
 from django.db import models
@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group
 from tinymce.models import HTMLField
 import decimal
 from django.core.validators import ValidationError
-from django.db.models import Sum
+import os
 
 from utils.models import PricingMixin
 
@@ -97,12 +97,77 @@ class Pricing(models.Model):
 
 class HourlyRate(models.Model):
     """
-    A pay rate for a particular time period
+    A pay rate for a particular time period. Dates active and inactive are inclusive
     """
     wage = models.ForeignKey(Wage, on_delete=models.CASCADE)
     hourly_rate = models.DecimalField(decimal_places=2, max_digits=5)
     date_active = models.DateField(default=date.today)
     date_inactive = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.wage} ({self.date_active.strftime('%m.%d.%y')}-{self.date_inactive.strftime('%m.%d.%y') if self.date_inactive else 'Present'})) ${self.hourly_rate}"
+
+    def get_shifts_used_in(self, filterset=None):
+        shifts_used = filterset.filter(
+                    Q(office_hours__position__hourly_rate=self.wage.pk)
+                    |
+                    Q(job__position__hourly_rate=self.wage.pk)
+                    |
+                    Q(trainee__position__hourly_rate=self.wage.pk)
+                )
+        if self.date_inactive:
+            shifts_used = shifts_used.filter(
+                (
+                    Q(time_in__gte=self.date_active)
+                    &
+                    Q(time_in__lte=self.date_inactive)
+                )
+            )
+        else:
+            shifts_used = shifts_used.filter(
+                Q(time_in__gte=self.date_active)
+            )
+        return shifts_used
+
+    def delete(self):
+        if self.get_shifts_used_in(Shift.objects.all()).count() > 0:
+            raise ValidationError("Cannot delete hourly rate that has been used")
+
+    def clean(self):
+        shifts_used = None
+
+        # Validation: Only allow fields to be changed in certain cases
+        if self.pk:
+            previous = self.__class__.objects.get(pk=self.pk)
+            shifts_used = self.get_shifts_used_in(Shift.objects.all())
+            # Validation: If used at all, do not allow to change price
+            if (previous.hourly_rate != self.hourly_rate):
+                if shifts_used.count() > 0:
+                    raise ValidationError("Cannot change hourly rate because it is used in shift IDs: " + ", ".join([str(s.pk) for s in shifts_used]))
+            # If changing timeframe, check that it does not decrease the amount of shifts covered 
+            # Get the number of shifts that are covered by the previous timeframe
+            shifts_used_prev = Shift.objects.filter(
+                    Q(office_hours__position__hourly_rate=previous.wage.pk)
+                    |
+                    Q(job__position__hourly_rate=previous.wage.pk)
+                    |
+                    Q(trainee__position__hourly_rate=previous.wage.pk)
+                )
+            if previous.date_inactive:
+                shifts_used_prev = shifts_used_prev.filter(
+                    (
+                        Q(time_in__gte=previous.date_active)
+                        &
+                        Q(time_in__lte=previous.date_inactive)
+                    )
+                )
+            else:
+                shifts_used_prev = shifts_used_prev.filter(
+                    Q(time_in__gte=previous.date_active)
+                )
+            # If the two aren't the same set and the previous set has shifts in it that the current set won't, raise an error
+            if set(shifts_used_prev) != set(shifts_used) and shifts_used_prev.exclude(pk__in=shifts_used.values('pk')).count() > 0:
+                raise ValidationError("Cannot change timeframe because it decreases the number of shifts covered")
 
 
 class BasePricing(Pricing):
@@ -394,6 +459,7 @@ class Shift(models.Model):
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     processed = models.BooleanField(default=False)
     contested = models.BooleanField(default=False)
+    reason_contested = models.CharField(max_length=256, blank=True, null=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -404,15 +470,29 @@ class Shift(models.Model):
     )
 
     def clean(self, *args, **kwargs):
-        # add custom validation here
-        super().clean(*args, **kwargs)
+        # Validation: Shift cannot be negative time
+        if self.time_out and self.time_in and self.time_out < self.time_in:
+            raise ValidationError("Shift cannot be negative.")
+
+        # Validation: Shift must have reason if contested
+        if self.contested and not self.reason_contested:
+            raise ValidationError("Shift must have reason if contested.")
+        
+        # Validation: Shift cannot be approved if it is not in a pay period
+        if self.processed and not PayPeriod.objects.filter(start__lte=timezone.localtime(self.time_in).date(), end__gte=timezone.localtime(self.time_in).date()).first():
+            raise ValidationError("Shift cannot be approved if there is no pay period within the shift's timeframe.")
+
+        # Validation: Cannot change times of shift once processed
+        # (do not apply if processing on this save and check that time in and out do not match)
+        prev_values = self.__class__.objects.get(pk=self.pk)
+        if self.processed and self.pk and prev_values.processed != False and (prev_values.time_in != self.time_in or prev_values.time_out != self.time_out):
+            raise ValidationError("Cannot change times of shift once processed. Please contact the Financial Director.")
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
-        if ((self.paid_at is None or self.paid_at == 0.00) and self.content_object is not None):
-            self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(
-                self.time_in
-            ).hourly_rate
+        self.paid_at = self.content_object.position.hourly_rate.get_price_at_date(
+            self.time_in
+        ).hourly_rate
         if self.description is None:
             self.description = self.__str__()
         if self.time_in and self.time_out:
@@ -421,10 +501,43 @@ class Shift(models.Model):
                 round(self.total_time / timezone.timedelta(minutes=15)) / 4
             ) * float(self.paid_at)
 
-        # Validation: Shift cannot be negative time
-        if self.cost < 0:
-            raise ValidationError("Shift cannot be negative payout.")
         super().save(*args, **kwargs)
+        
+
+        # Add shift to associated timesheet, if it doesn't exist already create it
+        # Find pay period (start of pay period to end of date end of pay period)
+        pay_period = PayPeriod.objects.filter(start__lte=timezone.localtime(self.time_in).date(), end__gte=timezone.localtime(self.time_in).date()).first()
+        if self.processed:
+            if self.override_pay_period:
+                tm, created = TimeSheet.objects.get_or_create(employee=self.content_object.employee, pay_period=self.override_pay_period)
+                tm.shifts.add(self)
+            else:
+                if pay_period:
+                    tm, created = TimeSheet.objects.get_or_create(employee=self.content_object.employee, pay_period=pay_period)
+                else:
+                    raise ValidationError("Shift must be within a pay period.")
+                tm.shifts.add(self)
+        # If shift is no longer in a timesheet, remove it
+        for ts in self.timesheet_set.all():
+            if not self.processed:
+                ts.shifts.remove(self)
+            elif self.override_pay_period and ts.pay_period != self.override_pay_period:
+                ts.shifts.remove(self)
+            elif self.override_pay_period is None and pay_period != ts.pay_period:
+                ts.shifts.remove(self)
+            
+            ts.check_empty()
+
+    def delete(self, *args, **kwargs):
+        # Validation: Cannot delete shift if it is processed
+        if self.processed:
+            raise ValidationError("Cannot delete this shift since it is processed. Please contact the Financial Director.")
+        
+        for ts in self.timesheet_set.all():
+            ts.shifts.remove(self)
+            
+            ts.check_empty()
+        super().delete(*args, **kwargs)
 
     def get_admin_url(self):
         return reverse(
@@ -452,6 +565,8 @@ class TimeSheet(models.Model):
         return f"uploads/{instance.employee.bnum}/{instance.employee.bnum}_{instance.employee.first_name[0].upper()}{instance.employee.last_name}_TimeSheet_{instance.pay_period.start}_{instance.pay_period.end}{fileExtension}"  # noqa
 
     employee = models.ForeignKey("employee.Employee", on_delete=models.PROTECT)
+    shifts = models.ManyToManyField("Shift", blank=True)
+    payments = models.ManyToManyField("EmployeePayment", blank=True)
     pay_period = models.ForeignKey(
         "PayPeriod", on_delete=models.PROTECT, related_name="pay_period"
     )
@@ -472,8 +587,7 @@ class TimeSheet(models.Model):
         return format_html(
             (
                 f"<div style='margin: .25rem 0 .25rem 0'>"
-                f"<a href='{reverse('finance:timesheet', args=[self.pay_period.pk, self.employee.pk])}'>Get Timesheet: {self.employee}</a>"
-                # f"<br><a style='margin-top: .25rem' href='{reverse('finance:rollover', args=[self.pk, emp.pk])}'>Rollover Timesheet</a>" # noqa
+                f"<a href='{reverse('finance:timesheet', args=[self.pk])}'>Get Timesheet: {self.employee}</a>"
                 f"</div><br>"
             )
         )
@@ -483,11 +597,61 @@ class TimeSheet(models.Model):
             "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
             args=(self.id,),
         )
+    
+    def cost(self):
+        return (round(self.shifts.aggregate(Sum('cost'))['cost__sum'], 2) if self.shifts.count() > 0 else 0) + (round(self.payments.aggregate(Sum('amount'))['amount__sum'], 2) if self.payments.count() > 0 else 0)
+    
+    def check_empty(self):
+        if self.shifts.count() == 0 and self.payments.count() == 0:
+            self.delete()
 
     def save(self, *args, **kwargs):
         if self.paid_during is None:
             self.paid_during = self.pay_period
         super().save(*args, **kwargs)
+
+        # Add timesheets to appropriate pay periods
+        self.payperiod_set.clear()
+        self.pay_period.timesheets.add(self)
+        self.timesheets_paid_out.clear()
+        self.paid_during.timesheets_paid_out.add(self)
+
+        # Make sure all shifts are associated with this timesheet are saved to it
+        emp_shifts = Shift.objects.filter(
+            (
+                Q(office_hours__employee=self.employee)
+                |
+                Q(job__employee=self.employee)
+                |
+                Q(trainee__employee=self.employee)
+            )
+            &
+            Q(processed=True)
+        )
+        shifts = emp_shifts.filter(override_pay_period=self.pay_period)
+        shifts = shifts | emp_shifts.filter(override_pay_period=None, time_in__gte=self.pay_period.start, time_in__lte=self.pay_period.end+timezone.timedelta(days=1))
+        self.shifts.set(shifts)
+
+        # Make sure all payments are associated with this timesheet are saved to it
+        self.payments.set(EmployeePayment.objects.filter(
+            Q(employee=self.employee)
+            &
+            (
+                (
+                    (
+                        Q(date__gte=self.pay_period.start)
+                        &
+                        Q(date__lte=self.pay_period.end)
+                    )
+                    &
+                    Q(override_pay_period=None)
+                )
+                |
+                Q(override_pay_period=self.pay_period)
+            )
+        ))
+
+        self.check_empty()
 
     def __str__(self):
         return f"{self.employee} - {self.pay_period}"
@@ -505,10 +669,20 @@ class PayPeriod(models.Model):
         null=True,
         help_text="All timesheets currently unprocessed but signed paid during this pay period will be processed on this date upon save.",
     )
-    shifts = models.ManyToManyField("finance.Shift")
+    timesheets = models.ManyToManyField("finance.TimeSheet")
+    timesheets_paid_out = models.ManyToManyField("finance.TimeSheet", related_name="timesheets_paid_out") 
 
     def cost(self):
-        return round(self.shifts.aggregate(Sum("cost"))['cost__sum'], 2) if self.shifts.aggregate(Sum("cost"))['cost__sum'] else None
+        total_cost = decimal.Decimal(0.00)
+        for ts in self.timesheets.all():
+            total_cost += ts.cost()
+        return total_cost
+    
+    def outflow(self):
+        total_cost = decimal.Decimal(0.00)
+        for ts in self.timesheets_paid_out.exclude(signed=None):
+            total_cost += ts.cost()
+        return total_cost
 
     def get_summary(self):
         return format_html(
@@ -516,7 +690,7 @@ class PayPeriod(models.Model):
         )  # noqa
 
     def get_paychex_summary(self):
-        tms = TimeSheet.objects.filter(paid_during=self.pk, employee__paychex_flex_workerID=None).exclude(signed=None).order_by('employee__last_name')
+        tms = self.timesheets_paid_out.filter(employee__paychex_flex_workerID=None).exclude(signed=None).order_by('employee__last_name')
         return format_html(
             f'''
                 <div style='margin: .25rem 0 .25rem 0'>
@@ -528,20 +702,14 @@ class PayPeriod(models.Model):
             '''
         )
 
-    def associated_shifts(self):
-        ret = ""
-        for shift in self.shifts.all().order_by("processed"):
-            ret += f"<div style='margin: .25rem 0 .25rem 0'><a href='{shift.get_admin_url()}'>{shift}</a></div><br>"
-        return format_html(ret)
-
     def timesheets_for_this_pay_period(self):
-        timesheets = TimeSheet.objects.filter(paid_during=self.pk).order_by('employee__last_name')
+        timesheets = self.timesheets_paid_out.order_by('employee__last_name')
         return format_html(
             "".join(
                 [
                     (
                         f"<div style='margin: .25rem 0 .25rem 0'>"
-                        f"<a href='{reverse('finance:timesheet', args=[timesheet.pay_period.pk, timesheet.employee.pk])}'>Get Timesheet: {timesheet.employee} {'<b>- SIGNED</b>' if timesheet.signed else ''}{(' - ('+str(timesheet.pay_period)+')') if timesheet.pay_period.pk is not self.pk else ''}</a>"
+                        f"<a href='{reverse('finance:timesheet', args=[timesheet.pk])}'>Get Timesheet: {timesheet.employee} {'<b>- SIGNED</b>' if timesheet.signed else ''}{(' - ('+str(timesheet.pay_period)+')') if timesheet.pay_period.pk is not self.pk else ''}</a>"
                         f"</div><br>"
                     )
                     for timesheet in timesheets
@@ -551,28 +719,24 @@ class PayPeriod(models.Model):
 
     def save(self):
         super().save()
-        self.shifts.set(
-            Shift.objects.filter(
-                (
-                    Q(time_in__gte=self.start)
-                    & Q(time_in__lte=self.end + timezone.timedelta(days=1))
-                    & Q(override_pay_period=None)
-                )
-                | Q(override_pay_period=self)
-            ).order_by("-time_out")
-        )
-        super().save()
-        emps = []
-        for shift in self.shifts.all():
-            if shift.content_object.employee not in emps and shift.content_object.employee is not None:
-                emps.append(shift.content_object.employee)
-        for emp in emps:
-            timesheet, created = TimeSheet.objects.get_or_create(
-                employee=emp,
-                pay_period_id=self.pk,
-            )
+
+        # Find shifts the fall within this pay period but are not associated with a timesheet
+        unclaimed_shifts = Shift.objects.annotate(timesheet_count=Count("timesheet")).filter(timesheet_count=0, processed=True, time_in__gte=self.start, time_in__lte=self.end+timezone.timedelta(days=1))
+        for shift in unclaimed_shifts:
+            shift.save()
+
+        # Find all payments that fall within this pay period but are not associated with a timesheet
+        unclaimed_payments = EmployeePayment.objects.annotate(timesheet_count=Count("timesheet")).filter(timesheet_count=0, date__gte=self.start, date__lte=self.end)
+        for payment in unclaimed_payments:
+            payment.save()
+
+        # Save all timesheets, in case the dates changed on the pay period        
+        for timesheet in self.timesheets.all():
+            timesheet.save()
+
+        # When submitted. Take all unsubmitted timesheets and submit them with latest date
         if self.submitted:
-            TimeSheet.objects.filter(paid_during=self.pk, processed=None).exclude(
+            self.timesheets_paid_out.filter(processed=None).exclude(
                 signed=None
             ).update(processed=self.submitted)
 
@@ -610,3 +774,61 @@ class Payment(models.Model):
 
     class Meta:
         verbose_name = "Incoming Payment"
+
+
+class Transaction(models.Model):
+    """
+    Base transaction class
+    """
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    outbound = models.BooleanField()
+    date = models.DateField(default=timezone.now)
+    description = models.CharField(max_length=512)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+
+class EmployeePayment(Transaction):
+    """
+    A one time payment made to an employee
+    """
+    employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
+    override_pay_period = models.ForeignKey("PayPeriod", on_delete=models.CASCADE, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.outbound = True
+        super().save(*args, **kwargs)
+
+        pay_period = PayPeriod.objects.filter(start__lte=self.date, end__gte=self.date).first()
+        if self.override_pay_period:
+            tm, created = TimeSheet.objects.get_or_create(employee=self.employee, pay_period=self.override_pay_period)
+            tm.payments.add(self)
+        else:
+            if pay_period:
+                tm, created = TimeSheet.objects.get_or_create(employee=self.employee, pay_period=pay_period)
+                tm.payments.add(self)
+        # If shift is no longer in a timesheet, remove it
+        for ts in self.timesheet_set.all():
+            if self.override_pay_period and ts.pay_period != self.override_pay_period:
+                ts.payments.remove(self)
+            elif self.override_pay_period is None and pay_period != ts.pay_period:
+                ts.payments.remove(self)
+
+            ts.check_empty()
+
+    def delete(self, *args, **kwargs):
+        for ts in self.timesheet_set.all():
+            ts.shifts.remove(self)
+
+            ts.check_empty()
+        super().delete(*args, **kwargs)
+
+    def get_admin_url(self):
+        return reverse(
+            "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+            args=(self.id,),
+        )
+
+    def __str__(self):
+        return f"{self.employee} - ${self.amount} - {self.date}"

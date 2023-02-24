@@ -286,7 +286,7 @@ class OfficeHours(models.Model):
         Group, default="Manager", to_field="name", on_delete=models.PROTECT
     )
     employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE)
-    shifts = GenericRelation("finance.Shift")
+    shifts = GenericRelation("finance.Shift", related_query_name="office_hours")
 
     class Meta:
         verbose_name_plural = "Office Hours"

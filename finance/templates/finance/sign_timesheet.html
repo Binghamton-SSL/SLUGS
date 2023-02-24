@@ -5,7 +5,7 @@
 <div class="flex flex-col max-w-5xl mx-auto mt-10">
     <h1 class="text-3xl">Sign Timesheet {{timesheet.pay_period}}</h1>
     <div class="bg-white w-full sm:w-[9in] mx-auto">
-        <iframe src="{% url 'finance:timesheetnoprint' timesheet.pay_period.pk request.user.pk %}" class="h-[11in] w-full sm:w-[8.5in] mx-auto"></iframe>
+        <iframe src="{% url 'finance:timesheetxframe' timesheet.pk %}" class="h-[11in] w-full sm:w-[8.5in] mx-auto"></iframe>
     </div>
     <div class="p-5 m-4 text-black bg-red-300 rounded-sm"> 
         <h2>

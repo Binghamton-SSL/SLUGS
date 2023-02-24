@@ -19,6 +19,13 @@
             {% endwith %}
             {{ ofform.management_form|crispy }}
             {% for form in ofform.forms %}
+            <div class="flex space-x-2">
+                {% for error in form.errors.values %}
+                    <div class="p-2 font-bold bg-red-500">
+                        {{error.0}}
+                    </div>
+                {% endfor %}
+            </div>
             <div class="{% cycle 'row1' 'row2' %} formset row-{{ofform.prefix}} flex">
                 <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
                     {% for field in form.visible_fields %}
@@ -43,7 +50,9 @@
                 deleteText: '✕',
                 deleteCssClass: 'delete-row my-auto bg-black w-min px-4 py-2',
                 prefix: '{{ ofform.prefix }}',
+                {% if not ofform.errors %}
                 hideLastAddForm: true,
+                {% endif %}
             });;
         </script>
         {% endfor %}

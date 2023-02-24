@@ -102,10 +102,11 @@
         <table class="w-full" width="100%" style="border: none!important;">
             <col span="1" style="width: 12%;">
             <col span="1" style="width: 12%;">
-            <col span="1" style="width: 40%;">
+            <col span="1" style="width: 36%;">
             <col span="1" style="width: 12%;">
             <col span="1" style="width: 12%;">
-            <col span="1" style="width: 12%;">
+            <col span="1" style="width: 8%;">
+            <col span="1" style="width: 8%;">
             <thead>
                 <tr class="text-sm font-bold text-center">
                     <td>
@@ -124,7 +125,10 @@
                         Time out
                     </td>
                     <td>
-                        Total Hours
+                        Hours
+                    </td>
+                    <td>
+                        Earnings
                     </td>
                 </tr>
             </thead>
@@ -132,7 +136,7 @@
                 {% for row in table_rows %}
                 {% if row.type == 'd' %}
                 <tr class="text-sm text-center">
-                    <td class="font-bold" style="background-color: #CCC;">
+                    <td class="font-bold border border-black" style="background-color: #CCC;">
                         {{row.name}}
                     </td>
                     <td class="pt-0 pb-auto">
@@ -159,22 +163,29 @@
                         <div>{{shift.1|floatformat:2}}</div>
                         {% endfor %}
                     </td>
+                    <td>
+                        {% for shift in row.shifts %}
+                        <div>${{shift.2|floatformat:2}}</div>
+                        {% endfor %}
+                    </td>
                 </tr>
                 {% elif row.type == 'w' %}
-                <tr class="font-bold">
-                    <td style="background-color: #CCC;"></td>
-                    <td colspan="4" class="bg-[#9FCD63] pl-4">Total {{row.name}}:</td>
-                    <td class="bg-[#9FCD63] text-center">{{row.total|floatformat:2}}</td>
+                <tr class="font-bold" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="4" class="bg-[#9FCD63] border-2 border-black pl-4">Total {{row.name}}:</td>
+                    <td class="bg-[#9FCD63] border-2 border-black text-center">{{row.total|floatformat:2}}</td>
+                    <td class="bg-[#9FCD63] border-2 border-black text-center">${{row.cost|floatformat:2}}</td>
                 </tr>
                 {% elif row.type == 't' %}
-                <tr class="font-bold border-b-2 border-black">
-                    <td style="background-color: #CCC;"></td>
-                    <td colspan="4" class="bg-[#9FCD63] pl-4">Subtotal {{row.name}}:</td>
-                    <td class="bg-[#9FCD63] text-center">{{row.total|floatformat:2}}</td>
+                <tr class="font-bold" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="4" class="bg-[#9FCD63] border-2 border-black pl-4">Subtotal {{row.name}}:</td>
+                    <td class="bg-[#9FCD63] border-2 border-black text-center">{{row.total|floatformat:2}}</td>
+                    <td class="bg-[#9FCD63] border-2 border-black text-center">${{row.cost|floatformat:2}}</td>
                 </tr>
                 {% endif %}
                 {% endfor %}
-                {% for rate, shifts in rates.values %}
+                {% for rate, shifts, cost in rates.values %}
                 {% if shifts != 0 %}
                 <tr style="border: none!important">
                     <td style="border: none!important"></td>
@@ -184,9 +195,14 @@
                     <td class="text-center bg-[#C7D6A1] border-b-2 border-black">
                         {{shifts|floatformat:2}}
                     </td>
+                    <td class="text-center bg-[#C7D6A1] border-b-2 border-black">
+                        ${{cost|floatformat:2}}
+                    </td>
                 </tr>
                 {% endif %}
                 {% endfor %}
+
+                {% if payments.count > 0 %}
                 <tr class="font-bold" style="border: none!important">
                     <td style="border: none!important"></td>
                     <td colspan="4" class="pl-4 bg-[#9FCD63] border-b-2 border-black">
@@ -195,16 +211,43 @@
                     <td class="text-center bg-[#9FCD63] border-b-2 border-black">
                         {{t_total|floatformat:2}}
                     </td>
+                    <td class="bg-[#9FCD63] border-b-2 border-black"></td>
                 </tr>
+                {% for payment in payments %}
+                <tr class="text-sm text-center" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td class="pt-0 pb-auto">
+                        {{payment.date|date:"n/j/Y"}}
+                    </td>
+                    <td colspan="4" class="pl-2 text-left">
+                        {{payment.description}}
+                    </td>
+                    <td>
+                        ${{payment.amount|floatformat:2}}
+                    </td>
+                </tr>
+                {% endfor %}
                 <tr class="font-bold" style="border: none!important">
                     <td style="border: none!important"></td>
-                    <td colspan="4" class="pl-4 bg-[#9FCD63] border-b-2 border-black">
-                        Total Amount:
+                    <td colspan="5" class="pl-4 bg-[#9FCD63] border-b-2 border-black">
+                        Total Payments:
                     </td>
                     <td class="text-center bg-[#9FCD63] border-b-2 border-black">
+                        ${{payment_total|floatformat:2}}
+                    </td>
+                </tr>
+                {% endif %}
+
+                <tr class="font-bold" style="border: none!important">
+                    <td style="border: none!important"></td>
+                    <td colspan="5" class="pl-4 bg-[#9FCD63] border-2 border-black">
+                        Total Earnings:
+                    </td>
+                    <td class="text-center bg-[#9FCD63] border-2 border-black">
                         ${{t_amt|floatformat:2}}
                     </td>
                 </tr>
+
             </tbody>
         </table>
     </div>

@@ -1,3 +1,40 @@
+### V2.5.0 - 02/23/23
+* Refactor entire Financial system
+  * Shift relationship entirely changed with Shift > Timesheet > PayPeriod relationship created
+  * Active and complete state management of relationships is now handled by the system
+  * Redesign Admin Pages
+    * Shift
+    * Timesheet
+    * Pay Period
+    * Employee Payments
+  * Add require "reason contested" to shift contesting
+    * Quick action built into Financial overview to add reason contested
+  * Add Shift validation
+    * Don't allow shift to be approved without valid pay period
+    * Don't allow shift to be contested without reason
+    * Don't allow shift to be negative
+  * Add Transaction Model
+    * TBA
+  * Add Employee Payments
+    * Allow employees to be paid arbitrary amounts
+    * Employee payments appear on Timesheets and in Pay Summaries, both have been redesigned as a result
+    * PayChex exporter has been updated to accomodate (puts payment in as "Bonus" type)
+  * Show outflow vs amount earned on Pay Period Admin
+  * Tweak timesheet to show monetary amounts for line items
+  * Don't allow shifts to be edited or deleted after they have been approved
+  * Add validation to hourly rates
+    * Don't allow rates to be edited if they have been used in a shift
+    * Don't allow timeframes to be edited if they've been used in a shift
+  * Add validation for gigs
+    * Gig cannot end before it starts
+    * Setup time cannot be after start time
+<br><br>
+BUG FIXES:
+    * Allow mutliple form views to return unsaved data with error
+    * Better error handling on multi-form view pages (errors standardized & more descriptive messages)
+    * Only allow FD/GM roles to approve/contest shifts from the admin
+    * Clean up payroll summary generator
+
 ### V2.4.3 - 02/16/23
 * Add `JobList` view that returns all jobs as CSV for API use in PECI form
 * Autopopulate fields in PECI when possible from gig

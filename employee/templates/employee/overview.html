@@ -152,7 +152,7 @@
                                         </div>
                                         <p>{{timesheet.signed}}</p>
                                     </div>
-                                    <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
+                                    <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
                                 {% else %}
                                     {% if timesheet.available_to_auto_sign %}
                                         {% if user.signature %}
@@ -196,7 +196,7 @@
                                     </div>
                                     <p>{{timesheet.signed}}</p>
                                 </div>
-                                <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pay_period.pk request.user.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
+                                <a class="mx-auto" href="{% url 'finance:timesheet' timesheet.pk %}"><button class="bg-[#009961] text-white mt-2 px-4 py-2 rounded">View Time Sheet</button></a>
                             {% else %}
                                 {% if timesheet.available_to_auto_sign %}
                                     {% if user.signature %}

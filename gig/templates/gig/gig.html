@@ -206,6 +206,13 @@
                     <div id="{{job_formset.form.prefix}}">
                         {{ job_formset.form.management_form|crispy }}
                         {% for form in job_formset.form.forms %}
+                        <div class="flex my-4 space-x-2">
+                            {% for error in form.errors.values %}
+                                <div class="p-2 font-bold bg-red-500">
+                                    {{error.0}}
+                                </div>
+                            {% endfor %}
+                        </div>
                         <div
                             class="{% cycle 'row1' 'row2' %} formset row-{{job_formset.form.prefix}} flex">
                             <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
@@ -217,7 +224,6 @@
                                     {{ hidden }}
                                     {% endfor %}
                                     {% endif %}
-                                    {{ field.errors.as_ul }}
                                     {{ field|as_crispy_field }}
                                 </div>
                                 {% endfor %}
@@ -257,8 +263,8 @@
                 <p class="text-md">
                     Awesome! Be sure to fill out the Post Event Check-In form. It takes no more than 45 seconds and makes sure that everyone at BSSL is in a positive work environment. Problems with the event, event coordinator, or fellow employee; report them here. Your responses are private!
                 </p>
-                <div class="bg-red-200 m-auto md:w-max p-2 rounded-sm">
-                    <p>If the SLUGS job ID doesn't automatically populate you can insert the number <code class="bg-black px-2 py-1 text-white">{{my_jobs.first.pk}}</code> manually into the field.</p>
+                <div class="p-2 m-auto bg-red-200 rounded-sm md:w-max">
+                    <p>If the SLUGS job ID doesn't automatically populate you can insert the number <code class="px-2 py-1 text-white bg-black">{{my_jobs.first.pk}}</code> manually into the field.</p>
                 </div>
                 <a class="mx-auto" target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSdCZ2A5rhJu7qROSR34dgCzoEmYcCUfLyU0wTuU0Uvo8QfuPg/viewform?usp=pp_url&entry.300479387={% if request.user.preferred_name %}{{request.user.preferred_name}} {% else %} {{request.user.first_name}} {% endif %} {{request.user.last_name}}&entry.40959942={{gig.name}}&entry.883382838={{gig.start|date:"Y-m-d"}}{% if my_job %}&entry.1894312857={{my_jobs.first.pk}}{% endif %}"><button class="px-8 py-4 m-4 text-white bg-black">Post Event Check-In form</button></a>
             </div>
@@ -291,7 +297,7 @@
     }
 </style>
 {% elif my_job %}
-<div class="mx-auto max-w-5xl">
+<div class="max-w-5xl mx-auto">
     <div class="flex flex-col p-4 text-black bg-red-300">
         <p class="text-lg font-bold">
             Ready to go home?

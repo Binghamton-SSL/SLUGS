@@ -42,7 +42,7 @@ class Trainee(models.Model):
     position = models.ForeignKey(
         Group, default="Trainee", to_field="name", on_delete=models.PROTECT
     )
-    shifts = GenericRelation("finance.Shift")
+    shifts = GenericRelation("finance.Shift", related_query_name="trainee")
 
     def __str__(self):
         return f"{self.training}"

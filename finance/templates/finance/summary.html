@@ -85,10 +85,11 @@
             <col span="1" style="width: 10%;">
             <col span="1" style="width: 20%;">
             {% for rate in rates %}
-                <col span="1" style="width: calc(50% / {{ rates | length }} );">
+                <col span="1" style="width: calc(50% /  {{ rates | length }} );">
             {% endfor %}
-            <col span="1" style="width: 10%;">
-            <col span="1" style="width: 10%;">
+            <col span="1" style="width: 7%;">
+            <col span="1" style="width: 5%;">
+            <col span="1" style="width: 8%;">
             <thead>
                 <tr>
                     <td class="bg-white" colspan="2"></td>
@@ -106,6 +107,9 @@
                     <td>{{rate.wage.name}}</td>
                     {% endfor %}
                     <td>Total Hours</td>
+                    {% if has_payments %}
+                    <td>Payments</td>
+                    {% endif %}
                     <td>Gross Pay</td>
                 </tr>
                 <tr>
@@ -127,15 +131,18 @@
                         <td>{% if emp.rates|get_hour_value:rate %}{{emp.rates|get_hour_value:rate}}{% else %}-{% endif %}</td>
                     {% endfor %}
                     <td>{{emp.total_hours}}</td>
+                    {% if has_payments %}
+                    <td>${{emp.total_payments|floatformat:2}}</td>
+                    {% endif %}
                     <td>${{emp.total_amount|floatformat:2|intcomma}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
-                <tr class="text-lg font-bold ">
+                <tr class="text-lg font-bold border-t-2 ">
                     <td class="pl-4 " colspan="{{ rates|length|add:2 }}">Total:</td>
                     <td class="text-center">{{total_hours}}</td>
-                    <td class="text-center">${{total_sum|floatformat:2|intcomma}}</td>
+                    <td class="text-right" colspan="2">${{total_sum|floatformat:2|intcomma}}</td>
                 </tr>
             </tfoot>
         </table>
@@ -165,7 +172,7 @@
             </div>
             {% if request.user.signature %}
             <div class="relative hidden autosign">
-                <div class="flex space-x-4 absolute" style="width: 4in; bottom: 0.3in; left: -9.3in">
+                <div class="absolute flex space-x-4" style="width: 4in; bottom: 0.3in; left: -9.3in">
                     <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
                     <p class="mt-auto text-right">{% now "N t, Y" %}</p>
                 </div>

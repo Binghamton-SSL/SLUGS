@@ -1,18 +1,15 @@
 from django.contrib import messages
 from django.urls.base import reverse_lazy, reverse
-from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.clickjacking import xframe_options_sameorigin, xframe_options_exempt
 from employee.forms import signPaperworkForm
 from finance.estimate_data_utils import calcuateSubcontractedCost, calculateGigCost
 from django.http.response import HttpResponse
-from finance.timsheet_utils import cost_of_shifts
 from finance.utils import prepareSummaryData
-from finance.forms import rollOverShiftsForm
 from django.views.generic.base import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect
-from django.views.decorators.clickjacking import xframe_options_exempt
 import django.utils.timezone as timezone
 import pytz
 import csv
@@ -33,7 +30,6 @@ from utils.generic_email import send_generic_email
 import decimal
 import calendar
 import barcode
-from functools import reduce
 
 
 class viewEstimate(SLUGSMixin, TemplateView):
@@ -68,9 +64,7 @@ class viewTimesheet(SLUGSMixin, TemplateView):
     template_name = "finance/printed_timesheet.html"
 
     def dispatch(self, request, *args, **kwargs):
-        pay_period = PayPeriod.objects.get(pk=kwargs["pp_id"])
-        employee = Employee.objects.get(pk=kwargs["emp_id"])
-        timesheet = TimeSheet.objects.get(employee=employee, pay_period=pay_period)
+        timesheet = TimeSheet.objects.get(pk=kwargs["timesheet_id"])
         barc = barcode.get("code128", str(timesheet.pk))
         barc.default_writer_options.update(
             {
@@ -82,34 +76,24 @@ class viewTimesheet(SLUGSMixin, TemplateView):
         self.added_context["barcode"] = (
             str(barc.render()).replace("\\n", "").replace("b'", "").replace("'", "")
         )
+
         if request.user.pk is not None:
-            if employee.pk != request.user.pk and not (
+            if timesheet.employee.pk != request.user.pk and not (
                 has_group(request.user, "Manager")
                 or
                 has_group(request.user, "SA Employee")
             ):
                 raise PermissionDenied()
-        shifts = pay_period.shifts.none()
+        shifts = timesheet.shifts.all()
         rates = {}
-        for shift in pay_period.shifts.all():
-            if shift.content_object.employee == employee and shift.processed:
-                shifts |= Shift.objects.filter(pk=shift.pk)
-                rate_of_pay = HourlyRate.objects.get(
-                    Q(wage=shift.content_object.position.hourly_rate)
-                    & Q(date_active__lte=shift.time_in)
-                    & (Q(date_inactive__gt=shift.time_in) | Q(date_inactive=None))
-                )
-                if rate_of_pay not in rates:
-                    rates[rate_of_pay] = [rate_of_pay, 0]
-                rates[rate_of_pay][1] += (
-                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
-                )
         table_rows = []
         w_num = 1
         w_total = 0
+        w_cost = 0
+        t_cost = 0
         t_total = 0
 
-        override_shifts = shifts.filter(override_pay_period=pay_period)
+        override_shifts = shifts.filter(override_pay_period__isnull=False)
         if len(override_shifts) > 0:
             override_start = override_shifts.order_by("time_in").first().time_in
             override_end = override_shifts.order_by("-time_in").first().time_in
@@ -128,51 +112,73 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                 for shift in shifts.filter(
                     time_in__range=(day, day + timezone.timedelta(minutes=1439))
                 ).order_by("time_in"):
+                    rate_of_pay = shift.content_object.position.hourly_rate.get_price_at_date(shift.time_in)
+                    if rate_of_pay not in rates:
+                        rates[rate_of_pay] = [rate_of_pay, 0, decimal.Decimal(0.00)]
+                    rates[rate_of_pay][1] += (
+                        round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                    )
+                    rates[rate_of_pay][2] += shift.cost
                     s.append(
                         (
                             shift,
                             round(shift.total_time / timezone.timedelta(minutes=15))
                             / 4,
+                            shift.cost,
                         )
                     )
                     w_total += (
                         round(shift.total_time / timezone.timedelta(minutes=15)) / 4
                     )
-                table_rows.append(
-                    {"type": "d", "date": day, "name": day.strftime("%A"), "shifts": s}
-                )
+                    w_cost += shift.cost
+                if len(s) > 0:
+                    table_rows.append(
+                        {"type": "d", "date": day, "name": day.strftime("%A"), "shifts": s}
+                    )
             table_rows.append(
                 {
                     "type": "w",
                     "name": "Overridden Shifts",
                     "total": w_total,
+                    "cost": w_cost,
                 }
             )
             t_total += w_total
             w_total = 0
+            t_cost += w_cost
+            w_cost = 0
 
         for d in range(
             0,
             int(
-                ((pay_period.end + timezone.timedelta(days=1)) - pay_period.start)
+                ((timesheet.pay_period.end + timezone.timedelta(days=1)) - timesheet.pay_period.start)
                 / timezone.timedelta(days=1)
             ),
         ):
             day = pytz.timezone("America/New_York").localize(
-                datetime.combine(pay_period.start, datetime.min.time())
+                datetime.combine(timesheet.pay_period.start, datetime.min.time())
                 + timezone.timedelta(days=d)
             )
             s = []
             for shift in shifts.filter(
                 time_in__range=(day, day + timezone.timedelta(minutes=1439))
             ).order_by("time_in"):
+                rate_of_pay = shift.content_object.position.hourly_rate.get_price_at_date(shift.time_in)
+                if rate_of_pay not in rates:
+                    rates[rate_of_pay] = [rate_of_pay, 0, decimal.Decimal(0.00)]
+                rates[rate_of_pay][1] += (
+                    round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                )
+                rates[rate_of_pay][2] += shift.cost
                 s.append(
                     (
                         shift,
                         round(shift.total_time / timezone.timedelta(minutes=15)) / 4,
+                        shift.cost,
                     )
                 )
                 w_total += round(shift.total_time / timezone.timedelta(minutes=15)) / 4
+                w_cost += shift.cost
             table_rows.append(
                 {"type": "d", "date": day, "name": day.strftime("%A"), "shifts": s}
             )
@@ -182,32 +188,38 @@ class viewTimesheet(SLUGSMixin, TemplateView):
                         "type": "w",
                         "name": f"Week {w_num}",
                         "total": w_total,
+                        "cost": w_cost,
                     }
                 )
                 w_num += 1
                 t_total += w_total
                 w_total = 0
+                t_cost += w_cost
+                w_cost = 0
         table_rows.append(
             {
                 "type": "t",
                 "name": f"Week{'s' if w_num > 1 else ''} {''.join([f'{num}'+ ('' if w_num-1 == num else ', ' if w_num-2 != num else ' & ') for num in range(1,w_num)])}{' + Overridden Shifts' if len(override_shifts) > 0 else ''}",  # noqa
                 "total": t_total,
+                "cost": t_cost,
             }
         )
         self.added_context["shifts"] = shifts
-        self.added_context["employee"] = employee
-        self.added_context["pay_period"] = pay_period
+        self.added_context["employee"] = timesheet.employee
+        self.added_context["pay_period"] = timesheet.pay_period
         self.added_context["timesheet"] = timesheet
         self.added_context["table_rows"] = table_rows
         self.added_context["rates"] = dict(
             sorted(rates.items(), key=lambda item: item[0].hourly_rate)
         )
         self.added_context["t_total"] = t_total
-        self.added_context["t_amt"] = cost_of_shifts(shifts)
+        self.added_context["t_amt"] = timesheet.cost()
+        self.added_context["payments"] = timesheet.payments.all()
+        self.added_context["payment_total"] = timesheet.payments.all().aggregate(Sum("amount"))["amount__sum"]
         return super().dispatch(request, *args, **kwargs)
 
 
-class ViewTimesheetNoPrint(viewTimesheet):
+class ViewTimesheetXframe(viewTimesheet):
     template_name = "finance/timesheet.html"
 
     @xframe_options_sameorigin
@@ -276,6 +288,7 @@ class viewSummary(SLUGSMixin, isAdminMixin, TemplateView):
         self.added_context["pay_period"] = sumData["pay_period"]
         self.added_context["total_sum"] = sumData["total_sum"]
         self.added_context["total_hours"] = sumData["total_hours"]
+        self.added_context["has_payments"] = sumData["has_payments"]
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -297,13 +310,15 @@ class exportSummaryCSV(SLUGSMixin, isAdminMixin, View):
                 f"{rate.wage.name} Hours - ${rate.hourly_rate}"
                 for rate in sumData["rates"]
             ]
-            + ["Total Hours", "Gross Pay"]
+            + ["Total Hours"]
+            + (["Payments"] if sumData["has_payments"] else [])
+            + ["Gross Pay"]
             + ["Pay Period Start", "Pay Period End", "Payday"]
         )
         writer.writerow(
             ["", ""]
             + ["" for rate in sumData["rates"]]
-            + ["", ""]
+            + (["", "", ""] if sumData["has_payments"] else ["", ""])
             + [
                 sumData["pay_period"].start,
                 sumData["pay_period"].end,
@@ -320,15 +335,19 @@ class exportSummaryCSV(SLUGSMixin, isAdminMixin, View):
                     else emp["rates"][rate][1]
                     for rate in sumData["rates"]
                 ]
-                + [emp["total_hours"], f"${round(emp['total_amount'], 2):,}"]
+                + [emp["total_hours"]]
+                + ([f"${round(emp['total_payments'], 2)}"] if sumData["has_payments"] else [])
+                + [f"${round(emp['total_amount'], 2):,}"]
             )
         writer.writerow(
             ["", ""]
             + ["" for rate in sumData["rates"]][:-1]
             + [
                 "Total",
-                sumData["total_hours"],
-                f'${round(sumData["total_sum"], 2):,}',
+                sumData["total_hours"]]
+            + ([""] if sumData["has_payments"] else [])
+            + [
+                f'${round(sumData["total_sum"], 2)}',
             ]
         )
         return response
@@ -363,6 +382,19 @@ class exportSummaryPayChexCSV(SLUGSMixin, isAdminMixin, View):
                             ""  # Check Seq Number
                         ]
                     )
+            if emp["total_payments"] > decimal.Decimal(0.00):
+                writer.writerow(
+                        [
+                            settings.PAYCHEX_COMPANY_ID_HUMAN,  # Company ID
+                            emp['paychex_flex_workerID'],  # Worker ID
+                            settings.PAYCHEX_ORG_HUMAN,  # Org
+                            "Bonus",  # Pay Component
+                            emp['total_payments'],  # Amount
+                            1,  # Qty
+                            sumData["pay_period"].payday.strftime("%m/%d/%Y"),  # Date
+                            ""  # Check Seq Number
+                        ]
+                )
         return response
 
 
@@ -410,20 +442,6 @@ class saBillingSummary(SLUGSMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class RollOverAllShifts(SLUGSMixin, FormView):
-    template_name = "finance/rollover.html"
-    form_class = rollOverShiftsForm
-    success_url = "."
-
-    def dispatch(self, request, *args, **kwargs):
-        self.added_context["pay_period"] = PayPeriod.objects.get(pk=kwargs["pp_id"])
-        self.added_context["emp"] = Employee.objects.get(pk=kwargs["emp_id"])
-        # emp = Employee.objects.get(pk=emp_id)
-        # emp_shifts = from_pay_period.shifts.filter(content_object__employee=emp_id)
-        # print(emp_shifts)
-        return super().dispatch(request, *args, **kwargs)
-
-
 class EstimateDownload(View):
 
     @xframe_options_exempt
@@ -451,8 +469,6 @@ class FinancialOverview(SLUGSMixin, TemplateView):
             Q(time_in__gte=most_recent_pay_period.start)
             & Q(time_in__lte=most_recent_pay_period.end + timezone.timedelta(days=1))
         ).order_by("processed", "-time_out")
-        most_recent_pay_period.shifts.set(shifts)
-        most_recent_pay_period.save()
         shifts_hours = shifts.aggregate(Sum("total_time"))
         shifts_price = shifts.aggregate(Sum("cost"))
 

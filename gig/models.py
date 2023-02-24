@@ -130,6 +130,15 @@ class Gig(models.Model):
             + (" [ARCHIVED]" if self.archived else "")
         )  # noop
 
+    def clean(self):
+        # Validation: Gig cannot end before it starts
+        if self.end < self.start:
+            raise ValidationError("Gig cannot end before it starts")
+
+        # Validation - Gig cannot start before it is setup
+        if self.start < self.setup_by:
+            raise ValidationError("Gig cannot start before it is setup")
+
     def save(self, *args, **kwargs):
         if self.available_for_signup is None:
             self.available_for_signup = self.start - timezone.timedelta(days=7)
@@ -202,7 +211,7 @@ class Job(models.Model):
     )
     department = models.CharField(choices=DEPARTMENTS, max_length=1)
     is_test = models.BooleanField(default=False)
-    shifts = GenericRelation("finance.Shift")
+    shifts = GenericRelation("finance.Shift", related_query_name="job")
 
     def __str__(self):
         return f"{self.gig.name} - {self.gig.org}"
