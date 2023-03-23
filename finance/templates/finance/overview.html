@@ -163,6 +163,36 @@
             {% endfor %}
         </div>
     </div>
+
+    {% if current_pay_period %}
+    <h2 class="mt-5 text-2xl">Current Pay Period</h2>
+    <div class="p-4 text-black bg-white rounded">
+        <div class="sm:flex">
+            <div class="flex-1">
+                <h2 class="text-xl">
+                    {{current_pay_period.start}} - {{current_pay_period.end}}; Payday {{current_pay_period.payday}}
+                </h2>
+                <div>
+                    {{current_shifts.count}} Shifts in period totaling {{current_shifts_hours.total_time__sum}} man-hours of work and costing ${{current_shifts_price.cost__sum|floatformat:2}}
+                </div>
+            </div>
+            <div class="flex flex-col flex-1 ml-0 mr-0 sm:ml-auto">
+                <button onclick="javascript:toggleCurrentPayPeriod(this)" class="px-4 py-2 my-2 ml-auto mr-0 text-black bg-white border-2 border-black rounded-sm w-52">
+                    Expand
+                </button>
+                <div class="CurrentPayPeriodHidden">
+                    {% unicorn 'financeApproveAllShifts' shiftset=current_shifts %}
+                </div>
+            </div>
+        </div>
+        <div class="CurrentPayPeriodHidden">
+            {% for shift in current_shifts %}
+                {% unicorn 'financeShift' shift=shift %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <h2 class="mt-5 text-2xl">See Previous Pay Period</h2>
     {% unicorn 'previousPayPeriod' %}
     <div class="flex flex-col md:flex-row md:space-x-8">
@@ -182,6 +212,7 @@
     const toggleUnsignedTimesheets = (element) => toggleSection(".UnsignedTimesheetsHidden", "unsignedTimesheetsState", element)
     const toggleUnprocessedTimesheets = (element) => toggleSection(".UnprocessedTimesheetsHidden", "unprocessedTimesheetsState", element)
     const toggleRecentPayPeriod = (element) => toggleSection(".RecentPayPeriodHidden", "recentPayPeriodState", element)
+    const toggleCurrentPayPeriod = (element) => toggleSection(".CurrentPayPeriodHidden", "currentPayPeriodState", element)
 
     const toggleSection = (sectionClass, state, element) => {
         if (!states[state]) {
@@ -197,7 +228,7 @@
     }
 </script>
 <style>
-    .RecentPayPeriodHidden, .UnsignedTimesheetsHidden, .UnprocessedTimesheetsHidden {
+    .RecentPayPeriodHidden, .UnsignedTimesheetsHidden, .UnprocessedTimesheetsHidden, .CurrentPayPeriodHidden {
         max-height: 0rem;
         overflow: hidden;
         transition: max-height 1s cubic-bezier(1, -0.01, 0.25, 1)

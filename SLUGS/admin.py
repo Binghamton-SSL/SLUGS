@@ -58,10 +58,21 @@ admin.site.unregister(Group)
 
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ["name", "hourly_rate", "description"]
+    list_display = ["name", "hourly_rate", "description", "required_by_slugs"]
     ordering = ["name"]
     search_fields = ["name", "description"]
-    pass
+    fields = ["name", "permissions", "hourly_rate", "description", "required_by_slugs"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.required_by_slugs:
+            return ["name", "required_by_slugs"]
+        else:
+            return ["required_by_slugs"]
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.required_by_slugs:
+            return False
+        return True
 
 
 # User Consent for OIDC auth

@@ -96,15 +96,10 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <table class="w-full ml-6">
-                                    <thead>
-                                        <tr>
-                                            <td>
-                                                Shop Time
-                                            </td>
-                                            <td>
-                                                Arrival Time
-                                            </td>
+                                {% if not no_loadins %}
+                                    {% if loadins.count > 1 %}
+                                    <table class="w-full ml-6">
+                                        <thead>
                                             <td>
                                                 Setup By
                                             </td>
@@ -114,21 +109,8 @@
                                             <td>
                                                 Show End
                                             </td>
-                                            <td>
-                                                Load Out
-                                            </td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                {{first_shop_time|date:"n/j/Y"}}<br>
-                                                {{first_shop_time|date:"f A"}}
-                                            </td>
-                                            <td>
-                                                {{first_load_in|date:"n/j/Y"}}<br>
-                                                {{first_load_in|date:"f A"}}
-                                            </td>
+                                        </thead>
+                                        <tbody>
                                             <td>
                                                 {{estimate.gig.setup_by|date:"n/j/Y"}}<br>
                                                 {{estimate.gig.setup_by|date:"f A"}}
@@ -141,17 +123,109 @@
                                                 {{estimate.gig.end|date:"n/j/Y"}}<br>
                                                 {{estimate.gig.end|date:"f A"}}
                                             </td>
-                                            <td>
-                                                {{last_load_out|date:"n/j/Y"}}<br>
-                                                {{last_load_out|date:"f A"}}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                    <table class="w-full ml-6">
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    Department
+                                                </td>
+                                                <td>
+                                                    Shop Time
+                                                </td>
+                                                <td>
+                                                    Arrival Time
+                                                </td>
+                                                <td>
+                                                    Load Out
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                {% for loadin in loadins %}
+                                                <tr>
+                                                    <td>
+                                                        {{loadin.get_department_display}}
+                                                        {% if loadin.note %}
+                                                        <p class="text-xs">{{loadin.note}}</p>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {{loadin.shop_time|date:"n/j/Y"}}<br>
+                                                        {{loadin.shop_time|date:"f A"}}
+                                                    </td>
+                                                    <td>
+                                                        {{loadin.load_in|date:"n/j/Y"}}<br>
+                                                        {{loadin.load_in|date:"f A"}}
+                                                    </td>
+                                                    <td>
+                                                        {{loadin.load_out|date:"n/j/Y"}}<br>
+                                                        {{loadin.load_out|date:"f A"}}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <table class="w-full ml-6">
+                                        <thead>
+                                            <tr>
+                                                <td>
+                                                    Shop Time
+                                                </td>
+                                                <td>
+                                                    Arrival Time
+                                                </td>
+                                                <td>
+                                                    Setup By
+                                                </td>
+                                                <td>
+                                                    Show Start
+                                                </td>
+                                                <td>
+                                                    Show End
+                                                </td>
+                                                <td>
+                                                    Load Out
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    {{first_shop_time|date:"n/j/Y"}}<br>
+                                                    {{first_shop_time|date:"f A"}}
+                                                </td>
+                                                <td>
+                                                    {{first_load_in|date:"n/j/Y"}}<br>
+                                                    {{first_load_in|date:"f A"}}
+                                                </td>
+                                                <td>
+                                                    {{estimate.gig.setup_by|date:"n/j/Y"}}<br>
+                                                    {{estimate.gig.setup_by|date:"f A"}}
+                                                </td>
+                                                <td>
+                                                    {{estimate.gig.start|date:"n/j/Y"}}<br>
+                                                    {{estimate.gig.start|date:"f A"}}
+                                                </td>
+                                                <td>
+                                                    {{estimate.gig.end|date:"n/j/Y"}}<br>
+                                                    {{estimate.gig.end|date:"f A"}}
+                                                </td>
+                                                <td>
+                                                    {{last_load_out|date:"n/j/Y"}}<br>
+                                                    {{last_load_out|date:"f A"}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {% endif %}
+                                {% endif %}
                                 <table class="w-full ml-6">
                                     <colgroup>
                                         <col span="1" style="width: 40%;">
-                                        {% if estimate.gig.org.SA_account_num %}
+                                        {% if estimate.billing_contact.organization.SA_account_num %}
                                         <col span="1" style="width: 15%;">
                                         {% endif %}
                                         <col span="1" style="width: 20%;">
@@ -162,7 +236,7 @@
                                             <td>
                                                 Bill To
                                             </td>
-                                            {% if estimate.gig.org.SA_account_num %}
+                                            {% if estimate.billing_contact.organization.SA_account_num %}
                                             <td>
                                                 SA Acct #
                                             </td>
@@ -180,9 +254,9 @@
                                             <td>
                                                 {{estimate.billing_contact.organization.name}}
                                             </td>
-                                            {% if estimate.gig.org.SA_account_num %}
+                                            {% if estimate.billing_contact.organization.SA_account_num %}
                                             <td>
-                                                {{estimate.gig.org.SA_account_num}}
+                                                {{estimate.billing_contact.organization.SA_account_num}}
                                             </td>
                                             {% endif %}
                                             <td>

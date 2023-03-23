@@ -44,7 +44,12 @@ class BaseShiftFormset(BaseModelFormSet):
                 else:
                     employee = shift["id"].content_object.employee
                 if shift:
-                    other_emp_shifts = Shift.objects.exclude(pk=shift["id"].pk).filter(
+                    other_emp_shifts = Shift.objects.all()
+                    if shift['id'] is not None:
+                        other_emp_shifts = Shift.objects.exclude(pk=shift["id"].pk)
+                    else:
+                        other_emp_shifts = Shift.objects.all()
+                    other_emp_shifts = other_emp_shifts.filter(
                         (
                             Q(office_hours__employee=employee)
                             |

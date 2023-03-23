@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.urls import path
-from django.contrib.contenttypes.models import ContentType
 from nested_admin import NestedStackedInline, NestedModelAdmin, NestedTabularInline
-from fieldsets_with_inlines import FieldsetsInlineMixin
+from .utils import FieldsetsInlineMixin
 from gig.forms import GigJobChangeForm, GigSystemsChangeForm, GigLoadinChangeForm
 from .models import SystemInstance, Gig, Job, LoadIn, JobInterest, AddonInstance, BingoBoard, BingoTile, TileOnBoard, SubcontractedEquipment, SubcontractedEquipmentInstance
 from .views import staffShow, SendStaffingEmail
@@ -139,16 +138,21 @@ class GigAdmin(DjangoQLSearchMixin, FieldsetsInlineMixin, NestedModelAdmin):
 
 
 @admin.register(Job)
-class JobAdmin(admin.ModelAdmin):
-    search_fields = ["employee__first_name", "employee__last_name", "gig__name"]
-    list_display = ["__str__", "employee"]
+class JobAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
+    djangoql_completion_enabled_by_default = False
+    search_fields = ["employee__first_name", "employee__last_name", "gig__name", "gig__org"]
+    list_display = ["__str__", "employee", "position", "is_test"]
     pass
 
 
 @admin.register(JobInterest)
-class JobInterestAdmin(DjangoQLSearchMixin ,admin.ModelAdmin):
+class JobInterestAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     djangoql_completion_enabled_by_default = False
     search_fields = ["employee__first_name", "employee__last_name"]
+    list_display = ["__str__", "job__position", "would_be_test"]
+
+    def job__position(self, obj):
+        return obj.job.position
 
 
 class TileOnBoardInline(admin.StackedInline):

@@ -1,6 +1,11 @@
 {% load gig_components %}
 {% if shift %}
 <div class="p-4 my-4 border-2 border-black rounded-sm">
+    {% if error_msg %}
+    <div class="p-2 my-1 font-bold bg-red-500">
+        {{error_msg}}
+    </div>
+    {% endif %}
     <div class="flex flex-col md:flex-row">
         <div class="flex flex-col">
             <span>{{shift.content_object.employee}}</span>
@@ -8,6 +13,11 @@
             <span class="mt-2">Start: {{shift.time_in}}</span>
             <span>End: {{shift.time_out}}</span>
             {% if shift.description %}<span>Description: {{shift.description}}</span> {% endif %}
+            <a href="{{shift.get_admin_url}}">
+                <button class="flex h-10 pl-4 text-white transition-all duration-75 bg-black rounded-sm">
+                    <span class="pr-3 my-auto">Edit Shift</span>
+                </button>
+            </a>
             {% if not has_parent %}
             {% if not shift.processed %}
             <button class="flex w-20 h-10 pl-4 mt-5 overflow-hidden text-white transition-all duration-75 bg-red-500 rounded-sm focus-within:w-max">
@@ -30,7 +40,7 @@
             {% if not has_parent %}
                 <button unicorn:click="accept" class="{% if shift.processed %} bg-[#009961] text-white {% else %} bg-[#AEFFE1] text-black {% endif %} px-4 py-2 my-2 rounded-sm">{% if shift.processed %} Processed {% else %} Accept {% endif %}</button>
                 <div class="flex flex-col my-2 {% if shift.contested %} bg-yellow-600 text-white {% else %} bg-yellow-100 text-black {% endif %}">
-                    <input unicorn:model="shift.reason_contested" class="px-4 py-2 border border-black rounded-sm {% if shift.contested %} bg-yellow-600 text-white {% else %} bg-yellow-100 text-black {% endif %}" placeholder="Add Reason Contested"/>
+                    <input unicorn:model="shift.reason_contested" class="px-4 py-2 border border-black rounded-sm {% if shift.contested %} bg-yellow-600 text-white {% else %} bg-yellow-100 text-black {% endif %}" placeholder="Add Reason to contest"/>
                     {% if can_be_contested %}
                         <button unicorn:click="contest" class="py-2 my-1 rounded-sm">{% if shift.contested %} Contested {% else %} Contest <br><div class="m-auto w-52"><sub>Please be patient when clicking Gary has to send an email! 🥺</sub></div> {% endif %}</button>
                     {% endif %}

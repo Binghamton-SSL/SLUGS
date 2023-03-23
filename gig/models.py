@@ -61,7 +61,7 @@ class SubcontractedEquipment(models.Model):
                     datetime.now(),
                     f"Print Subcontracted Equipment Form - {self.vendor}",
                 )
-            )
+            ) if not self.client_provided else "Provided by client"
 
     def __str__(self):
         return f"{self.vendor} - {self.gig}"
@@ -224,6 +224,7 @@ class JobInterest(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     employee = models.ForeignKey(employee.Employee, on_delete=models.CASCADE)
     submitted = models.DateTimeField(auto_now_add=True)
+    would_be_test = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.employee} - {self.job.gig}"

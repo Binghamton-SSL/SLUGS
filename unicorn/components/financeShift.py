@@ -2,12 +2,14 @@ from django_unicorn.components import UnicornView
 from finance.models import Shift
 from utils.generic_email import send_generic_email
 import django.utils.timezone as timezone
+from django.core.validators import ValidationError
 
 
 class FinanceshiftView(UnicornView):
     shift: Shift = None
     has_parent = False
     can_be_contested = False
+    error_msg = None
 
     def updated_search(self, query):
         self.parent.load_table()
@@ -41,8 +43,12 @@ class FinanceshiftView(UnicornView):
         shift.processed = False if shift.processed else True
         if shift.processed:
             shift.contested = False
-        shift.save()
-        self.shift = shift
+        try:
+            shift.save()
+            self.shift = shift
+        except ValidationError as e:
+            print(e.message)
+            self.error_msg = e.message
 
     def contest(self):
         reason = self.shift.reason_contested

@@ -1,3 +1,33 @@
+### V2.5.1 - 03/21/23
+* If a shift is processed, don't allow it to be changed
+    * Adjust admin page and also throws error on sever side
+* Make the shift admin searchable and DjangoQL'able
+* Validation on Time Sheet
+    * Time Sheet can be "unsigned" for 1 week, after that, value is locked
+    * Time Sheet can be "unprocessed" for 6 months, after that, value is locked
+    * Time Sheet cannot be processed without being signed (cannot be unsigned if processed for free)
+* Add current pay period to financial overview page
+* Reformat estimate page to display all load ins individually
+* Make Jobs DjangoQL'able
+* Clean up JobInterests admin (as will be used now)
+* Add "would be test" field to Job Interest for use with Engineering Bonus
+* Add SLUGS job ID to gig page in case google forms change their format for auto-populate
+* Lock down groups that are required by slugs and mark them as such
+* Add button to edit shifts directly from financial overview page
+<br><br>
+BUG FIXES:
+    * Shift admin was inaccessible to non GM/FD personnel 
+    * Fix clean to look for overlapping shifts
+    * Fix validation for changed shifts that are processed
+    * SA Account # was still shown on estimates where event contact was SA account but billing contact was not
+    * Show notes on subcontracted equipment form
+    * Autosign on time sheet showed UTC time not local time
+    * Remove "Bi-Weekly" wording form time sheet (for cases where pay period is not bi-weekly)
+    * FieldsetsInlineMixin would not display in cases of view-only, fix bug and roll ourselves until upstream fix arrives
+    * Don't show SEOF printout option on client provided subcontracts
+    * Add back in views to download SEOF uploads and Attachments (needed after security patch)
+    * "Accept all" button on financial page should exclude contested shifts
+
 ### V2.5.0 - 02/23/23
 * Refactor entire Financial system
   * Shift relationship entirely changed with Shift > Timesheet > PayPeriod relationship created

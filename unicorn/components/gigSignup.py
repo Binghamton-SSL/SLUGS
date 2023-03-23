@@ -74,5 +74,6 @@ class GigsignupView(UnicornView):
         if is_Signedup:
             JobInterest.objects.get(employee=employee, job=job).delete()
         else:
-            JobInterest.objects.get_or_create(employee=employee, job=job)
+            wbtest = employee.groups.filter(name=job.position).exists()
+            JobInterest.objects.get_or_create(employee=employee, job=job, would_be_test=wbtest)
         self.setJobs()

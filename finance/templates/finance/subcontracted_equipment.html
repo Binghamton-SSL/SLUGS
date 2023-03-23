@@ -131,7 +131,7 @@
                             </div>
                         </div>
                         <div class="mt-2" style="width: 8.75in">
-                            <div class="flex w-full">
+                            <div class="flex w-full mb-4">
                                 <table class="w-full mr-2">
                                     <thead>
                                         <tr>
@@ -207,8 +207,18 @@
                                     </table>
                                 </div>
                             </div>
+                            {% if subcontracted.notes %}
+                            <div>
+                                <div class="p-2 font-mono border-2 border-b-0 border-black">
+                                    <h1 class="text-lg font-bold">NOTE:</h1>
+                                    <div class="text-sm">
+                                        {{subcontracted.notes|safe}}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             {% if subcontracted.subcontractedequipmentinstance_set.all.count > 0 %}
-                            <table style="border-bottom: none; border-top: none" class="w-full mt-4 text-sm no-border">
+                            <table style="border-bottom: none; border-top: none" class="w-full text-sm no-border">
                                 <colgroup>
                                     <col span="1" style="width: 20%;">
                                     <col span="1" style="width: 45%;">

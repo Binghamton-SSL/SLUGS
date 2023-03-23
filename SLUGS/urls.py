@@ -18,6 +18,7 @@ from django.urls import path, include
 import debug_toolbar
 from SLUGS import views
 from django.contrib.auth import views as auth_views
+from gig.views import AttachmentDownload, VendorDownload
 from employee.views import FormDownload, FilledFormDownload
 from finance.views import EstimateDownload
 from django.views.generic.base import RedirectView
@@ -44,6 +45,16 @@ urlpatterns = [
         "media/estimates/<path:relative_path>",
         EstimateDownload.as_view(),
         name="download_estimate",
+    ),
+    path(
+        "media/attachments/<path:relative_path>",
+        AttachmentDownload.as_view(),
+        name="download_attachment",
+    ),
+    path(
+        "media/vendors/<path:relative_path>",
+        VendorDownload.as_view(),
+        name="download_vendor_form",
     ),
     path(
         "auth/password_reset/",

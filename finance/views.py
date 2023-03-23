@@ -472,6 +472,15 @@ class FinancialOverview(SLUGSMixin, TemplateView):
         shifts_hours = shifts.aggregate(Sum("total_time"))
         shifts_price = shifts.aggregate(Sum("cost"))
 
+        current_pay_period = PayPeriod.objects.filter(end__gte=datetime.now()).order_by("end").last()
+        if current_pay_period:
+            current_shifts = Shift.objects.filter(
+                Q(time_in__gte=current_pay_period.start)
+                & Q(time_in__lte=current_pay_period.end + timezone.timedelta(days=1))
+            ).order_by("processed", "-time_out")
+            current_shifts_hours = current_shifts.aggregate(Sum("total_time"))
+            current_shifts_price = current_shifts.aggregate(Sum("cost"))
+
         unsigned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=True)
         unsigned_abandoned_tms = TimeSheet.objects.filter(signed=None, employee__is_active=False)
         unprocessed_tms = TimeSheet.objects.filter(~Q(signed=None) & Q(processed=None))
@@ -480,6 +489,12 @@ class FinancialOverview(SLUGSMixin, TemplateView):
         self.added_context["shifts"] = shifts
         self.added_context["shifts_hours"] = shifts_hours
         self.added_context["shifts_price"] = shifts_price
+
+        self.added_context["current_pay_period"] = current_pay_period
+        self.added_context["current_shifts"] = current_shifts if current_pay_period else None
+        self.added_context["current_shifts_hours"] = current_shifts_hours if current_pay_period else None
+        self.added_context["current_shifts_price"] = current_shifts_price if current_pay_period else None
+
         self.added_context["unsigned_tms"] = unsigned_tms
         self.added_context["unsigned_abandoned_tms"] = unsigned_abandoned_tms
         self.added_context["unprocessed_tms"] = unprocessed_tms

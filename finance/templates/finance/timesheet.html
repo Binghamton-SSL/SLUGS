@@ -63,7 +63,7 @@
             </div>
         </div>
         <div style="width: 4.25in" class="flex flex-col">
-            <h1 class="text-3xl font-medium text-right text-gray-400 font-brand">Biweekly Time Sheet</h1>
+            <h1 class="text-3xl font-medium text-right text-gray-400 font-brand">Time Sheet</h1>
             <div class="flex-col ml-auto mr-0 text-right text-gray-600">
                 <div class="flex">
                     <div style="transform: scaleX(1.25)" class="mx-auto">
@@ -155,7 +155,7 @@
                     <td>
                         {% for shift in row.shifts %}
                         <div>{{shift.0.time_out|date:"h:i A"}}
-                            {% if shift.0.time_in|localtime|date:'d' != shift.0.time_out|localtime|date:'d' %}(+1){% endif %}</div>
+                            {% if shift.0.time_in|localtime|date:'d' != shift.0.time_out|localtime|date:'d' %}<span class="text-[.6rem]">(+1)</span>{% endif %}</div>
                         {% endfor %}
                     </td>
                     <td>
@@ -270,7 +270,9 @@
                     <div class="absolute hidden autosign" style="width: 4in; bottom: 0.3in; right: -0.4in">
                         <div class="flex space-x-4">
                             <img src="{{request.user.signature|signature_base64}}" style="width: 2.0in;max-height: 0.6in;top: 0.06in;position: relative;">
-                            <p class="mt-auto text-right">{% now "N t, Y" %}</p>
+                            {% localtime on %}
+                            <p class="mt-auto text-right">{% now "N j, Y" %}</p>
+                            {% endlocaltime %}
                         </div>
                     </div>
                     {% endif %}

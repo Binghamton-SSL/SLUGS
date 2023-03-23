@@ -482,11 +482,21 @@ class Shift(models.Model):
         if self.processed and not PayPeriod.objects.filter(start__lte=timezone.localtime(self.time_in).date(), end__gte=timezone.localtime(self.time_in).date()).first():
             raise ValidationError("Shift cannot be approved if there is no pay period within the shift's timeframe.")
 
-        # Validation: Cannot change times of shift once processed
-        # (do not apply if processing on this save and check that time in and out do not match)
-        prev_values = self.__class__.objects.get(pk=self.pk)
-        if self.processed and self.pk and prev_values.processed != False and (prev_values.time_in != self.time_in or prev_values.time_out != self.time_out):
-            raise ValidationError("Cannot change times of shift once processed. Please contact the Financial Director.")
+        if self.pk:
+            prev_values = self.__class__.objects.get(pk=self.pk)
+
+            # Has anything changed between saves?
+            changed_since_last_save = False if (
+                str(timezone.localtime(prev_values.time_in.replace(microsecond=0))) == str(self.time_in)
+                and str(timezone.localtime(prev_values.time_out.replace(microsecond=0))) == str(self.time_out)
+                and prev_values.processed == self.processed
+                and prev_values.contested == self.contested
+            ) else True
+
+            # Validation: Cannot change times of shift once processed
+            # (do not apply if processing on this save and check that time in and out do not match)
+            if changed_since_last_save and self.processed and prev_values.processed is not False:
+                raise ValidationError("Cannot change times of shift once processed. Please contact the Financial Director.")
 
     def save(self, *args, **kwargs):
         self.total_time = timedelta()
@@ -510,12 +520,20 @@ class Shift(models.Model):
         if self.processed:
             if self.override_pay_period:
                 tm, created = TimeSheet.objects.get_or_create(employee=self.content_object.employee, pay_period=self.override_pay_period)
+                if tm.signed:
+                    raise ValidationError("Cannot add shift to time sheet that has been signed. Unsign this time sheet first or override this shift into another pay period.")
+                if tm.processed:
+                    raise ValidationError("Cannot add shift to time sheet that has been processed. Unprocess this time sheet first or override this shift into another pay period.")
                 tm.shifts.add(self)
             else:
                 if pay_period:
                     tm, created = TimeSheet.objects.get_or_create(employee=self.content_object.employee, pay_period=pay_period)
                 else:
                     raise ValidationError("Shift must be within a pay period.")
+                if tm.signed:
+                    raise ValidationError("Cannot add shift to time sheet that has been signed. Unsign this time sheet first or override this shift into another pay period.")
+                if tm.processed:
+                    raise ValidationError("Cannot add shift to time sheet that has been processed. Unprocess this time sheet first or override this shift into another pay period.")
                 tm.shifts.add(self)
         # If shift is no longer in a timesheet, remove it
         for ts in self.timesheet_set.all():
@@ -554,6 +572,7 @@ Group.add_to_class(
     models.ForeignKey(Wage, on_delete=models.PROTECT, null=True, blank=True),
 )
 Group.add_to_class("description", models.TextField(blank=True, null=True))
+Group.add_to_class("required_by_slugs", models.BooleanField(default=False))
 
 
 class TimeSheet(models.Model):
@@ -578,10 +597,30 @@ class TimeSheet(models.Model):
         help_text="Use this to override the Pay Period during which the timesheet was paid. Defaults to the Pay Period during which shifts took place.",
         related_name="paid_during",
     )
-    signed = models.DateField(blank=True, null=True)
-    processed = models.DateField(blank=True, null=True)
+    signed = models.DateField(blank=True, null=True, help_text="This remains editable until 3 week after the date entered in case of error. After that period *this* value will be locked FOREVER")
+    processed = models.DateField(blank=True, null=True, help_text="This remains editable until 6 months after the date submitted in case of error. After that period this value will be locked (along with the entire timesheet) FOREVER")
     available_to_auto_sign = models.BooleanField(default=False)
     pdf = models.FileField(upload_to=user_dir_path, blank=True, null=True)
+
+    def clean(self):
+        if self.pk:
+
+            # Validation: Cannot be processed without being signed
+            if self.signed is None and self.processed is not None:
+                raise ValidationError("A time sheet cannot be processed without being signed first")
+
+            previous = self.__class__.objects.get(pk=self.pk)
+            # Validation: If previously signed, cannot be unsigned after 1 week
+            if self.signed is None and previous.signed is not None and (previous.signed < timezone.now() - timezone.timedelta(weeks=3)):
+                raise ValidationError("Time sheet cannot be unsigned after 1 week")
+
+            # Validation: If previously processed, cannot be unprocessed after 6 months
+            if self.processed is None and previous.processed is not None and (previous.processed < timezone.now() - timezone.timedelta(weeks=6*4)):
+                raise ValidationError("Time sheet cannot be unprocessed after 6 months")
+
+    def delete(self):
+        if self.processed:
+            raise ValidationError("Cannot delete time sheet once processed")
 
     def printout_link(self):
         return format_html(
@@ -803,12 +842,20 @@ class EmployeePayment(Transaction):
         pay_period = PayPeriod.objects.filter(start__lte=self.date, end__gte=self.date).first()
         if self.override_pay_period:
             tm, created = TimeSheet.objects.get_or_create(employee=self.employee, pay_period=self.override_pay_period)
+            if tm.signed:
+                raise ValidationError("Cannot add payment to time sheet that has been signed. Unsign this time sheet first or override this payment into another pay period.")
+            if tm.processed:
+                raise ValidationError("Cannot add payment to time sheet that has been processed. Unprocess this time sheet first or override this payment into another pay period.")
             tm.payments.add(self)
         else:
             if pay_period:
                 tm, created = TimeSheet.objects.get_or_create(employee=self.employee, pay_period=pay_period)
+                if tm.signed:
+                    raise ValidationError("Cannot add payment to time sheet that has been signed. Unsign this time sheet first or override this payment into another pay period.")
+                if tm.processed:
+                    raise ValidationError("Cannot add payment to time sheet that has been processed. Unprocess this time sheet first or override this payment into another pay period.")
                 tm.payments.add(self)
-        # If shift is no longer in a timesheet, remove it
+        # If payment is no longer in a timesheet, remove it
         for ts in self.timesheet_set.all():
             if self.override_pay_period and ts.pay_period != self.override_pay_period:
                 ts.payments.remove(self)
@@ -819,7 +866,7 @@ class EmployeePayment(Transaction):
 
     def delete(self, *args, **kwargs):
         for ts in self.timesheet_set.all():
-            ts.shifts.remove(self)
+            ts.payments.remove(self)
 
             ts.check_empty()
         super().delete(*args, **kwargs)

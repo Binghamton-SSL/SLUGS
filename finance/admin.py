@@ -66,11 +66,34 @@ class WageAdmin(admin.ModelAdmin):
 
 
 @admin.register(Shift)
-class ShiftAdmin(admin.ModelAdmin):
+class ShiftAdmin(DjangoQLSearchMixin, admin.ModelAdmin):
     autocomplete_fields = ["override_pay_period"]
-    readonly_fields = ["total_time", "cost", "paid_at"]
     exclude = ["content_type", "content_object", "object_id"]
     list_filter = ("processed", "contested")
+    search_fields = ["job__employee__first_name",
+                     "job__employee__last_name",
+                     "job__gig__name",
+                     "office_hours__employee__first_name",
+                     "office_hours__employee__last_name",
+                     "trainee__employee__first_name",
+                     "trainee__employee__last_name",
+                     "time_in",
+                     "time_out",
+                     "description"]
+    djangoql_completion_enabled_by_default = False
+    
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.processed:
+            return ["time_in",
+                    "time_out", 
+                    "description",
+                    "contested",
+                    "reason_contested",
+                    "total_time",
+                    "cost",
+                    "paid_at"]
+        else:
+            return ["total_time", "cost", "paid_at"]
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -99,7 +122,12 @@ class ShiftAdmin(admin.ModelAdmin):
                         "override_pay_period",
                     ] + (["paid_at", "cost"] if obj else [])
                 })
-        ] if (has_group(request.user, "Financial Director/GM") or request.user.is_superuser) else ["cost"])
+        ] if (has_group(request.user, "Financial Director/GM") or has_group(request.user, "SA Employee") or request.user.is_superuser) else [
+            ("Financial Details",
+                {
+                    "fields": (["paid_at", "cost"] if obj else [])
+                })
+        ])
         return base_fieldsets
 
 
@@ -124,7 +152,7 @@ class ShiftInlineAdmin(NestedGenericTabularInline):
                         "contested",
                         "reason_contested",
                         "override_pay_period",
-                    ] + (["paid_at", "cost"] if obj else [])) if (has_group(request.user, "Financial Director/GM") or request.user.is_superuser) else ["cost"])
+                    ] + (["paid_at", "cost"] if obj else [])) if (has_group(request.user, "Financial Director/GM") or has_group(request.user, "SA Employee") or request.user.is_superuser) else ["cost"])
                 })
         ]
         return base_fieldsets
@@ -321,6 +349,29 @@ class TimeSheetAdmin(admin.ModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.processed:
+            return ["pay_period",
+                    "printout_link",
+                    "links_to_shifts",
+                    "links_to_payments",
+                    "employee",
+                    "signed",
+                    "paid_during",
+                    "available_to_auto_sign",
+                    "pdf"] + (
+                        # Timesheet is locked after 6 months
+                        ["processed"] if (timezone.now() - timezone.timedelta(weeks=(4*6))).date() > obj.processed else []
+                    )
+        else:
+            return ["pay_period", "printout_link", "links_to_shifts", "links_to_payments", "employee"] + (
+                        # Timesheet signed is locked after 1 week
+                        ["signed"] if (obj.signed and (timezone.now() - timezone.timedelta(weeks=3)) > obj.signed) else []
+                    )
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     def links_to_shifts(self, obj):
         ret = ""
         for shift in obj.shifts.all().order_by("time_in"):
@@ -353,6 +404,8 @@ class TimeSheetAdmin(admin.ModelAdmin):
 
 
 class TimeSheetInline(admin.StackedInline):
+    verbose_name = "Unlocked Time Sheet"
+    verbose_name_plural = "Unlocked Time Sheets"
     model = TimeSheet
     readonly_fields = ["printout_link", "links_to_shifts", "links_to_payments", "employee"]
     exclude = ["shifts"]
@@ -360,7 +413,14 @@ class TimeSheetInline(admin.StackedInline):
     extra = 0
     ordering = ("processed",)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(processed=None)
+
     def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
     
     def links_to_shifts(self, obj):
@@ -393,13 +453,62 @@ class TimeSheetInline(admin.StackedInline):
         ]
 
 
+class SoonLockedTimeSheetInline(TimeSheetInline):
+    verbose_name = "Soon to be Locked Time Sheet"
+    verbose_name_plural = "Soon to be Locked Time Sheets"
+    readonly_fields = ["printout_link",
+                       "links_to_shifts",
+                       "links_to_payments",
+                       "employee",
+                       "signed",
+                       "pdf",
+                       "paid_during",
+                       "available_to_auto_sign"]
+
+    def get_queryset(self, request):
+        qs = self.model._default_manager.get_queryset()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        qs = qs.exclude(processed__lte=(timezone.now() - timezone.timedelta(weeks=(4*6))))
+        return qs.exclude(processed=None)
+
+
+class LockedTimeSheetInline(TimeSheetInline):
+    verbose_name = "Locked Time Sheet"
+    verbose_name_plural = "Locked Time Sheets"
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def get_queryset(self, request):
+        qs = self.model._default_manager.get_queryset()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        qs = qs.exclude(processed__gte=(timezone.now() - timezone.timedelta(weeks=(4*6))))
+        return qs.exclude(processed=None)
+
 @admin.register(PayPeriod)
 class PayPeriodAdmin(admin.ModelAdmin):
-    readonly_fields = ["get_summary", "get_paychex_summary", "timesheets_for_this_pay_period"]
+    readonly_fields = ["cost", "outflow", "get_summary", "get_paychex_summary", "timesheets_for_this_pay_period"]
     exclude = ["timesheets", "timesheets_paid_out"]
     search_fields = ["start", "end", "payday"]
-    list_display = ["payday", "start", "end", "cost", "outflow", "submitted"]
-    inlines = [TimeSheetInline]
+    list_display = ["payday", "start", "end", "submitted"]
+
+    def get_inlines(self, request, obj=None):
+        # Show the timesheet lifecycles that apply
+        inlines = []
+        if obj:
+            if TimeSheet.objects.filter(pay_period=obj.pk, processed=None).count() > 0:
+                inlines.append(TimeSheetInline)
+            if TimeSheet.objects.filter(pay_period=obj.pk, processed__gte=(timezone.now() - timezone.timedelta(weeks=(4*6)))):
+                inlines.append(SoonLockedTimeSheetInline)
+            if TimeSheet.objects.filter(pay_period=obj.pk, processed__lte=(timezone.now() - timezone.timedelta(weeks=(4*6)))):
+                inlines.append(LockedTimeSheetInline)
+        return inlines
+        # Default, show all
+        # return [TimeSheetInline, SoonLockedTimeSheetInline, LockedTimeSheetInline]
 
     def get_form(self, request, obj=None, **kwargs):
         help_texts = {'timesheets_for_this_pay_period': 'All timesheets that are due to be PAID during this pay period. This includes timesheets not listed below since they were created during another pay period. Timesheets from another pay period will be post-marked with the timeframe of their original pay period'}

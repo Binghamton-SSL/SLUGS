@@ -1,8 +1,10 @@
 import csv
+from django.conf import settings
+from django.http import FileResponse
 from SLUGS.templatetags.grouping import has_group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
@@ -31,7 +33,7 @@ from gig.forms import (
     StaffShowForm,
 )
 from finance.models import Shift, Estimate
-from utils.models import signupStatus
+from utils.models import Attachment, signupStatus
 
 
 # Create your views here.
@@ -310,3 +312,29 @@ class DistinctGigJobsList(View):
         for job in Job.objects.annotate(gig_start=ExpressionWrapper(F("gig__start"), output_field=DateTimeField())).exclude(employee=None).exclude(gig_start__gte=(timezone.now())).annotate(distinct_name=Concat('gig', 'employee', output_field=TextField())).values('distinct_name').annotate(pk=Min('pk'), emp_id=Min("employee_id")).order_by('pk'):
             writer.writerow([job['pk'], job['emp_id']])
         return response
+
+
+class AttachmentDownload(SLUGSMixin, View):
+    def get(self, request, relative_path):
+        path = f"attachments/{relative_path}"
+        document = get_object_or_404(Attachment, file=path)
+        if request.user.is_active and (
+            (document.available_to_managers and request.user.is_staff)
+            or document.available_to_engineers or document.available_to_all_employees
+        ):
+            absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
+            response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
+            return response
+        else:
+            raise PermissionDenied()
+
+
+class VendorDownload(SLUGSMixin, View):
+    def get(self, request, relative_path):
+        path = f"vendors/{relative_path}"
+        if request.user.is_staff:
+            absolute_path = "{}/{}".format(settings.MEDIA_ROOT, path)
+            response = FileResponse(open(absolute_path, "rb"), as_attachment=False)
+            return response
+        else:
+            raise PermissionDenied()
